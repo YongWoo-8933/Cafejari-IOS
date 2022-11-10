@@ -15,10 +15,12 @@ struct AuthView: View {
     
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var userViewModel: UserViewModel
+    @EnvironmentObject private var cafeViewModel: CafeViewModel
     
     @State private var nickname: String = ""
     @State private var phoneNumber: String = ""
     @State private var authNumber: String = ""
+    @State private var isAutoLoginOn: Bool = true
     
     @FocusState private var focusedField: Field?
     
@@ -80,7 +82,7 @@ struct AuthView: View {
                             coreState: coreState, phoneNumber: phoneNumber, authNumber: authNumber
                         )
                     }
-                }label: {
+                } label: {
                     Text("인증")
                         .foregroundColor(.white)
                         .padding(8)
@@ -94,22 +96,23 @@ struct AuthView: View {
                 .font(.footnote)
                 .foregroundColor(.gray)
             
-            Button{
+            Button {
                 Task {
-                    await userViewModel.authorize(coreState: coreState, nickName: nickname, phoneNumber: phoneNumber)
+                    await userViewModel.authorize(coreState: coreState, nickname: nickname, phoneNumber: phoneNumber) {
+                        await cafeViewModel.getCafeInfos(coreState: coreState)
+                    }
                 }
-            }label: {
+            } label: {
                 Text("등록")
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
             }
             .background(.brown)
-            .cornerRadius(8)
         }
         .padding()
         .frame(maxHeight: .infinity, alignment: .top)
-        .navigationTitle("인증")
+        .navigationTitle("본인인증")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .keyboard) {
@@ -120,15 +123,9 @@ struct AuthView: View {
                         Text("완료")
                         Image(systemName: "chevron.down")
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(width: 600)
                 }
             }
         }
-    }
-}
-
-struct AuthView_Previews: PreviewProvider {
-    static var previews: some View {
-        AuthView()
     }
 }

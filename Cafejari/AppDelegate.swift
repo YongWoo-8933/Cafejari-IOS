@@ -8,6 +8,8 @@
 import Foundation
 import GoogleMaps
 import GooglePlaces
+import FirebaseCore
+import GoogleSignIn
 
 class AppDelegate: NSObject, UIApplicationDelegate    {
      func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -20,6 +22,16 @@ class AppDelegate: NSObject, UIApplicationDelegate    {
          
          // GooglePlace SDK 초기화
          GMSPlacesClient.provideAPIKey(googleMapApiKey as! String)
+         
+         let signInConfig = GIDConfiguration(clientID: "YOUR_IOS_CLIENT_ID")
+         
+         // Firebase SDK 초기화
+         FirebaseApp.configure()
+         
          return true
      }
+    
+    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
+        return GIDSignIn.sharedInstance.handle(url)
+    }
  }

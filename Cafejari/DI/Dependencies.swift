@@ -7,13 +7,17 @@
 
 import Foundation
 import CoreData
+import CoreLocation
+import SwiftUI
 
 class Dependencies {
     
-    init(){
+    init() {
         @Provider var httpRoute = HttpRoute()
+        @Provider var customUrlRequest = CustomURLRequest()
         @Provider var context = PersistenceController.shared.container.viewContext as NSManagedObjectContext
         
+        @Provider var time = Time()
         @Provider var tokenRepository = TokenRepositoryImpl() as TokenRepository
         @Provider var userRepository = UserRepositoryImpl() as UserRepository
         @Provider var cafeRepository = CafeRepositoryImpl() as CafeRepository

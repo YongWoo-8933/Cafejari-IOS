@@ -12,8 +12,25 @@ struct AccessTokenResponse: Decodable {
     let access_token_expiration: String
 }
 
+struct PreAuthResponse: Decodable {
+    let nickname: String
+    let phone_number: String
+}
+
 struct KakaoLoginResponse: Decodable {
     let access_token: String
+    let is_user_exist: Bool
+}
+
+struct GoogleLoginResponse: Decodable {
+    let access_token: String
+    let code: String
+    let is_user_exist: Bool
+}
+
+struct AppleLoginResponse: Decodable {
+    let id_token: String
+    let code: String
     let is_user_exist: Bool
 }
 
@@ -31,6 +48,27 @@ struct UserResponse: Decodable {
     let authorization: Bool
     let profile: ProfileResponse?
 }
+extension UserResponse {
+    func getUser() -> User {
+        let profile = self.profile ?? ProfileResponse.empty
+        
+        return User(
+            userId: self.id,
+            profileId: profile.id,
+            dateJoined: self.date_joined,
+            email: self.email,
+            lastLogin: self.last_login,
+            authorization: self.authorization,
+            nickname: profile.nickname ?? "",
+            fcmToken: profile.fcm_token,
+            phoneNumber: profile.phone_number ?? "00000000",
+            image: profile.image,
+            point: profile.point,
+            grade: profile.grade,
+            activity: profile.activity
+        )
+    }
+}
 
 struct ProfileResponse: Decodable {
     let id: Int
@@ -45,4 +83,8 @@ struct ProfileResponse: Decodable {
 
 extension ProfileResponse {
     static let empty = ProfileResponse(id: 0, nickname: "", fcm_token: GlobalString.None.rawValue, phone_number: "00000000", image: "", point: 0, grade: 0, activity: 0)
+}
+
+struct SocialUserTypeResponse: Decodable {
+    let type: String
 }

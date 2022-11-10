@@ -6,215 +6,173 @@
 //
 
 import SwiftUI
+import CachedAsyncImage
 
 struct MasterRoomView: View {
     
-    @EnvironmentObject var master: Master
     @EnvironmentObject var coreState: CoreState
+    @EnvironmentObject var cafeViewModel: CafeViewModel
     
-    @State private var crowdedSliderValue = 100.0
-    @State private var sliderColor = Color.green
+    @State private var selectedCrowded = 1
+    
+    @State private var isCafeDetailLogLoading = false
+    @State private var isExpireDialogOpened = false
+    @State private var isAdWatchDialogOpened = false
     
     var body: some View {
-        ScrollView{
-            LazyVStack{
-                ZStack{
-                    Image("cafe_picture_default")
-                        .resizable()
-                        .scaledToFit()
-                    VStack{
-                        Text("여기는 꿀팁이 들어올 자리 블라블라 두줄 세줄 계속 드러갈 것이여\n")
-                            .frame(maxWidth: .infinity, alignment: .topLeading)
-                        Text("-카페자리우녕자")
-                            .frame(maxWidth: .infinity, alignment: .bottomTrailing)
+        ZStack {
+            VStack(spacing: 0) {
+                ZStack(alignment: .leading) {
+                    HStack {
+                        Text("\(coreState.masterRoomCafeLog.name)")
+                            .font(.headline)
                     }
-                    .foregroundColor(.white)
-                    .padding(30)
-                    .background(.black.opacity(0.6))
-                    .cornerRadius(10)
-                    .padding(30)
+                    .frame(maxWidth: .infinity)
+                    .padding(20)
+                    .background(.gray)
                     
-                }
-                .frame(maxWidth: .infinity)
-                
-                HStack{
-                    Text("스타벅스 뭐시기 신촌뭐시기점")
-                    Spacer()
-                    Button{
-                        
-                    }label: {
-                        Image(systemName: "scope")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30)
-                            .foregroundColor(.gray)
+                    Button {
+                        cafeViewModel.cafeInfoLoading = true
+                        Task {
+                            await cafeViewModel.getCafeInfos(coreState: coreState)
+                        }
+                        coreState.popUp()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.headline.bold())
+                            .padding()
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                Divider()
                 
-                if(!master.isMasterActivated){
-                    Text("초기 혼잡도 값을 지정해주세요")
-                        .foregroundColor(.gray)
-                    Text("(현재 이곳의 마스터가 아닙니다)")
-                        .foregroundColor(.gray)
-                }else{
-                    Image("cafe_picture_default")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 250)
-                        .cornerRadius(20)
-                }
-                
-                HStack{
-                    Image("crowded_marker_0")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30)
-                        .onTapGesture {
-                            crowdedSliderValue = 0.0
-                        }
-                    Spacer()
-                    Image("crowded_marker_1")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30)
-                        .onTapGesture {
-                            crowdedSliderValue = 100.0
-                        }
-                    Spacer()
-                    Image("crowded_marker_2")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30)
-                        .onTapGesture {
-                            crowdedSliderValue = 200.0
-                        }
-                    Spacer()
-                    Image("crowded_marker_3")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30)
-                        .onTapGesture {
-                            crowdedSliderValue = 300.0
-                        }
-                    Spacer()
-                    Image("crowded_marker_4")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30)
-                        .onTapGesture {
-                            crowdedSliderValue = 400.0
-                        }
-                }
-                
-                Slider(value: $crowdedSliderValue, in: 0...400, step: 1){
-                    Text("Speed")
-                } onEditingChanged: { editing in
-                    if !editing {
-                        if crowdedSliderValue < 50.0 {
-                            crowdedSliderValue = 0.0
-                            sliderColor = Color.blue
-                        } else if crowdedSliderValue < 150.0 {
-                            crowdedSliderValue = 100.0
-                            sliderColor = Color.green
-                        } else if crowdedSliderValue < 250.0 {
-                            crowdedSliderValue = 200.0
-                            sliderColor = Color.yellow
-                        } else if crowdedSliderValue < 350.0 {
-                            crowdedSliderValue = 300.0
-                            sliderColor = Color.orange
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        if coreState.isMasterActivated {
+                            ActivatedMasterRoom(
+                                selectedCrowded: $selectedCrowded,
+                                isCafeDetailLogLoading: $isCafeDetailLogLoading,
+                                isExpireDialogOpened: $isExpireDialogOpened
+                            )
                         } else {
-                            crowdedSliderValue = 400.0
-                            sliderColor = Color.red
+                            InactivatedMasterRoom(selectedCrowded: $selectedCrowded)
                         }
                     }
+                    .padding()
                 }
-                .onChange(of: crowdedSliderValue){ newValue in
-                    if newValue < 100.0 {
-                        sliderColor = Color.blue
-                    } else if newValue < 200.0 {
-                        sliderColor = Color.green
-                    } else if newValue < 300.0 {
-                        sliderColor = Color.yellow
-                    } else if newValue < 400.0 {
-                        sliderColor = Color.orange
-                    } else {
-                        sliderColor = Color.red
-                    }
-                }
-                .accentColor(sliderColor)
-                .padding(.horizontal, 8)
-                
-                HStack{
-                    Text("한적")
-                    Spacer()
-                    Text("여유")
-                    Spacer()
-                    Text("보통")
-                    Spacer()
-                    Text("혼잡")
-                    Spacer()
-                    Text("만석")
-                }
-                
-                Button{
-                    if master.isMasterActivated {
-                        // crowded change logic
-                    }else{
-                        master.activateMaster(cafeId: 0)
-                    }
-                }label: {
-                    if master.isMasterActivated {
-                        Text("혼잡도 변경")
-                            .padding(10)
-                            .background(.brown)
-                            .cornerRadius(10)
-                            .frame(width: 100)
-                    }else{
-                        Text("마스터 등록")
-                            .padding(10)
-                            .background(.brown)
-                            .cornerRadius(10)
-                            .frame(width: 100)
-                    }
-                }
-                    
-                Text("이 아래로 각종 로그들")
+                .scrollIndicators(.never)
             }
+            
+            FullScreenLoadingView(loading: $isCafeDetailLogLoading, text: "로그 삭제중..")
+            CustomDialog(
+                isDialogVisible: $isExpireDialogOpened,
+                content: "마스터를 종료하시겠습니까?",
+                positiveButtonText: "종료",
+                negativeButtonText: "취소",
+                onPositivebuttonClick: { isAdWatchDialogOpened = true },
+                onNegativebuttonClick: {},
+                onDismiss: {}
+            )
+            CustomDialog(
+                isDialogVisible: $isAdWatchDialogOpened,
+                content: "광고를 보고 종료하시면 포인트가 1.5배로 지급됩니다. 광고 보고 종료하시겠습니까?",
+                positiveButtonText: "광고시청",
+                negativeButtonText: "종료",
+                onPositivebuttonClick: {
+                    Task {
+                        await cafeViewModel.expireMaster(coreState: coreState, adWatched: true)
+                    }
+                },
+                onNegativebuttonClick: {
+                    Task {
+                        await cafeViewModel.expireMaster(coreState: coreState, adWatched: false)
+                    }
+                },
+                onDismiss: {}
+            )
         }
         .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading){
-                Button{
-                    if(master.isMasterActivated){
-                        coreState.tapToHome()
-                    }
-                    coreState.clearStack()
-                } label: {
-                    HStack {
-                        Image(systemName: "chevron.backward")
-                            .font(.callout.weight(.semibold))
-                        master.isMasterActivated ? Text("홈") : Text("마스터지도")
-                    }
-                }
-            }
-            ToolbarItem(placement: .principal) {
-                Text("마스터룸")
-                    .font(.title2)
-                    .fontWeight(.black)
-                    .padding(.vertical, 15)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Toggle("", isOn: $master.isMasterActivated)
-                    .toggleStyle(.switch)
-            }
-        }
     }
 }
 
-struct MasterRoomView_Previews: PreviewProvider {
-    static var previews: some View {
-        MasterRoomView()
-    }
-}
+
+// 랜덤 이미지 받아오던 코드
+
+//                        ZStack {
+//                            CachedAsyncImage(url: URL(string: cafeViewModel.masterRoomImageSaying.image )) { image in
+//                                image
+//                                    .resizable()
+//                                    .scaledToFit()
+//                                    .frame(maxWidth: .infinity)
+//                            } placeholder: {
+//                                Image("cafe_picture_default")
+//                                    .resizable()
+//                                    .scaledToFit()
+//                                    .frame(maxWidth: .infinity)
+//                                    .frame(height: 250)
+//                            }
+//
+//                            VStack{
+//                                Text(cafeViewModel.masterRoomImageSaying.saying.useNonBreakingSpace() + "\n")
+//                                    .frame(maxWidth: .infinity, alignment: .topLeading)
+//                                Text("- " + cafeViewModel.masterRoomImageSaying.person)
+//                                    .frame(maxWidth: .infinity, alignment: .bottomTrailing)
+//                            }
+//                            .foregroundColor(.white)
+//                            .padding(30)
+//                            .background(.black.opacity(0.6))
+//                            .cornerRadius(10)
+//                            .padding(30)
+//
+//                            if isImageLoading {
+//                                HStack {
+//                                    ProgressView()
+//                                }
+//                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                                .background(.white)
+//                            }
+//                        }
+//                        .frame(maxWidth: .infinity)
+//                        .frame(height: 250)
+//                        .onTapGesture {
+//                            if !isImageLoading {
+//                                withAnimation(.easeInOut(duration: 0.15)) {
+//                                    isImageLoading = true
+//                                }
+//                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+//                                    isImageLoading = false
+//                                }
+//                            }
+//                            Task {
+//                                try await cafeViewModel.getRandomImageSaying(coreState: coreState)
+//                            }
+//                        }
+
+
+// 슬라이더 코드
+//                        HStack {
+//                            ForEach(Array(Crowded.crowdedListExceptNegative.enumerated()), id: \.offset) { index, crowded in
+//                                if index != 0 { Spacer() }
+//                                Image(crowded.image)
+//                                    .resizable()
+//                                    .scaledToFit()
+//                                    .frame(width: 30)
+//                                    .onTapGesture {
+//                                        crowdedSliderValue = Double(crowded.value) * 100.0
+//                                    }
+//                            }
+//                        }
+                        
+//                        Slider(value: $crowdedSliderValue, in: 0...400, step: 1){
+//
+//                        } onEditingChanged: { editing in
+//                            if !editing {
+//                                let crowdedDouble = round(crowdedSliderValue / 100.0)
+//                                sliderColor = Int(crowdedDouble).toCrowded().color
+//                                crowdedSliderValue = crowdedDouble * 100
+//                            }
+//                        }
+//                        .onChange(of: crowdedSliderValue){ newValue in
+//                            let crowdedDouble = floor(newValue / 100.0)
+//                            sliderColor = Int(crowdedDouble).toCrowded().color
+//                        }
+//                        .accentColor(sliderColor)
+//                        .padding(.horizontal, 8)

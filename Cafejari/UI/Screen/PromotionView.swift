@@ -12,6 +12,7 @@ struct PromotionView: View {
     
     @Environment(\.openURL) private var openURL
     
+    @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var informationViewModel: InformationViewModel
     
     var body: some View {
@@ -56,14 +57,8 @@ struct PromotionView: View {
         .navigationTitle("공지 & 이벤트")
         .task {
             if informationViewModel.events.isEmpty {
-                await informationViewModel.getEvents()
+                await informationViewModel.getEvents(coreState: coreState)
             }
         }
-    }
-}
-
-struct PromotionView_Previews: PreviewProvider {
-    static var previews: some View {
-        PromotionView()
     }
 }

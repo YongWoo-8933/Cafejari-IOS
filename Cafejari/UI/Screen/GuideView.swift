@@ -10,6 +10,7 @@ import SwiftUI
 struct GuideView: View {
     @Environment(\.dismiss) var dismiss
     @State private var currentPageIndex = 0
+    
     let guideImages: [String]
     
     var body: some View {

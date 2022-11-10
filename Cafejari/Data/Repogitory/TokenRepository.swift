@@ -23,6 +23,7 @@ final class TokenRepositoryImpl: TokenRepository {
     
     @Inject var httpRoute: HttpRoute
     @Inject var context: NSManagedObjectContext
+    @Inject var customUrlRequest: CustomURLRequest
     
     func getSavedRefreshToken() async throws -> String {
         let tokens = try context.fetch(RefreshToken.fetchRequest()) as! [RefreshToken]
@@ -63,17 +64,28 @@ final class TokenRepositoryImpl: TokenRepository {
     }
     
     func refreshAccessToken(refreshToken: String) async throws -> AccessTokenResponse {
-        let urlSession = URLSession.shared
-        var request = URLRequest.init(url: URL( string: httpRoute.refresh() )!)
-        let requestData = ["refresh" : refreshToken]
-        let requestJson = try! JSONSerialization.data(withJSONObject: requestData, options: [])
-        
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpMethod = "POST"
-        request.httpBody = requestJson
-        
-        let (data, _) = try await urlSession.data(for: request)
-        return try JSONDecoder().decode(AccessTokenResponse.self, from: data)
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.post(urlString: httpRoute.refresh(), requestBody: ["refresh" : refreshToken])
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if httpUrlRes.statusCode == 401 {
+                _ = try JSONDecoder().decode(TokenExpiredErrorResponse.self, from: data)
+                throw CustomError.refreshTokenExpired
+            } else if (200..<300).contains(httpUrlRes.statusCode) {
+                return try JSONDecoder().decode(AccessTokenResponse.self, from: data)
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+        } catch CustomError.refreshTokenExpired {
+            throw CustomError.refreshTokenExpired
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
     }
 }

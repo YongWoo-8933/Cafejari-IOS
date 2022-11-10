@@ -29,7 +29,6 @@ struct DependencyInjector {
     
     init() {
         self.wrappedValue = DependencyInjector.resolve()
-        print("Injected <-", self.wrappedValue)
     }
 }
 
@@ -40,6 +39,5 @@ struct DependencyInjector {
     init(wrappedValue: T) {
         self.wrappedValue = wrappedValue
         DependencyInjector.register(dependency: wrappedValue)
-        print("Provided <-", self.wrappedValue)
     }
 }

@@ -22,6 +22,42 @@ struct CafeInfo: Decodable {
 }
 extension CafeInfo {
     static var empty = CafeInfo(id: 0, name: "", city: "", gu: "", address: "", totalFloor: 1, floor: 1, latitude: 37.0, longitude: 126.0, googlePlaceId: GlobalString.None.rawValue, cafes: [])
+    
+    func getMinCrowded() -> Int {
+        var minCrowded = -1
+        self.cafes.forEach { cafe in
+            if cafe.crowded != -1 {
+                if minCrowded == -1 {
+                    minCrowded = cafe.crowded
+                } else {
+                    if minCrowded > cafe.crowded {
+                        minCrowded = cafe.crowded
+                    }
+                }
+            }
+        }
+        return minCrowded
+    }
+    
+    func isMasterAvailable() -> Bool {
+        var available = false
+        self.cafes.forEach { cafe in
+            if cafe.isMasterAvailable() {
+                available = true
+            }
+        }
+        return available
+    }
+    
+    func masterAvailableFloors() -> [Int] {
+        var masterAvailableFloors: [Int] = []
+        self.cafes.forEach { cafe in
+            if cafe.isMasterAvailable() {
+                masterAvailableFloors.append(cafe.floor)
+            }
+        }
+        return masterAvailableFloors
+    }
 }
 typealias CafeInfos = [CafeInfo]
 
@@ -35,6 +71,13 @@ struct Cafe: Decodable {
 }
 extension Cafe {
     static var empty = Cafe(id: 0, crowded: -1, master: CafeMaster.empty, floor: 1, recentUpdatedLogs: [])
+    
+    func isMasterAvailable() -> Bool {
+        return self.master.userId == 0
+    }
+    func hasRecentLog() -> Bool {
+        return !self.recentUpdatedLogs.isEmpty
+    }
 }
 typealias Cafes = [Cafe]
 
@@ -49,13 +92,3 @@ extension RecentUpdatedLog {
     static var empty = RecentUpdatedLog(id: 0, master: CafeMaster.empty, update: "", crowded: -1)
 }
 typealias RecentUpdatedLogs = [RecentUpdatedLog]
-
-
-struct CafeMaster: Decodable {
-    let userId: Int
-    let nickname: String
-    let grade: Int
-}
-extension CafeMaster {
-    static var empty = CafeMaster(userId: 0, nickname: "", grade: 0)
-}

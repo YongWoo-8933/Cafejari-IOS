@@ -6,108 +6,86 @@
 //
 
 import SwiftUI
+import CachedAsyncImage
 
 struct ShoppingBagView: View {
+    
+    @EnvironmentObject private var shopViewModel: ShopViewModel
+    @EnvironmentObject private var coreState: CoreState
+    
+    struct PuchaseType {
+        let int: Int
+        let string: String
+        let image: String
+        let color: Color
+        
+        init(_ int: Int) {
+            self.int = int
+            switch(int) {
+            case -1:
+                self.string = "거절됨"
+                self.image = "x.circle"
+                self.color = Color.red
+            case 1:
+                self.string = "처리중"
+                self.image = "ellipsis.bubble"
+                self.color = Color.gray
+            case 2:
+                self.string = "지급완료"
+                self.image = "checkmark.circle"
+                self.color = Color.green
+            default:
+                self.string = "요청됨"
+                self.image = "paperplane"
+                self.color = Color.gray
+            }
+        }
+    }
+    
     var body: some View {
         VStack {
             ScrollView{
                 LazyVStack{
-                    Divider()
-                    Button {
-                        // 삭제 로직
-                    } label: {
-                        HStack{
-                            Image("category_icecream")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50)
-                            VStack{
-                                Text("아이템 이름")
-                                Text("( 브랜드 )")
+                    ForEach(shopViewModel.purchases, id: \.id) { purchase in
+                        Divider()
+                        let purchaseType = PuchaseType(purchase.state)
+                        Button {
+                            if purchaseType.int != 1 {
+                                Task {
+                                    await shopViewModel.deletePurchase(coreState: coreState, purchaseId: purchase.id)
+                                }
                             }
-                            Image(systemName: "paperplane")
-                                .font(.body.weight(.bold))
-                                .foregroundColor(.gray)
-                            Text("요청됨")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                    }
-                    Divider()
-                    Button {
-                        
-                    } label: {
-                        HStack{
-                            Image("category_icecream")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50)
-                            VStack{
-                                Text("아이템 이름")
-                                Text("( 브랜드 )")
+                        } label: {
+                            HStack{
+                                CachedAsyncImage(url: URL(string: purchase.item.image)!) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50)
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                VStack{
+                                    Text(purchase.item.name)
+                                    Text("( \(purchase.item.brand) )")
+                                }
+                                Image(systemName: purchaseType.image)
+                                    .font(.body.weight(.bold))
+                                    .foregroundColor(purchaseType.color)
+                                Text(purchaseType.string)
                             }
-                            Image(systemName: "ellipsis.bubble")
-                                .font(.body.weight(.bold))
-                                .foregroundColor(.gray)
-                            Text("처리중")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 20)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                    }
-                    Divider()
-                    Button {
-                        
-                    } label: {
-                        HStack{
-                            Image("category_icecream")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50)
-                            VStack{
-                                Text("아이템 이름")
-                                Text("( 브랜드 )")
-                            }
-                            Image(systemName: "checkmark.circle")
-                                .font(.body.weight(.bold))
-                                .foregroundColor(.green)
-                            Text("지급 완료")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                    }
-                    Divider()
-                    Button {
-                        
-                    } label: {
-                        HStack{
-                            Image("category_icecream")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50)
-                            VStack{
-                                Text("아이템 이름")
-                                Text("( 브랜드 )")
-                            }
-                            Image(systemName: "x.circle")
-                                .font(.body.weight(.bold))
-                                .foregroundColor(.red)
-                            Text("거절됨")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
                     }
                     Divider()
                 }
             }
             .scrollIndicators(.hidden)
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("구매 이력")
-    }
-}
-
-struct ShoppingBagView_Previews: PreviewProvider {
-    static var previews: some View {
-        ShoppingBagView()
+        .navigationTitle("장바구니")
+        .task {
+            await shopViewModel.getPurchases(coreState: coreState)
+        }
     }
 }

@@ -8,30 +8,33 @@
 import Foundation
 
 enum Screen {
-    case Home
     case Profile
     case ProfileEdit
+    case MasterDetail
     case Promotion
     case Shop
     case ShoppingBag
     case GuideGrid
     case Guide
     case Information
-    case UserMap
-    case MasterMap
     case MasterRoom
     case Login
-    case Register
     case Auth
+    case LeaderBoard
+    case CafeInquiry
+    case PatchNote
+    case FAQ
+    case Inquiry
+    case PointResult
 
     var route: String {
         switch self {
-        case .Home:
-            return "HomeView"
         case .Profile:
             return "ProfileView"
         case .ProfileEdit:
             return "ProfileEditView"
+        case .MasterDetail:
+            return "MasterDetailView"
         case .Promotion:
             return "PromotionView"
         case .Shop:
@@ -44,46 +47,57 @@ enum Screen {
             return "GuideView"
         case .Information:
             return "InformationView"
-        case .UserMap:
-            return "UserMapView"
-        case .MasterMap:
-            return "MasterMapView"
         case .MasterRoom:
             return "MasterRoomView"
         case .Login:
             return "LoginView"
-        case .Register:
-            return "RegisterView"
         case .Auth:
             return "RegisterView"
+        case .LeaderBoard:
+            return "LeaderBoardView"
+        case .CafeInquiry:
+            return "CafeInquiryView"
+        case .PatchNote:
+            return "PatchNoteView"
+        case .FAQ:
+            return "FAQView"
+        case .Inquiry:
+            return "InquiryView"
+        case .PointResult:
+            return "PointResultView"
         }
     }
 }
 
 enum BottomTab {
-    case UserMap
-    case Home
-    case MasterMap
+    case Map
+    case LeaderBoard
+    case Shop
+    case Profile
     
     var name: String {
         switch self {
-        case .Home:
-            return "홈"
-        case .UserMap:
+        case .Map:
             return "카페지도"
-        case .MasterMap:
-            return "마스터지도"
+        case .LeaderBoard:
+            return "랭킹"
+        case .Shop:
+            return "포인트상점"
+        case .Profile:
+            return "프로필"
         }
     }
     
     var SFImage: String {
         switch self {
-        case .Home:
-            return "house"
-        case .UserMap:
-            return "map"
-        case .MasterMap:
-            return "flag"
+        case .Map:
+            return "map.fill"
+        case .LeaderBoard:
+            return "medal.fill"
+        case .Shop:
+            return "cart.fill"
+        case .Profile:
+            return "person.crop.circle"
         }
     }
 }

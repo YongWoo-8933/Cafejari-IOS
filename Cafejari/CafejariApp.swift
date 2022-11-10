@@ -10,6 +10,7 @@ import KakaoSDKCommon
 import KakaoSDKAuth
 import GoogleMaps
 import CoreData
+import GoogleSignIn
 
 @main
 struct CafejariApp: App {
@@ -17,9 +18,9 @@ struct CafejariApp: App {
     let dependencies = Dependencies()
     
     @StateObject var coreState = CoreState()
-    @StateObject var master = Master()
     
     @StateObject var userViewModel = UserViewModel()
+    @StateObject var cafeViewModel = CafeViewModel()
     @StateObject var shopViewModel = ShopViewModel()
     @StateObject var informationViewModel = InformationViewModel()
     
@@ -33,30 +34,20 @@ struct CafejariApp: App {
     var body: some Scene {
         
         WindowGroup {
-            if coreState.isSplashFinished {
-                HomeView()
-                    .environmentObject(coreState)
-                    .environmentObject(master)
-                    .environmentObject(userViewModel)
-                    .environmentObject(shopViewModel)
-                    .environmentObject(informationViewModel)
-                    .accentColor(.black)
-                    .onOpenURL(perform: { url in
-                        if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                            AuthController.handleOpenUrl(url: url)
-                        }
-                    })
-            }else{
-                SplachView()
-                    .onAppear{
-                        Task {
-                            try await userViewModel.appInit(coreState: coreState)
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) {
-                            coreState.isSplashFinished.toggle()
-                        }
+            MapView()
+                .environmentObject(coreState)
+                .environmentObject(userViewModel)
+                .environmentObject(cafeViewModel)
+                .environmentObject(shopViewModel)
+                .environmentObject(informationViewModel)
+                .accentColor(.black)
+                .onOpenURL { url in
+                    if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                        _ = AuthController.handleOpenUrl(url: url)
+                    } else {
+                        GIDSignIn.sharedInstance.handle(url)
                     }
-            }
+                }
         }
     }
 }
