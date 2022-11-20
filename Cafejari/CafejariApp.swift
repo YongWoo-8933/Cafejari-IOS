@@ -19,6 +19,7 @@ struct CafejariApp: App {
     
     @StateObject var coreState = CoreState()
     
+    @StateObject var loginViewModel = LoginViewModel()
     @StateObject var userViewModel = UserViewModel()
     @StateObject var cafeViewModel = CafeViewModel()
     @StateObject var shopViewModel = ShopViewModel()
@@ -32,10 +33,11 @@ struct CafejariApp: App {
     }
         
     var body: some Scene {
-        
         WindowGroup {
             MapView()
+                .font(.body)
                 .environmentObject(coreState)
+                .environmentObject(loginViewModel)
                 .environmentObject(userViewModel)
                 .environmentObject(cafeViewModel)
                 .environmentObject(shopViewModel)

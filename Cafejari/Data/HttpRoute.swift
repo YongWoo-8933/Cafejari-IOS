@@ -44,6 +44,8 @@ struct HttpRoute {
     func logout() -> String { return "\(userBaseUrl)/logout/" }
     func socialUserCheck() -> String { return "\(userBaseUrl)/social_user_check/" }
     func profile(id: Int) -> String { return "\(userBaseUrl)/profile/\(id)/" }
+    func weekLeader() -> String { return "\(userBaseUrl)/week_leader/" }
+    func monthLeader() -> String { return "\(userBaseUrl)/month_leader/" }
     
     // cafe
     func cafeInfo() -> String { return "\(cafeBaseUrl)/cafe_info/" }
@@ -63,8 +65,6 @@ struct HttpRoute {
     
     // infomation
     func event() -> String { return "\(infomationBaseUrl)/event/" }
-    func randomSaying() -> String { return "\(infomationBaseUrl)/random_saying/" }
-    func randomImageSaying() -> String { return "\(infomationBaseUrl)/random_image_saying/" }
     func pointPolicy() -> String { return "\(infomationBaseUrl)/point_policy/" }
     func caution() -> String { return "\(infomationBaseUrl)/caution/" }
     func faq() -> String { return "\(infomationBaseUrl)/faq/" }

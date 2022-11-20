@@ -6,25 +6,44 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 struct GuideGridView: View {
     
+    @EnvironmentObject private var coreState: CoreState
+    
     var body: some View {
-        VStack{
-            LazyVGrid(columns: GridItem(.flexible()).setGridColumn(columns: 2), spacing: 10) {
-                ForEach(Guide.guides, id: \.images[0]) { guide in
-                    NavigationLink {
-                        GuideView(guideImages: guide.images)
-                    } label: {
-                        Image(guide.titleImage)
-                            .resizable()
-                            .scaledToFit()
-                            .padding(20)
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                NavigationTitle(title: "유저 가이드북", leadingIconSystemName: "chevron.backward") {
+                    coreState.popUp()
+                }
+                
+                LazyVGrid(columns: GridItem(.flexible()).setGridColumn(columns: 2), spacing: .large) {
+                    ForEach(Guide.guides, id: \.images[0]) { guide in
+                        NavigationLink {
+                            GuideView(guideImages: guide.images)
+                        } label: {
+                            Image(guide.titleImage)
+                                .resizable()
+                                .scaledToFit()
+                                .cornerRadius(.medium)
+                                .shadow(radius: 2)
+                                .padding(.medium)
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.moreLarge)
+                
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
-            Spacer()
+            .navigationBarBackButtonHidden()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            AdBannerView()
+                .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
+                .offset(x: 0, y: .moreLarge)
         }
     }
 }

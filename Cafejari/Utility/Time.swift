@@ -51,6 +51,15 @@ extension Time {
         return Date() > self.translateFromStringToDate(timeString: timeString)
     }
     
+    func getPassingSecondsFrom(timeString: String) -> Int {
+        if let seconds = Calendar.current.dateComponents(
+            [.second], from: self.translateFromStringToDate(timeString: timeString), to: Date.now
+        ).second {
+            return seconds
+        }
+        return 0
+    }
+    
     func getPassingDayFrom(timeString: String) -> Int {
         if let day = Calendar.current.dateComponents(
             [.day], from: self.translateFromStringToDate(timeString: timeString), to: Date.now

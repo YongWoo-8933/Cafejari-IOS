@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import CoreLocation
+import GoogleMobileAds
 
 
 class BaseViewModel: ObservableObject {
@@ -17,8 +18,10 @@ class BaseViewModel: ObservableObject {
     @Inject var time: Time
     @Inject var httpRoute: HttpRoute
     
+    @Published var interstitial: GADInterstitial? = nil
+    
     func getSavedRefreshToken() async throws -> String {
-        return try await tokenRepository.getSavedRefreshToken()
+        return await tokenRepository.getSavedRefreshToken()
     }
     
     func saveRefreshToken(refreshToken: String) {
@@ -26,7 +29,7 @@ class BaseViewModel: ObservableObject {
     }
     
     func deleteSavedRefreshToken() {
-        tokenRepository.deleteSavedToken()
+        tokenRepository.deleteSavedRefreshToken()
     }
     
     func refreshAccessToken(coreState: CoreState, jobWithNewAccessToken: (String) async throws -> Void) async {
@@ -49,7 +52,15 @@ class BaseViewModel: ObservableObject {
     func logout(coreState: CoreState) async {
         do {
             try await userRepository.logout(refreshToken: coreState.refreshToken)
-            self.tokenRepository.deleteSavedToken()
+            self.tokenRepository.deleteSavedRefreshToken()
+            self.tokenRepository.deleteSavedFcmToken()
+            
+            _ = try await userRepository.putFcmToken(
+                accessToken: coreState.accessToken,
+                profileId: coreState.user.profileId,
+                fcmToken: GlobalString.None.rawValue
+            )
+            
             DispatchQueue.main.sync {
                 coreState.isLogedIn = false
                 coreState.user = User.empty
@@ -66,5 +77,10 @@ class BaseViewModel: ObservableObject {
         } catch {
             print(error)
         }
+    }
+    
+    func loadInterstitalAd() {
+        interstitial = GADInterstitial(adUnitID: AdUnit.interstitial.id)
+        interstitial?.load(GADRequest())
     }
 }

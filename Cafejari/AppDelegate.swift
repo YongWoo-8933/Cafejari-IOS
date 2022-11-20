@@ -8,30 +8,120 @@
 import Foundation
 import GoogleMaps
 import GooglePlaces
-import FirebaseCore
 import GoogleSignIn
+import GoogleMobileAds
+import FirebaseCore
+import FirebaseMessaging
+import FirebaseInAppMessaging
+import AudioToolbox
+import AppTrackingTransparency
 
-class AppDelegate: NSObject, UIApplicationDelegate    {
-     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-         
-         let googleMapApiKey = Bundle.main.infoDictionary?["GOOGLE_MAP_API_KEY"] ?? ""
-         
-         // GoogleMap SDK 초기화
-         GMSServices.provideAPIKey(googleMapApiKey as! String)
-         GMSServices.setMetalRendererEnabled(true)
-         
-         // GooglePlace SDK 초기화
-         GMSPlacesClient.provideAPIKey(googleMapApiKey as! String)
-         
-         let signInConfig = GIDConfiguration(clientID: "YOUR_IOS_CLIENT_ID")
-         
-         // Firebase SDK 초기화
-         FirebaseApp.configure()
-         
-         return true
-     }
+class AppDelegate: NSObject, UIApplicationDelegate {
+    
+    @Inject private var tokenRepogitory: TokenRepository
+    
+    // 앱이 켜졌을때
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        
+        let googleMapApiKey = Bundle.main.infoDictionary?["GOOGLE_MAP_API_KEY"] ?? ""
+        
+        // GoogleMap SDK 초기화
+        GMSServices.provideAPIKey(googleMapApiKey as! String)
+        GMSServices.setMetalRendererEnabled(true)
+        
+        // GooglePlace SDK 초기화
+        GMSPlacesClient.provideAPIKey(googleMapApiKey as! String)
+        
+//        let signInConfig = GIDConfiguration(clientID: "YOUR_IOS_CLIENT_ID")
+        
+        // Firebase 초기화
+        FirebaseApp.configure()
+        
+        // 원격 알림 등록
+        UNUserNotificationCenter.current().delegate = self
+        
+        // 메세징 델리겟
+        Messaging.messaging().delegate = self
+        
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: { _, _ in }
+        )
+        
+        application.registerForRemoteNotifications()
+        
+        // GoogleAdmob 초기화
+        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = ["478444e6db8ce9170616526ac599c0cd"]
+        
+        ATTrackingManager.requestTrackingAuthorization {
+                switch $0 {
+                case .authorized:
+                    print("auth")
+                case .denied:
+                    print("denied")
+                case .notDetermined:
+                    print("not determind")
+                case .restricted:
+                    print("restrict")
+                default:
+                    print("default")
+                }
+            }
+        
+        return true
+    }
+    
+    // fcm 토큰이 등록 되었을 때
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
     
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         return GIDSignIn.sharedInstance.handle(url)
     }
- }
+}
+
+extension AppDelegate : MessagingDelegate {
+    
+    // fcm 등록 토큰을 받았을 때
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+        tokenRepogitory.saveFcmToken(fcmToken: fcmToken)
+    }
+}
+
+extension AppDelegate : UNUserNotificationCenterDelegate {
+    
+    // 푸시메세지가 앱이 켜져 있을때 나올때
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        _ = notification.request.content.userInfo
+        
+        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+        
+        completionHandler([.banner, .list, .sound, .badge])
+    }
+    
+    // 푸시메세지를 통해 앱을 켤때
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        _ = response.notification.request.content.userInfo
+        
+        completionHandler()
+    }
+    
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async
+      -> UIBackgroundFetchResult {
+      AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+
+      // Print full message.
+      print(userInfo)
+
+      return UIBackgroundFetchResult.newData
+    }
+}

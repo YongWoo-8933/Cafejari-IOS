@@ -10,9 +10,12 @@ import CoreData
 
 protocol TokenRepository {
     
-    func getSavedRefreshToken() async throws -> String
+    func getSavedRefreshToken() async -> String
+    func getSavedFcmToken() async -> String
     func saveRefreshToken(refreshToken: String)
-    func deleteSavedToken()
+    func saveFcmToken(fcmToken: String)
+    func deleteSavedRefreshToken()
+    func deleteSavedFcmToken()
     
     func refreshAccessToken(refreshToken: String) async throws -> AccessTokenResponse
 }
@@ -25,10 +28,26 @@ final class TokenRepositoryImpl: TokenRepository {
     @Inject var context: NSManagedObjectContext
     @Inject var customUrlRequest: CustomURLRequest
     
-    func getSavedRefreshToken() async throws -> String {
-        let tokens = try context.fetch(RefreshToken.fetchRequest()) as! [RefreshToken]
-        let response = tokens.isEmpty ? "" : tokens[0].value
-        return response ?? ""
+    func getSavedRefreshToken() async -> String {
+        do {
+            let tokens = try context.fetch(RefreshToken.fetchRequest()) as! [RefreshToken]
+            let response = tokens.isEmpty ? "" : tokens[0].value
+            return response ?? ""
+        } catch {
+            print(error)
+            return ""
+        }
+    }
+    
+    func getSavedFcmToken() async -> String {
+        do {
+            let tokens = try context.fetch(FcmToken.fetchRequest()) as! [FcmToken]
+            let response = tokens.isEmpty ? "" : tokens[0].value
+            return response ?? ""
+        } catch {
+            print(error)
+            return ""
+        }
     }
     
     func saveRefreshToken(refreshToken: String) {
@@ -50,12 +69,44 @@ final class TokenRepositoryImpl: TokenRepository {
         }
     }
     
-    func deleteSavedToken() {
+    func saveFcmToken(fcmToken: String) {
+        do {
+            let tokens = try context.fetch(FcmToken.fetchRequest()) as! [FcmToken]
+            if tokens.isEmpty {
+                let newSavedEntity = NSEntityDescription.entity(forEntityName: "FcmToken", in: context)
+                let newSavedToken = NSManagedObject(entity: newSavedEntity!, insertInto: context)
+                newSavedToken.setValue(0, forKey: "id")
+                newSavedToken.setValue(fcmToken, forKey: "value")
+            } else {
+                let savedToken = tokens[0]
+                savedToken.setValue(0, forKey: "id")
+                savedToken.setValue(fcmToken, forKey: "value")
+            }
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func deleteSavedRefreshToken() {
         let context = PersistenceController.shared.container.viewContext
         do {
             let tokens = try context.fetch(RefreshToken.fetchRequest()) as! [RefreshToken]
             tokens.forEach { refreshToken in
                 context.delete(refreshToken)
+            }
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func deleteSavedFcmToken() {
+        let context = PersistenceController.shared.container.viewContext
+        do {
+            let tokens = try context.fetch(FcmToken.fetchRequest()) as! [FcmToken]
+            tokens.forEach { fcmToken in
+                context.delete(fcmToken)
             }
             try context.save()
         } catch {

@@ -22,7 +22,6 @@ final class CafeViewModel: BaseViewModel {
     @Published var modalCafeInfo: CafeInfo = CafeInfo.empty
     @Published var modalCafeIndex: Int = 0
     @Published var modalCafePhoneNumber: String? = nil
-    @Published var modalCafeWebSite: URL? = nil
     
     @Published var markerRefeshTrigger: Bool = false
     
@@ -32,9 +31,17 @@ final class CafeViewModel: BaseViewModel {
     @Published var modalMoreImagesLoading: Bool = false
     @Published var modalImageMetaData: [GMSPlacePhotoMetadata] = []
     
-//    @Published var masterRoomImageSaying: ImageSaying = ImageSaying.empty
+    @Published var isModalSnackBarOpened: Bool = false
+    @Published var modalSnackBarContent: String = ""
+    @Published var modalSnackBarType: SnackBarType = .alert
+    
+    @Published var isThumbsUpDialogOpened: Bool = false
+    @Published var thumbsUpRecentLog: RecentUpdatedLog = RecentUpdatedLog.empty
+    
+    @Published var isMasterRoomCtaProgress: Bool = false
     
     private let googlePlaceClient = GMSPlacesClient.shared()
+    private var snackBarWork: DispatchWorkItem? = nil
     
     
     // core
@@ -71,7 +78,6 @@ final class CafeViewModel: BaseViewModel {
        modalCafeInfo = CafeInfo.empty
        modalCafeIndex = 0
        modalCafePhoneNumber = nil
-       modalCafeWebSite = nil
        modalPreviewImages = []
        modalAttributions = ""
        modalMoreImages = []
@@ -80,6 +86,7 @@ final class CafeViewModel: BaseViewModel {
     
     func getCafeInfos(coreState: CoreState) async {
         do {
+            cafeInfoLoading = true
             let cafeInfoResponses = try await cafeRepository.fetchCafeInfos(accessToken: coreState.accessToken)
             var newCafeInfos: CafeInfos = []
             
@@ -133,6 +140,10 @@ final class CafeViewModel: BaseViewModel {
                     )
                 )
             }
+            self.cafeInfoRefreshDisabled = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
+                self.cafeInfoRefreshDisabled = false
+            }
             self.cafeInfos = newCafeInfos
             self.cafeInfoLoading = false
             self.markerRefeshTrigger = true
@@ -163,7 +174,7 @@ final class CafeViewModel: BaseViewModel {
         if googlePlaceId != GlobalString.None.rawValue {
             googlePlaceClient.fetchPlace(
                 fromPlaceID: googlePlaceId,
-                placeFields: GMSPlaceField(rawValue: UInt(GMSPlaceField.photos.rawValue) | UInt(GMSPlaceField.phoneNumber.rawValue) | UInt(GMSPlaceField.website.rawValue)),
+                placeFields: GMSPlaceField(rawValue: UInt(GMSPlaceField.photos.rawValue) | UInt(GMSPlaceField.phoneNumber.rawValue)),
                 sessionToken: nil,
                 callback: { place, error in
                     if let error = error {
@@ -172,7 +183,6 @@ final class CafeViewModel: BaseViewModel {
                     if let place = place {
                         self.modalImageMetaData = place.photos ?? []
                         self.modalCafePhoneNumber = place.phoneNumber
-                        self.modalCafeWebSite = place.website
                         var photoNum = self.modalImageMetaData.count
                         photoNum = photoNum > 2 ? 3 : photoNum
                         self.modalImageMetaData[0 ..< photoNum].forEach { photoMetaData in
@@ -235,7 +245,7 @@ final class CafeViewModel: BaseViewModel {
     }
     
     func thumbsUp(
-        coreState: CoreState, recentLogId: Int, isAdWatched: Bool, onSuccess: () -> Void, onFail: (String) -> Void) async {
+        coreState: CoreState, recentLogId: Int, isAdWatched: Bool, onSuccess: () -> Void) async {
         do {
             let userRes = try await cafeRepository.thumbsUp(
                 accessToken: coreState.accessToken, recentLogId: recentLogId, isAdWatched: isAdWatched)
@@ -247,65 +257,63 @@ final class CafeViewModel: BaseViewModel {
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
                 await thumbsUp(
-                    coreState: coreState, recentLogId: recentLogId, isAdWatched: isAdWatched, onSuccess: onSuccess, onFail: onFail)
+                    coreState: coreState, recentLogId: recentLogId, isAdWatched: isAdWatched, onSuccess: onSuccess)
             })
         } catch CustomError.errorMessage(let msg){
-            onFail(msg)
+            self.showModalSnackBar(message: msg, type: SnackBarType.error)
         } catch {
             print(error.localizedDescription)
         }
     }
     
-//    func setCafeLogFloor(coreState: CoreState, cafeId: Int) {
-//        let masterRoomCafeLog = coreState.masterRoomCafeLog
-//        coreState.masterRoomCafeLog = CafeLog(
-//            id: masterRoomCafeLog.id,
-//            cafeId: cafeId,
-//            name: masterRoomCafeLog.name,
-//            latitude: masterRoomCafeLog.latitude,
-//            longitude: masterRoomCafeLog.longitude,
-//            floor: masterRoomCafeLog.floor,
-//            start: masterRoomCafeLog.start,
-//            finish: masterRoomCafeLog.finish,
-//            expired: masterRoomCafeLog.expired,
-//            point: masterRoomCafeLog.point,
-//            master: masterRoomCafeLog.master,
-//            cafeDetailLogs: masterRoomCafeLog.cafeDetailLogs
-//        )
-//    }
+    func clearModalSnackBar() {
+        self.isModalSnackBarOpened = false
+        self.modalSnackBarType = SnackBarType.alert
+        self.modalSnackBarContent = ""
+    }
     
+    func showModalSnackBar(message: String, type: SnackBarType = SnackBarType.alert) {
+        if let work = self.snackBarWork {
+            work.cancel()
+        }
+        self.snackBarWork = DispatchWorkItem(block: {
+            self.clearModalSnackBar()
+        })
+        self.modalSnackBarType = type
+        self.modalSnackBarContent = message
+        self.isModalSnackBarOpened = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: self.snackBarWork!)
+    }
     
-    
-    
-//    func getRandomImageSaying(coreState: CoreState) async throws {
-//        self.masterRoomImageSaying = try await informationRepository.fetchRandomImageSaying(accessToken: coreState.accessToken)
-//    }
     
     // master room
     func registerMaster(coreState: CoreState, crowded: Int) async {
+        isMasterRoomCtaProgress = true
         do {
             let cafeLog = try await cafeRepository.registerMaster(
                 accessToken: coreState.accessToken, cafeId: modalCafeInfo.cafes[modalCafeIndex].id, crowded: crowded
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
-            withAnimation(.easeInOut(duration: 0.1)) {
-                coreState.isMasterActivated = true
-                coreState.mapType = MapType.crowded
-                self.markerRefeshTrigger = true
-            }
+            coreState.isMasterActivated = true
+            coreState.mapType = MapType.crowded
+            self.markerRefeshTrigger = true
+            isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "마스터등록 성공! 주기적으로 혼잡도를 업데이트 해주세요")
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
                 await registerMaster(coreState: coreState, crowded: crowded)
             })
-        } catch CustomError.errorMessage(let msg){
+        } catch CustomError.errorMessage(let msg) {
+            isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: msg, type: SnackBarType.error)
         } catch {
+            isMasterRoomCtaProgress = false
             print(error.localizedDescription)
         }
     }
     
     func updateCrowded(coreState: CoreState, crowded: Int) async {
+        isMasterRoomCtaProgress = true
         do {
             let cafeLog = try await cafeRepository.putCrowded(
                 accessToken: coreState.accessToken, cafeLogId: coreState.masterRoomCafeLog.id, crowded: crowded
@@ -313,6 +321,7 @@ final class CafeViewModel: BaseViewModel {
             coreState.masterRoomCafeLog = cafeLog
             coreState.mapType = MapType.crowded
             self.markerRefeshTrigger = true
+            isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "카페 혼잡도를 '\(crowded.toCrowded().string)'(으)로 변경하였습니다")
         } catch CustomError.masterExpired {
             coreState.isMasterActivated = false
@@ -322,8 +331,10 @@ final class CafeViewModel: BaseViewModel {
                 await updateCrowded(coreState: coreState, crowded: crowded)
             })
         } catch CustomError.errorMessage(let msg){
+            isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: msg, type: SnackBarType.error)
         } catch {
+            isMasterRoomCtaProgress = false
             print(error.localizedDescription)
         }
     }
@@ -354,14 +365,11 @@ final class CafeViewModel: BaseViewModel {
             coreState.mapType = MapType.crowded
             await self.getCafeInfos(coreState: coreState)
             
-            withAnimation(.easeInOut(duration: 0.1)) {
-                coreState.isMasterActivated = false
-            }
+            coreState.isMasterActivated = false
             
             coreState.pointResultViewType = adWatched ? PointResultViewType.masterExpiredWithAd : PointResultViewType.masterExpired
             coreState.pointResultPoint = cafeLog.point
             coreState.navigateWithClear(Screen.PointResult.route)
-            
         } catch CustomError.masterExpired {
             coreState.isMasterActivated = false
             await checkAutoExpiredCafeLog(coreState: coreState)

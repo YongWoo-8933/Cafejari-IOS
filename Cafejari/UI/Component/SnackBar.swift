@@ -20,45 +20,52 @@ struct SnackBar: View {
     
     var body: some View {
         ZStack {
-            HStack {
+            HStack(spacing: 0) {
                 if isSnackBarOpened {
                     switch(snackBarType) {
                         
                     case .alert:
                         Image(systemName: "checkmark.circle")
-                            .font(.title2.bold())
-                            .foregroundColor(.green)
+                            .font(.subtitle.bold())
+                            .foregroundColor(.crowdedGreen)
                     case .error:
                         Image(systemName: "exclamationmark.circle")
-                            .font(.title2.bold())
-                            .foregroundColor(.red)
+                            .font(.subtitle.bold())
+                            .foregroundColor(.error)
                     case .info:
                         Image(systemName: "info.circle")
-                            .font(.title2.bold())
-                            .foregroundColor(.gray)
+                            .font(.subtitle.bold())
+                            .foregroundColor(.lightGray)
                     }
                     
-                    HorizontalSpacer(15)
+                    HorizontalSpacer(.medium)
                     
-                    Text(content.useNonBreakingSpace())
+                    Text(content)
+                        .font(.headline2.bold())
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.white)
                     
-                    HorizontalSpacer(15)
+                    Spacer()
+                    
+                    HorizontalSpacer(.large)
                     
                     Button {
                         onCloseButtonClick()
                     } label: {
                         Text("닫기")
+                            .font(.headline2)
+                            .foregroundColor(.lightGray)
                     }
                 }
             }
-            .padding()
+            .padding(16)
             .frame(maxWidth: isSnackBarOpened ? .infinity : 0)
-            .background(.white)
-            .cornerRadius(10)
+            .background(.black.opacity(0.6))
+            .cornerRadius(.medium)
             .shadow(radius: 3)
-            .padding()
-            .animation(.easeInOut(duration: 0.15), value: isSnackBarOpened)
+            .padding(.horizontal, .large)
+            .padding(.vertical, 40)
+            .animation(.easeInOut(duration: .short), value: isSnackBarOpened)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }

@@ -8,6 +8,7 @@
 import Foundation
 
 func nsErrorHandle(_ error: NSError) -> CustomError {
+    print(error)
     switch error.code {
     case -999:
         return CustomError.errorMessage("데이터 로드 취소됨")

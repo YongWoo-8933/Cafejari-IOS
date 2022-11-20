@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 struct InquiryView: View {
     
@@ -21,50 +22,48 @@ struct InquiryView: View {
     @FocusState private var focusedField: Field?
     
     var body: some View {
-        ScrollView {
-            LazyVStack {
-                Text("- 기타 문의를 위한 공간입니다 -")
-                    .padding(.vertical, 30)
-                HStack {
-                    Text("문의 내용")
-                        .frame(width: 80)
-                    TextField("여러줄 작성이 가능합니다", text: $content, axis: .vertical)
-                        .frame(maxWidth: .infinity)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: Field.inquiryEtc)
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                NavigationTitle(title: "1:1 문의", leadingIconSystemName: "chevron.backward") {
+                    coreState.popUp()
                 }
-                VerticalSpacer(36)
-                Button {
-                    Task {
-                        await informationViewModel.submitInquiryEtc(coreState: coreState, content: content) {
-                            content = ""
-                            coreState.showSnackBar(message: "문의를 제출하였습니다. 가입하신 이메일로 빠른 시일내에 답변드리겠습니다")
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        VerticalSpacer(.moreLarge)
+                        
+                        Text("궁금한 점이 생기면 언제든 문의하세요")
+                            .font(.headline.bold())
+                        
+                        VerticalSpacer(40)
+                        
+                        TextField("문의하고 싶은 내용을 자세히 작성해주세요", text: $content, axis: .vertical)
+                            .textFieldStyle(MultiLineTextFieldStyle())
+                            .focused($focusedField, equals: Field.inquiryEtc)
+                        
+                        VerticalSpacer(40)
+                        
+                        FilledCtaButton(text: "문의하기", backgroundColor: .primary) {
+                            if content.isEmpty {
+                                coreState.showSnackBar(message: "문의할 내용을 입력해주세요", type: .info)
+                            } else {
+                                Task {
+                                    await informationViewModel.submitInquiryEtc(coreState: coreState, content: content)
+                                }
+                            }
                         }
                     }
-                } label: {
-                    Text("문의하기")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(.brown)
-                        .cornerRadius(5)
+                    .padding(.moreLarge)
                 }
-            }
-            .padding(.horizontal, 10)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarTitle("문의")
-        .toolbar {
-            ToolbarItem(placement: .keyboard) {
-                Button{
+                .navigationBarBackButtonHidden()
+                .addKeyboardDownButton {
                     focusedField = nil
-                } label: {
-                    HStack{
-                        Text("완료")
-                        Image(systemName: "chevron.down")
-                    }
-                    .frame(width: 600)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            AdBannerView()
+                .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
+                .offset(x: 0, y: .moreLarge)
         }
     }
 }

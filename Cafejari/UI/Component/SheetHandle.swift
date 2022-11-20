@@ -13,6 +13,6 @@ struct SheetHandle: View {
             .fill(.gray)
             .frame(width: 44, height: 5)
             .cornerRadius(2.5)
-            .padding(8)
+            .padding(.medium)
     }
 }

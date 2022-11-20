@@ -12,10 +12,13 @@ enum GlobalString: String {
     case NoneImage = "https://cafejari.shop/_none"
 }
 
-
 enum GlobalZoom: Float {
     case Large = 18.5
     case Default = 16.5
     case Small = 14.5
 }
+
+let RELEASE_VERSION_CODE = 0
+let MAJOR_VERSION_CODE = 0
+let MINOR_VERSION_CODE = 0
 

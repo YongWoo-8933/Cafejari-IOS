@@ -70,6 +70,15 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
         userLastLocation = locations.first
     }
     
+    func isNearBy(latitude: Double, longitude: Double) -> Bool {
+//        if let userLocation = self.userLastLocation {
+//            return userLocation.coordinate.latitude < latitude + 0.00023 && userLocation.coordinate.latitude > latitude - 0.00023 && userLocation.coordinate.longitude < longitude + 0.00027 && userLocation.coordinate.longitude > longitude - 0.00027
+//        } else {
+//            return false
+//        }
+        return true
+    }
+    
     
     
     // main

@@ -14,18 +14,19 @@ struct FullScreenLoadingView: View {
     let text: String
     
     var body: some View {
-        if loading {
-            VStack{
-                ProgressView()
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                Text(text)
-                    .foregroundColor(.white)
-                    .padding(20)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(.black.opacity(0.5))
-            .onTapGesture {  }
+        VStack {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                .frame(width: 44, height: 44)
+            Text(text)
+                .font(.subtitle.bold())
+                .foregroundColor(.white)
+                .padding(.moreLarge)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.black.opacity(0.5))
+        .onTapGesture {  }
+        .opacity(loading ? 1 : 0)
+        .animation(.easeInOut, value: loading)
     }
 }

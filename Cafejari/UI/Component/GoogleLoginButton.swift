@@ -55,7 +55,7 @@ struct GoogleLoginButton: View {
                 if isLoading {
                     ProgressView()
                         .frame(height: 12)
-                    HorizontalSpacer(10)
+                    HorizontalSpacer(.medium)
                 } else {
                     Image("google_logo")
                         .resizable()
@@ -63,16 +63,16 @@ struct GoogleLoginButton: View {
                         .frame(height: 12)
                 }
                 Text(isLoading ? "구글 로그인 진행중..." : "구글 로그인")
-                    .font(.system(size: 17, weight: .medium))
+                    .font(Font.custom("Roboto-Medium", size: 17))
                     .foregroundColor(.black.opacity(0.54))
             }
             .padding(12)
             .frame(maxWidth: .infinity)
             .background(.white)
-            .cornerRadius(8)
+            .cornerRadius(.medium)
         }
         .background(.gray)
-        .cornerRadius(8)
+        .cornerRadius(.medium)
         .shadow(radius: 1)
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 struct MasterDetailView: View {
     
@@ -16,116 +17,122 @@ struct MasterDetailView: View {
     @State private var bottomModalDateCafeLog: DateCafeLog? = nil
     
     var body: some View {
-        ZStack {
-            ScrollView {
-                LazyVStack {
-                    VerticalSpacer(20)
-                    Text("지금까지")
-                    Text("총 ")
-                    +
-                    Text(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: coreState.user.activity))
-                        .font(.title3.bold())
-                    +
-                    Text("동안 활동했어요!")
-                    VerticalSpacer(30)
-
-                    if !userViewModel.isDateCafeLogsLoading {
-                        CalendarView(
-                            selectedDate: $userViewModel.selectedDate,
-                            dateCafeLogs: $userViewModel.dateCafeLogs,
-                            onDateSelected: { date in
-                                let imageDateFormatter = DateFormatter()
-                                imageDateFormatter.dateFormat = "yyyyMMdd"
-                                let dateStr = imageDateFormatter.string(from: date)
-                                let selectedDateCafeLogs = userViewModel.dateCafeLogs.filter({ dateCafeLog in
-                                    imageDateFormatter.string(from: dateCafeLog.date) == dateStr
-                                })
-                                if !selectedDateCafeLogs.isEmpty {
-                                    bottomModalDateCafeLog = selectedDateCafeLogs[0]
-                                    isBottomSheetOpened = true
-                                }
-                            }
-                        )
-                        .frame(height: 480)
-                        .padding(20)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color.gray, lineWidth: 2)
-                        )
-                    }
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                NavigationTitle(title: "내 마스터 활동", leadingIconSystemName: "chevron.backward") {
+                    coreState.popUp()
                 }
-                .padding(20)
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        VerticalSpacer(.moreLarge)
+                        
+                        VStack(spacing: .small) {
+                            Text("지금까지")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text("총 ")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            +
+                            Text(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: coreState.user.activity))
+                                .font(.headline.bold())
+                                .foregroundColor(.primary)
+                            +
+                            Text(" 동안 카페를 지켰어요!")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                        }
+                        
+                        VerticalSpacer(.moreLarge)
+                        
+                        if !userViewModel.isDateCafeLogsLoading {
+                            CalendarView(
+                                selectedDate: $userViewModel.selectedDate,
+                                dateCafeLogs: $userViewModel.dateCafeLogs,
+                                onDateSelected: { date in
+                                    let imageDateFormatter = DateFormatter()
+                                    imageDateFormatter.dateFormat = "yyyyMMdd"
+                                    let dateStr = imageDateFormatter.string(from: date)
+                                    let selectedDateCafeLogs = userViewModel.dateCafeLogs.filter({ dateCafeLog in
+                                        imageDateFormatter.string(from: dateCafeLog.date) == dateStr
+                                    })
+                                    if !selectedDateCafeLogs.isEmpty {
+                                        bottomModalDateCafeLog = selectedDateCafeLogs[0]
+                                        isBottomSheetOpened = true
+                                    }
+                                }
+                            )
+                            .frame(height: 420)
+                            .padding(.moreLarge)
+                            .roundBorder(cornerRadius: .moreLarge, lineWidth: 1.5, borderColor: .primary)
+                        }
+                    }
+                    .padding(.moreLarge)
+                }
+                .scrollIndicators(.never)
             }
-            .scrollIndicators(.never)
-
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            AdBannerView()
+                .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
+                .offset(x: 0, y: .moreLarge)
+            
             FullScreenLoadingView(loading: $userViewModel.isDateCafeLogsLoading, text: "마스터 활동 정보 로드중..")
         }
-        .navigationTitle("내 마스터 활동")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .sheet(isPresented: $isBottomSheetOpened) {
             SheetHandle()
-            VStack(alignment: .leading) {
+            
+            VStack(alignment: .leading, spacing: 0) {
                 if let bottomModalDateCafeLog = bottomModalDateCafeLog {
-                    HStack {
+                    HStack(spacing: .large) {
                         Image("stamp_icon")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 24)
+                            .frame(width: 16)
                         Text("\(userViewModel.time.parseYearFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))년  \(userViewModel.time.parseMonthFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))월  \(userViewModel.time.parseDayFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))일")
+                            .font(.headline.bold())
+                            .foregroundColor(.primary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+                    .padding(.moreLarge)
 
                     ScrollView {
-                        LazyVStack(alignment: .leading) {
+                        LazyVStack(alignment: .leading, spacing: .large) {
                             ForEach(bottomModalDateCafeLog.cafeLogs, id: \.id) { cafeLog in
                                 ZStack {
                                     VStack(alignment: .leading) {
-                                        Text(cafeLog.name)
-                                        +
-                                        Text("  \(cafeLog.floor.toFloor())층")
+                                        Text(cafeLog.name + " \(cafeLog.floor.toFloor())층")
+                                            .font(.body.bold())
 
                                         HStack {
-                                            HStack {
-                                                Text("\(userViewModel.time.getAMPMHourMinuteStringFrom(timeString: cafeLog.start)) ~ \(userViewModel.time.getAMPMHourMinuteStringFrom(timeString: cafeLog.finish))")
-                                                    .font(.caption.bold())
-                                                    .foregroundColor(.white)
-                                            }
-                                            .padding(8)
-                                            .frame(height: 32)
-                                            .background(.gray)
-                                            .cornerRadius(16)
+                                            RoundTimeFrame(timeStringFrom: cafeLog.start, timeStringTo: cafeLog.finish)
                                             Text("총 \(userViewModel.time.getPassingHourMinuteStringFromTo(timeStringFrom: cafeLog.start, timeStringTo: cafeLog.finish)) 활동")
-                                                .font(.body)
+                                                .font(.caption)
                                         }
                                     }
-                                    .padding(15)
-                                    .frame(height: 110)
+                                    .padding(.moreLarge)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.black, lineWidth: 1)
-                                    )
+                                    .roundBorder(cornerRadius: .moreLarge, lineWidth: 1, borderColor: .black)
+                                    
                                     VStack {
                                         Text("+\(cafeLog.point)P")
-                                            .font(.title3.bold())
+                                            .font(.headline.bold())
                                     }
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                                    .padding(25)
+                                    .padding(.large)
                                 }
                             }
                         }
-                        .padding()
+                        .padding(.moreLarge)
                     }
                     .scrollIndicators(.never)
                 } else {
                     ProgressView()
-                        .foregroundColor(.black)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .top)
-            .presentationDetents([.fraction(0.65)])
+            .presentationDetents([.fraction(0.7)])
         }
         .onChange(of: isBottomSheetOpened, perform: { newValue in
             if !newValue {

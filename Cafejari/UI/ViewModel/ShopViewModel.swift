@@ -11,6 +11,7 @@ import Foundation
 final class ShopViewModel: BaseViewModel {
     
     @Published var items: Items = []
+    @Published var selectedCategoryItems: Items = []
     @Published var itemLoading = false
     @Published var selectedShopCategoty = ""
     @Published var purchases: Purchases = []
@@ -21,6 +22,7 @@ final class ShopViewModel: BaseViewModel {
         itemLoading = true
         do {
             items = try await shopRepository.fetchItems()
+            selectedCategoryItems = items
             itemLoading = false
         } catch CustomError.errorMessage(let msg) {
             itemLoading = false
@@ -28,6 +30,19 @@ final class ShopViewModel: BaseViewModel {
         } catch {
             itemLoading = false
             print(error)
+        }
+    }
+    
+    func categorizeItems(selectedCategory: String) {
+        selectedCategoryItems = []
+        if selectedCategory.isEmpty {
+            selectedCategoryItems = items
+        } else {
+            items.forEach { item in
+                if item.category == selectedCategory {
+                    selectedCategoryItems.append(item)
+                }
+            }
         }
     }
     

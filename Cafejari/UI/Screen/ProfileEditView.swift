@@ -16,6 +16,7 @@ struct ProfileEditView: View {
     
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var userViewModel: UserViewModel
+    @EnvironmentObject private var loginViewModel: LoginViewModel
     
     @State private var isAuthenticated = false
     @State private var nickname = ""
@@ -29,110 +30,136 @@ struct ProfileEditView: View {
     
     var body: some View {
         ZStack {
-            VStack {
-                if !isAuthenticated {
-                    Text("프로필 정보 변경을 위해 인증을 진행해주세요")
-                    switch(userViewModel.socialUserType) {
-                    case .kakao:
-                        KakaoLoginButton(isLoading: $userViewModel.isKakaoLoginLoading) { accessToken in
-                            Task{
-                                let res = await userViewModel.loginWithKakaoForAuth(
-                                    coreState: coreState,
-                                    kakaoAccessToken: accessToken
-                                )
-                                withAnimation(.easeInOut(duration: 0.1)) {
-                                    isAuthenticated = res
+            VStack(spacing: 0) {
+                NavigationTitle(title: "프로필 편집", leadingIconSystemName: "chevron.backward") {
+                    coreState.popUp()
+                }
+                VStack(spacing: 0) {
+                    VerticalSpacer(.moreLarge)
+                    
+                    if !isAuthenticated {
+                        Text("프로필 정보 변경을 위해 인증을 진행해주세요")
+                            .font(.headline)
+                        
+                        VerticalSpacer(40)
+                        
+                        switch(loginViewModel.socialUserType) {
+                        case .kakao:
+                            KakaoLoginButton(isLoading: $loginViewModel.isKakaoLoginLoading) { accessToken in
+                                Task {
+                                    isAuthenticated = await loginViewModel.loginWithKakaoForAuth(
+                                        coreState: coreState,
+                                        kakaoAccessToken: accessToken
+                                    )
                                 }
+                            } onFailure: { errorMessage in
+                                print(errorMessage)
                             }
-                        } onFailure: { errorMessage in
-                            print(errorMessage)
-                        }
-                    case .google:
-                        GoogleLoginButton(isLoading: $isGoogleLoginLoading) { email, code in
-                            Task{
-                                let res = await userViewModel.loginWithGoogleForAuth(coreState: coreState, email: email, code:code)
-                                withAnimation(.easeInOut(duration: 0.1)) {
-                                    isAuthenticated = res
+                        case .google:
+                            GoogleLoginButton(isLoading: $isGoogleLoginLoading) { email, code in
+                                Task{
+                                    isAuthenticated = await loginViewModel.loginWithGoogleForAuth(coreState: coreState, email: email, code:code)
                                 }
+                            } onFailure: { errorMessage in
+                                print(errorMessage)
                             }
-                        } onFailure: { errorMessage in
-                            print(errorMessage)
-                        }
-                    case .apple:
-                        AppleLoginButton(isLoading: $userViewModel.isAppleLoginLoading) { idToken, code in
-                            Task {
-                                let res = await userViewModel.loginWithAppleForAuth(coreState: coreState, idToken: idToken, code: code)
-                                withAnimation(.easeInOut(duration: 0.1)) {
-                                    isAuthenticated = res
+                        case .apple:
+                            AppleLoginButton(isLoading: $loginViewModel.isAppleLoginLoading) { idToken, code in
+                                Task {
+                                    isAuthenticated = await loginViewModel.loginWithAppleForAuth(coreState: coreState, idToken: idToken, code: code)
                                 }
+                            } onFailure: { errorMessage in
+                                print(errorMessage)
                             }
-                        } onFailure: { errorMessage in
-                            print(errorMessage)
+                        default:
+                            ProgressView()
                         }
-                    default:
-                        ProgressView()
-                            .foregroundColor(.black)
-                    }
-                } else {
-                    HStack(spacing: 20) {
-                        ZStack(alignment: .bottomTrailing) {
-                            RoundProfileImage(120)
-                                .shadow(radius: 1)
-                            VStack {
-                                Image(systemName: "camera.fill")
-                                    .foregroundColor(.gray)
+                    } else {
+                        HStack(spacing: .large) {
+                            RoundProfileImage(image: coreState.user.image, size: 100)
+                            if let uiImage = uiImage {
+                                Image(systemName: "chevron.forward")
+                                    .font(.headline.bold())
+                                    .foregroundColor(.primary)
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100)
+                                    .clipShape(Circle())
+                                    .shadow(radius: 1)
                             }
-                            .padding(10)
-                            .background(.white)
-                            .clipShape(Circle())
-                            .shadow(radius: 2)
                         }
-                        .frame(width: 120, height: 120)
-                        .onTapGesture {
-                            if isPhotoLibraryPermitted {
-                                isImagePickerOpened = true
-                            } else {
-                                PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-                                    switch status {
-                                    case .authorized:
-                                        isImagePickerOpened = true
-                                        isPhotoLibraryPermitted = true
-                                    case .denied, .limited:
-                                        guard let url = URL(string: UIApplication.openSettingsURLString),
-                                              UIApplication.shared.canOpenURL(url) else {
-                                            assertionFailure("Not able to open App privacy settings")
-                                            return
+                        
+                        VerticalSpacer(.large)
+                        
+                        Text("프로필 사진 수정")
+                            .font(.body.bold())
+                            .foregroundColor(.primary)
+                            .frame(width: 128, height: 32)
+                            .roundBorder(cornerRadius: 16, lineWidth: 1.5, borderColor: .primary)
+                            .onTapGesture {
+                                if isPhotoLibraryPermitted {
+                                    isImagePickerOpened = true
+                                } else {
+                                    PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                                        switch status {
+                                        case .authorized:
+                                            isImagePickerOpened = true
+                                            isPhotoLibraryPermitted = true
+                                        case .denied, .limited:
+                                            guard let url = URL(string: UIApplication.openSettingsURLString),
+                                                  UIApplication.shared.canOpenURL(url) else {
+                                                coreState.showSnackBar(message: "저장소 권한 접근 에러", type: SnackBarType.error)
+                                                return
+                                            }
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                                            }
+                                        case .notDetermined:
+                                            print("결정장애")
+                                        default:
+                                            print("취소?")
                                         }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                                        }
-                                    case .notDetermined:
-                                        print("결정장애")
-                                    default:
-                                        print("취소?")
                                     }
                                 }
                             }
-                        }
-                        if let uiImage = uiImage {
-                            Image(systemName: "chevron.right")
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 120)
-                                .clipShape(Circle())
-                                .shadow(radius: 1)
-                        }
-                    }
-                    HStack {
-                        Text("닉네임 변경 :")
-                        TextField("", text: $nickname)
-                            .textFieldStyle(.roundedBorder)
+                        
+                        VerticalSpacer(32)
+                        
+                        TextField("변경할 닉네임", text: $nickname)
+                            .textFieldStyle(SingleLineTextFieldStyle())
                             .focused($focusedField, equals: Field.nickname)
-                            .frame(width: 200)
+                        
+                        VerticalSpacer(.medium)
+                        
+                        VStack(spacing: .small) {
+                            Text(nickname.isNicknameLengthValid() ? "닉네임 길이가 적당합니다" : "닉네임은 2~10자로 정해주세요")
+                                .foregroundColor(nickname.isNicknameLengthValid() ? .lightGray : .textSecondary)
+                            Text(nickname.hasSpecialChar() || nickname.isEmpty ? "특수문자 및 공백이 허용되지 않습니다" : "닉네임 구성이 유효합니다")
+                                .foregroundColor(nickname.hasSpecialChar() || nickname.isEmpty ? .textSecondary : .lightGray)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        VerticalSpacer(40)
+                        
+                        FilledCtaButton(text: "변경사항 저장", backgroundColor: .secondary) {
+                            if coreState.user.nickname == nickname && uiImage == nil {
+                                coreState.showSnackBar(message: "변경 사항이 없습니다", type: SnackBarType.info)
+                            } else {
+                                userViewModel.isProfileEditLoading = true
+                                Task {
+                                    await userViewModel.updateProfile(coreState: coreState, nickname: nickname, image: uiImage)
+                                }
+                            }
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.moreLarge)
+                .animation(.easeInOut, value: isAuthenticated)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            
             FullScreenLoadingView(loading: $userViewModel.isProfileEditLoading, text: "변경사항 저장중..")
         }
         .sheet(isPresented: $isImagePickerOpened) {
@@ -145,36 +172,12 @@ struct ProfileEditView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    withAnimation {
-                        userViewModel.isProfileEditLoading = true
-                    }
-                    Task {
-                        await userViewModel.updateProfile(coreState: coreState, nickname: nickname, image: uiImage)
-                    }
-                } label: {
-                    Text("저장")
-                }
-                .disabled(uiImage == nil && coreState.user.nickname == nickname)
-            }
-            ToolbarItem(placement: .keyboard) {
-                Button{
-                    focusedField = nil
-                }label: {
-                    HStack{
-                        Text("완료")
-                        Image(systemName: "chevron.down")
-                    }
-                    .frame(width: 600)
-                }
-            }
+        .navigationBarBackButtonHidden()
+        .addKeyboardDownButton {
+            focusedField = nil
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("회원정보 변경")
         .task {
-            await userViewModel.getSocialUserType(coreState: coreState)
+            await loginViewModel.getSocialUserType(coreState: coreState)
             nickname = coreState.user.nickname
             if PHPhotoLibrary.authorizationStatus() == .authorized {
                 isPhotoLibraryPermitted = true

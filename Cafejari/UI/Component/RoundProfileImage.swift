@@ -9,17 +9,17 @@ import SwiftUI
 
 struct RoundProfileImage: View {
     
-    @EnvironmentObject private var coreState: CoreState
-    
     let size: CGFloat
+    let image: String
     
-    init(_ size: CGFloat) {
+    init(image: String, size: CGFloat) {
+        self.image = image
         self.size = size
     }
     
     var body: some View {
         AsyncImage(
-            url: URL(string: coreState.user.image),
+            url: URL(string: image),
             content: { image in
                 image
                     .resizable()
@@ -37,5 +37,6 @@ struct RoundProfileImage: View {
                     .clipped()
             }
         )
+        .shadow(radius: 1)
     }
 }

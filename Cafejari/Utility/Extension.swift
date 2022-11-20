@@ -19,6 +19,83 @@ extension Color {
 
         self.init(.sRGB, red: red, green: green, blue: blue, opacity: opacity)
     }
+    
+    static let primary = Color(hexString: "50342B")
+    static let onPrimary = Color(hexString: "E4947A")
+    static let secondary = Color(hexString: "C2948A")
+    static let onSecondary = Color(hexString: "A06C6C")
+    static let textPrimary = Color(hexString: "9B5242")
+    static let textSecondary = Color(hexString: "BC796B")
+    static let background = Color(hexString: "F6EBDA")
+    static let error = Color(hexString: "f33203")
+    
+    static let backgroundGray = Color(hexString: "F5F5F5")
+    static let moreLightGray = Color(hexString: "ECECEC")
+    static let lightGray = Color(hexString: "D4D4D4")
+    static let gray = Color(hexString: "BCBCBC")
+    static let heavyGray = Color(hexString: "A3A3A3")
+    static let moreHeavyGray = Color(hexString: "6C6C6C")
+    
+    static let crowdedBlue = Color(hexString: "0656f7")
+    static let crowdedGreen = Color(hexString: "8fe968")
+    static let crowdedYellow = Color(hexString: "ffea56")
+    static let crowdedOrange = Color(hexString: "fd9018")
+    static let crowdedRed = Color(hexString: "f33203")
+}
+
+extension UIColor {
+    convenience init(red: Int, green: Int, blue: Int) {
+        assert(red >= 0 && red <= 255, "Invalid red component")
+        assert(green >= 0 && green <= 255, "Invalid green component")
+        assert(blue >= 0 && blue <= 255, "Invalid blue component")
+        
+        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1.0)
+    }
+    
+    convenience init(rgb: Int) {
+        self.init(
+            red: (rgb >> 16) & 0xFF,
+            green: (rgb >> 8) & 0xFF,
+            blue: rgb & 0xFF
+        )
+    }
+    
+    static let crowdedGray = UIColor(rgb: 0xBCBCBC)
+    static let crowdedBlue = UIColor(rgb: 0x0656f7)
+    static let crowdedGreen = UIColor(rgb: 0x8fe968)
+    static let crowdedYellow = UIColor(rgb: 0xffea56)
+    static let crowdedOrange = UIColor(rgb: 0xfd9018)
+    static let crowdedRed = UIColor(rgb: 0xf33203)
+}
+
+extension Font {
+    static let title: Font = .system(size: 20, weight: .regular)
+    static let subtitle: Font = .system(size: 18, weight: .regular)
+    static let headline: Font = .system(size: 16, weight: .regular)
+    static let headline2: Font = .system(size: 15, weight: .regular)
+    static let body: Font = .system(size: 14, weight: .regular)
+    static let body2: Font = .system(size: 13, weight: .regular)
+    static let caption: Font = .system(size: 12, weight: .regular)
+    static let caption2: Font = .system(size: 11, weight: .regular)
+    
+    func bold() -> Font {
+        return self.weight(.bold)
+    }
+}
+
+extension CGFloat {
+    // corner radius size
+    // spacing size
+    static let small = 4.0
+    static let medium = 8.0
+    static let large = 12.0
+    static let moreLarge = 20.0
+}
+
+extension Double {
+    // animation duration
+    static let short = 0.1
+    static let long = 0.4
 }
 
 extension GridItem {
@@ -41,6 +118,24 @@ extension GMSCameraPosition  {
     static var kwangWoon = GMSCameraPosition.camera(
         withLatitude: 37.620769,
         longitude: 127.058921,
+        zoom: GlobalZoom.Default.rawValue
+    )
+    
+    static var hongik = GMSCameraPosition.camera(
+        withLatitude: 37.557176,
+        longitude: 126.924175,
+        zoom: GlobalZoom.Default.rawValue
+    )
+    
+    static var ewha = GMSCameraPosition.camera(
+        withLatitude: 37.557407,
+        longitude: 126.945836,
+        zoom: GlobalZoom.Default.rawValue
+    )
+    
+    static var noryangjin = GMSCameraPosition.camera(
+        withLatitude: 37.513058,
+        longitude: 126.942192,
         zoom: GlobalZoom.Default.rawValue
     )
 }
@@ -156,10 +251,33 @@ extension String {
         let str = (0 ..< length).map{ _ in self.randomElement()! }
         return String(str)
     }
+    
+    func hasSpecialChar() -> Bool {
+        let pattern: String = "^[0-9a-zA-Z가-힣]*$"
+
+        guard let _ = self.range(of: pattern, options: .regularExpression) else {
+            return true
+        }
+        
+        return false
+    }
+    
+    func isNicknameLengthValid() -> Bool {
+        return self.count <= 10 && self.count >= 2
+    }
 }
 
 extension Date {
     func get(_ component: Calendar.Component, calendar: Calendar = Calendar.current) -> Int {
         return calendar.component(component, from: self)
+    }
+}
+
+extension View {
+    func addKeyboardDownButton(onClick: @escaping () -> Void) -> some View {
+        modifier(KeyboardDownButton(onClick: onClick))
+    }
+    func roundBorder(cornerRadius: CGFloat, lineWidth: CGFloat, borderColor: Color) -> some View {
+        modifier(RoundBorder(cornerRadius: cornerRadius, lineWidth: lineWidth, borderColor: borderColor))
     }
 }

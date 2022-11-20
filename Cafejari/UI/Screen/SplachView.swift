@@ -45,11 +45,7 @@ struct SplachView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) {
                     if coreState.isAppInitiated {
                         if coreState.isLogedIn {
-                            if coreState.user.authorization {
-                                coreState.clearStack()
-                            } else {
-                                coreState.navigate(Screen.Auth.route)
-                            }
+                            coreState.clearStack()
                         } else {
                             coreState.navigate(Screen.Login.route)
                         }

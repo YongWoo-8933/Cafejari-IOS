@@ -20,7 +20,7 @@ struct AppleLoginButton: View {
             HStack{
                 ProgressView()
                     .frame(height: 12)
-                HorizontalSpacer(10)
+                HorizontalSpacer(.medium)
                 Text("애플 로그인 진행중...")
                     .font(.system(size: 17, weight: .medium))
                     .foregroundColor(.black)
@@ -28,7 +28,7 @@ struct AppleLoginButton: View {
             .padding(12)
             .frame(maxWidth: .infinity)
             .background(.white)
-            .cornerRadius(8)
+            .cornerRadius(.medium)
         } else {
             SignInWithAppleButton { request in
                 request.requestedScopes = [.email]
@@ -53,7 +53,7 @@ struct AppleLoginButton: View {
             }
             .signInWithAppleButtonStyle(.white)
             .frame(height: 44)
-            .cornerRadius(8)
+            .cornerRadius(.medium)
             .shadow(radius: 1)
         }
     }

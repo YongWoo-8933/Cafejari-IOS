@@ -8,20 +8,16 @@
 import SwiftUI
 
 struct RoundButton: View {
-    let buttonHeight: CGFloat
     let iconSystemName: String?
-    let iconColor: Color
     let text: String
-    let textColor: Color
+    let foregroundColor: Color
     let backgroundColor: Color
     let onClick: () -> Void
     
-    init(buttonHeight: CGFloat, iconSystemName: String? = nil, iconColor: Color = Color.black, text: String = "", textColor: Color = Color.black, backgroundColor: Color = Color.white, onClick: @escaping () -> Void) {
-        self.buttonHeight = buttonHeight
+    init(iconSystemName: String? = nil, text: String = "", foregroundColor: Color = .white, backgroundColor: Color = .primary, onClick: @escaping () -> Void) {
         self.iconSystemName = iconSystemName
-        self.iconColor = iconColor
         self.text = text
-        self.textColor = textColor
+        self.foregroundColor = foregroundColor
         self.backgroundColor = backgroundColor
         self.onClick = onClick
     }
@@ -33,20 +29,22 @@ struct RoundButton: View {
             HStack{
                 if let iconSystemName = iconSystemName {
                     Image(systemName: iconSystemName)
-                        .font(.callout.weight(.bold))
-                        .frame(width: buttonHeight / 2, height: buttonHeight / 2)
-                        .foregroundColor(iconColor)
+                        .font(.headline2.bold())
+                        .frame(height: 15)
+                        .foregroundColor(foregroundColor)
                 }
                 if !text.isEmpty {
                     Text(text)
-                        .foregroundColor(textColor)
+                        .foregroundColor(foregroundColor)
+                        .font(.caption2.bold())
                 }
             }
+            .padding(.horizontal, 10)
+            .frame(height: 32)
+            .background(backgroundColor)
+            .cornerRadius(16)
         }
-        .padding(.horizontal, 10)
-        .frame(height: buttonHeight)
-        .background(backgroundColor)
-        .cornerRadius(buttonHeight / 2 + 10)
-        .shadow(radius: 1)
+        .background(Color.white)
+        .cornerRadius(16)
     }
 }

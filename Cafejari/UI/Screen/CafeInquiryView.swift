@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 struct CafeInquiryView: View {
     private enum Field {
@@ -21,67 +22,56 @@ struct CafeInquiryView: View {
     @FocusState private var focusedField: Field?
     
     var body: some View {
-        ScrollView {
-            LazyVStack {
-                Text("- 새로운 카페를 등록하기 위한 공간입니다 -")
-                    .padding(.vertical, 30)
-                HStack(spacing: 15) {
-                    VStack {
-                        Text("요청 카페이름")
-                        Text("(지점명 포함)")
-                    }
-                    .frame(width: 100)
-                    
-                    TextField("ex) 스타벅스 신촌점", text: $name)
-                        .frame(maxWidth: .infinity)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: Field.name)
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                NavigationTitle(title: "카페 추가", leadingIconSystemName: "xmark") {
+                    coreState.popUp()
                 }
-                HStack(spacing: 15) {
-                    VStack {
-                        Text("주소")
-                        Text("(시, 구 포함)")
-                    }
-                    .frame(width: 100)
-                    
-                    TextField("ex) 서울특별시 서대문구 연세로 1-1", text: $address)
-                        .frame(maxWidth: .infinity)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: Field.address)
-                }
-                VerticalSpacer(36)
-                Button {
-                    Task {
-                        await informationViewModel.submitInquiryCafe(coreState: coreState, name: name, address: address) {
-                            name = ""
-                            address = ""
-                            coreState.showSnackBar(message: "카페 등록 요청을 제출하였습니다. 결과는 알림을 통해 알려드립니다")
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        VerticalSpacer(.moreLarge)
+                        
+                        Text("새로운 카페를 등록해보세요")
+                            .font(.headline.bold())
+                        
+                        VerticalSpacer(40)
+                        
+                        TextField("등록할 카페 이름(지점명 포함)", text: $name)
+                            .textFieldStyle(SingleLineTextFieldStyle())
+                            .focused($focusedField, equals: Field.name)
+                        
+                        VerticalSpacer(.moreLarge)
+                        
+                        TextField("주소(시, 구 포함)", text: $address)
+                            .textFieldStyle(SingleLineTextFieldStyle())
+                            .focused($focusedField, equals: Field.address)
+                        
+                        VerticalSpacer(40)
+                        
+                        FilledCtaButton(text: "카페등록 요청", backgroundColor: .primary) {
+                            if name.isEmpty {
+                                coreState.showSnackBar(message: "등록할 카페 지점명을 입력해주세요", type: .info)
+                            } else if address.isEmpty {
+                                coreState.showSnackBar(message: "등록할 카페의 주소를 입력해주세요", type: .info)
+                            } else {
+                                Task {
+                                    await informationViewModel.submitInquiryCafe(coreState: coreState, name: name, address: address)
+                                }
+                            }
                         }
                     }
-                } label: {
-                    Text("카페등록 요청")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(.brown)
-                        .cornerRadius(5)
+                    .padding(.moreLarge)
                 }
-            }
-            .padding(.horizontal, 10)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarTitle("카페 등록")
-        .toolbar {
-            ToolbarItem(placement: .keyboard) {
-                Button{
+                .navigationBarBackButtonHidden()
+                .addKeyboardDownButton {
                     focusedField = nil
-                } label: {
-                    HStack{
-                        Text("완료")
-                        Image(systemName: "chevron.down")
-                    }
-                    .frame(width: 600)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            AdBannerView()
+                .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
+                .offset(x: 0, y: .moreLarge)
         }
     }
 }

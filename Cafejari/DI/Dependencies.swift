@@ -19,6 +19,7 @@ class Dependencies {
         
         @Provider var time = Time()
         @Provider var tokenRepository = TokenRepositoryImpl() as TokenRepository
+        @Provider var loginRepository = LoginRepositoryImpl() as LoginRepository
         @Provider var userRepository = UserRepositoryImpl() as UserRepository
         @Provider var cafeRepository = CafeRepositoryImpl() as CafeRepository
         @Provider var shopRepository = ShopRepositoryImpl() as ShopRepository

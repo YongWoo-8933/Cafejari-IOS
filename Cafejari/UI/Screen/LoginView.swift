@@ -10,37 +10,57 @@ import SwiftUI
 struct LoginView: View {
     
     @EnvironmentObject private var coreState: CoreState
-    @EnvironmentObject private var userViewModel: UserViewModel
+    @EnvironmentObject private var loginViewModel: LoginViewModel
     @EnvironmentObject private var cafeViewModel: CafeViewModel
     
+    @State private var isTouchTextVisible = false
+    @State private var isScreenTouched = false
+    
     var body: some View {
-        GeometryReader { geo in
+        ZStack {
+            Image("login_background")
+                .resizable()
+                .scaledToFit()
+                .frame(width: UIScreen.main.bounds.size.width)
             ZStack {
-                Image("login_background")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: geo.size.width)
-                VStack {
-                    Text("카페자리에 오신것을 환영함돠\n로그인하고 활용해보십쇼")
-                        .font(.title3)
+                Text("아무곳이나 터치해보세요!")
+                    .font(.title.bold())
+                    .foregroundColor(.white)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.opacity(0.4))
+            .opacity(!isScreenTouched && isTouchTextVisible ? 1 : 0)
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: .long)) {
+                    isScreenTouched = true
+                }
+            }
+            if isScreenTouched {
+                VStack(spacing: .large) {
+                    Text("카페 혼잡도 확인하고 싶다면?")
+                        .font(.headline.bold())
+                        .foregroundColor(.onPrimary)
+                    Text("10초 만에 회원가입 하세요")
+                        .font(.title.bold())
                         .foregroundColor(.white)
-                    KakaoLoginButton(isLoading: $userViewModel.isKakaoLoginLoading) { accessToken in
+                    VerticalSpacer(.medium)
+                    
+                    KakaoLoginButton(isLoading: $loginViewModel.isKakaoLoginLoading) { accessToken in
                         Task{
-                            await userViewModel.loginWithKakao(
+                            await loginViewModel.loginWithKakao(
                                 coreState: coreState,
                                 kakaoAccessToken: accessToken
                             ) {
                                 await cafeViewModel.checkMasterActivated(coreState: coreState)
                             }
                         }
-                        coreState.navigate(Screen.Auth.route)
                     } onFailure: { errorMessage in
                         print(errorMessage)
                     }
                     
-                    GoogleLoginButton(isLoading: $userViewModel.isGoogleLoginLoading) { email, code in
+                    GoogleLoginButton(isLoading: $loginViewModel.isGoogleLoginLoading) { email, code in
                         Task{
-                            await userViewModel.loginWithGoogle(coreState: coreState, email: email, code:code) {
+                            await loginViewModel.loginWithGoogle(coreState: coreState, email: email, code:code) {
                                 await cafeViewModel.checkMasterActivated(coreState: coreState)
                             }
                         }
@@ -48,9 +68,9 @@ struct LoginView: View {
                         print(errorMessage)
                     }
                     
-                    AppleLoginButton(isLoading: $userViewModel.isAppleLoginLoading) { idToken, code in
+                    AppleLoginButton(isLoading: $loginViewModel.isAppleLoginLoading) { idToken, code in
                         Task {
-                            await userViewModel.loginWithApple(coreState: coreState, idToken: idToken, code: code) {
+                            await loginViewModel.loginWithApple(coreState: coreState, idToken: idToken, code: code) {
                                 await cafeViewModel.checkMasterActivated(coreState: coreState)
                             }
                         }
@@ -58,14 +78,20 @@ struct LoginView: View {
                         print(errorMessage)
                     }
                 }
-                .padding(15)
-                .frame(maxWidth: .infinity)
-                .background(.black.opacity(0.6))
-                .padding(40)
+                .padding(.moreLarge)
+                .padding(.vertical, .moreLarge)
+                .frame(width: UIScreen.main.bounds.size.width * 0.75)
+                .background(Color.primary)
+                .cornerRadius(.moreLarge)
             }
-            .navigationBarBackButtonHidden()
-            .ignoresSafeArea()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .navigationBarBackButtonHidden()
+        .ignoresSafeArea()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task {
+            withAnimation(.easeInOut(duration: 1.5).repeatForever()) {
+                isTouchTextVisible.toggle()
+            }
         }
     }
 }

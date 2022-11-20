@@ -13,121 +13,168 @@ struct ShopView: View {
     @EnvironmentObject private var shopViewModel: ShopViewModel
     @EnvironmentObject private var coreState: CoreState
     
-    let categoryItemButtonHeight = 44.0
+    @State private var isPurchaseDialogOpened = false
+    @State private var selectedItem: Item? = nil
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                VStack {
-                    ScrollViewReader{ proxy in
-                        ScrollView(.horizontal){
-                            LazyHStack{
-                                RoundButton(
-                                    buttonHeight: categoryItemButtonHeight,
-                                    text: "전체보기",
-                                    backgroundColor: shopViewModel.selectedShopCategoty.isEmpty ? Color.red : Color.gray
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.1)) {
-                                        shopViewModel.selectedShopCategoty = ""
-                                    }
-                                }
-                                .id("")
-                                
-                                ForEach(ItemCategory.categories, id: \.name){ itemCategory in
-                                    RoundButton(
-                                        buttonHeight: categoryItemButtonHeight,
-                                        iconSystemName: itemCategory.icon,
-                                        text: itemCategory.name,
-                                        backgroundColor: shopViewModel.selectedShopCategoty == itemCategory.name ? Color.red : Color.gray
-                                    ) {
-                                        withAnimation(.easeInOut(duration: 0.1)) {
-                                            shopViewModel.selectedShopCategoty = itemCategory.name
-                                        }
-                                    }
-                                    .id(itemCategory.name)
-                                }
-                            }
-                            .frame(height: categoryItemButtonHeight)
-                            .padding(.horizontal, 20)
+        ZStack {
+            VStack(spacing: 0) {
+                ZStack(alignment: .trailing) {
+                    HStack {
+                        Text("상점")
+                            .font(.title.bold())
+                            .foregroundColor(.primary)
+                    }
+                    .frame(maxWidth: .infinity)
+        
+                    Image(systemName: "cart")
+                        .font(.subtitle.bold())
+                        .onTapGesture {
+                            coreState.navigate(Screen.ShoppingBag.route)
                         }
-                        .scrollIndicators(.never)
-                        .task {
-                            proxy.scrollTo(shopViewModel.selectedShopCategoty)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.moreLarge)
+                .background(Color.background)
+                
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: .medium) {
+                        RoundButton(
+                            text: "전체보기",
+                            foregroundColor: shopViewModel.selectedShopCategoty.isEmpty ? .white : .moreHeavyGray,
+                            backgroundColor: shopViewModel.selectedShopCategoty.isEmpty ? .primary : .moreLightGray
+                        ) {
+                            shopViewModel.selectedShopCategoty = ""
+                            shopViewModel.categorizeItems(selectedCategory: "")
+                        }
+                        .id("")
+                        
+                        ForEach(ItemCategory.categories, id: \.name){ itemCategory in
+                            RoundButton(
+                                iconSystemName: itemCategory.icon,
+                                text: itemCategory.name,
+                                foregroundColor: shopViewModel.selectedShopCategoty == itemCategory.name ? .white : .moreHeavyGray,
+                                backgroundColor: shopViewModel.selectedShopCategoty == itemCategory.name ? .primary : .moreLightGray
+                            ) {
+                                shopViewModel.selectedShopCategoty = itemCategory.name
+                                shopViewModel.categorizeItems(selectedCategory: itemCategory.name)
+                            }
+                            .id(itemCategory.name)
                         }
                     }
-                    
-                    ScrollView{
-                        LazyVStack{
-                            if shopViewModel.itemLoading {
-                                ProgressView()
-                            } else {
-                                ForEach(shopViewModel.items, id: \.id) { item in
+                    .padding(.horizontal, .moreLarge)
+                    .padding(.vertical, .large)
+                    .animation(.easeInOut(duration: .short), value: shopViewModel.selectedShopCategoty)
+                }
+                .scrollIndicators(.never)
+                .frame(height: 52)
+                
+                Divider()
+                
+                if shopViewModel.itemLoading {
+                    ProgressView()
+                        .frame(height: 100)
+                } else {
+                    if shopViewModel.selectedCategoryItems.isEmpty {
+                        VStack {
+                            Text("아직 올라온 상품이 없어요")
+                                .foregroundColor(.primary)
+                                .font(.title.bold())
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(shopViewModel.selectedCategoryItems, id: \.id) { item in
                                     Button {
-                                        if coreState.user.point >= item.price {
-                                            Task {
-                                                await shopViewModel.requestPurchase(coreState: coreState, itemId: item.id)
-                                            }
-                                        } else {
-                                            coreState.showSnackBar(message: "포인트가 부족합니다", type: SnackBarType.error)
-                                        }
+                                        selectedItem = item
+                                        isPurchaseDialogOpened = true
                                     } label: {
-                                        HStack{
+                                        HStack(spacing: 16) {
                                             CachedAsyncImage(
                                                 url: URL(string: item.image),
                                                 content: { image in
                                                     image
                                                         .resizable()
                                                         .scaledToFit()
-                                                        .frame(width: 50)
+                                                        .frame(width: 60)
                                                 },
                                                 placeholder: {
                                                     ProgressView()
                                                 }
                                             )
-                                            Spacer()
-                                            VStack{
+                                            VStack(alignment: .leading, spacing: .medium) {
                                                 Text(item.name)
+                                                    .font(.body.bold())
                                                 Text("( \(item.brand) )")
+                                                    .foregroundColor(.heavyGray)
                                             }
                                             Spacer()
-                                            Image(systemName: "cart")
-                                                .font(.body.weight(.bold))
-                                                .foregroundColor(.gray)
-                                            Text("\(item.price) p")
+                                            HStack {
+                                                Image(systemName: "p.circle")
+                                                    .font(.subheadline.bold())
+                                                    .foregroundColor(.secondary)
+                                                Text("\(item.price)")
+                                            }
                                         }
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 20)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.moreLarge)
                                     }
                                     Divider()
                                 }
                             }
                         }
+                        .scrollIndicators(.hidden)
                     }
-                    .padding(.top, 10)
-                    .scrollIndicators(.hidden)
                 }
-                //
-                //            CustomDialog(
-                //                isDialogVisible: <#T##Binding<Bool>#>,
-                //                content: <#T##String#>,
-                //                positiveButtonText: <#T##String#>,
-                //                negativeButtonText: <#T##String#>,
-                //                onPositivebuttonClick: <#T##() -> Void#>,
-                //                onNegativebuttonClick: <#T##() -> Void#>,
-                //                onDismiss: <#T##() -> Void#>
-                //            )
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("상점")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        coreState.navigate(Screen.ShoppingBag.route)
-                    } label: {
-                        Image(systemName: "cart")
-                            .font(.body.weight(.bold))
+            .animation(.easeInOut, value: shopViewModel.selectedCategoryItems.isEmpty)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            
+            Dialog(
+                isDialogVisible: $isPurchaseDialogOpened,
+                positiveButtonText: "구매하기",
+                negativeButtonText: "취소",
+                onPositivebuttonClick: {
+                    guard let item = selectedItem else { return }
+                    if coreState.user.point >= item.price {
+                        Task {
+                            await shopViewModel.requestPurchase(coreState: coreState, itemId: item.id)
+                        }
+                    } else {
+                        coreState.showSnackBar(message: "포인트가 부족합니다", type: .info)
                     }
-                }
+                },
+                onNegativebuttonClick: { selectedItem = nil },
+                onDismiss: { selectedItem = nil }
+            ) {
+                guard let item = selectedItem else { return Text("") }
+                return Text("\(item.name)\n\n")
+                    .foregroundColor(.primary)
+                    .font(.subtitle.bold())
+                +
+                Text("필요 포인트: ")
+                    .foregroundColor(.primary)
+                +
+                Text("\(item.price)P\n")
+                    .foregroundColor(.primary)
+                    .font(.body.bold())
+                +
+                Text("보유 포인트: ")
+                    .foregroundColor(.primary)
+                    .baselineOffset(-.small)
+                +
+                Text("\(coreState.user.point)P\n\n")
+                    .foregroundColor(.primary)
+                    .font(.body.bold())
+                    .baselineOffset(-.small)
+                +
+                Text("구매하기 버튼을 클릭하면\n")
+                    .foregroundColor(.heavyGray)
+                +
+                Text("포인트 확인후 기프티콘을 발송해드려요")
+                    .foregroundColor(.heavyGray)
+                    .baselineOffset(-.small)
             }
         }
         .task {

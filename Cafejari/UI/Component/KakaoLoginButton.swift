@@ -25,20 +25,18 @@ struct KakaoLoginButton: View {
                     if let error = error {
                         onFailure(error.localizedDescription)
                         isLoading = false
-                    }
-                    else {
+                    } else {
                         if let oauthToken = oauthToken {
                             onSuccess(oauthToken.accessToken)
                         }
                     }
                 }
-            }else{
+            } else {
                 UserApi.shared.loginWithKakaoAccount {(oauthToken, error) in
                     if let error = error {
                         onFailure(error.localizedDescription)
                         isLoading = false
-                    }
-                    else {
+                    } else {
                         if let oauthToken = oauthToken {
                             onSuccess(oauthToken.accessToken)
                         }
@@ -46,11 +44,11 @@ struct KakaoLoginButton: View {
                 }
             }
         } label: {
-            HStack{
+            HStack {
                 if isLoading {
                     ProgressView()
                         .frame(height: 12)
-                    HorizontalSpacer(10)
+                    HorizontalSpacer(.medium)
                 } else {
                     Image("kakao_logo")
                         .resizable()
@@ -64,10 +62,10 @@ struct KakaoLoginButton: View {
             .padding(12)
             .frame(maxWidth: .infinity)
             .background(Color(hexString: "FEE500"))
-            .cornerRadius(8)
+            .cornerRadius(.medium)
         }
         .background(.gray)
-        .cornerRadius(8)
+        .cornerRadius(.medium)
         .shadow(radius: 1)
     }
 }

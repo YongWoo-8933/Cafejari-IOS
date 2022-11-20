@@ -6,8 +6,6 @@
 	<array>
 		<string>ko</string>
 	</array>
-	<key>GOOGLE_SERVER_CLIENT_ID</key>
-	<string>${GOOGLE_SERVER_CLIENT_ID}</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,8 +25,14 @@
 			</array>
 		</dict>
 	</array>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-6775038074316382~3362262645</string>
+	<key>GADIsAdManagerApp</key>
+	<true/>
 	<key>GOOGLE_MAP_API_KEY</key>
 	<string>${GOOGLE_MAP_API_KEY}</string>
+	<key>GOOGLE_SERVER_CLIENT_ID</key>
+	<string>${GOOGLE_SERVER_CLIENT_ID}</string>
 	<key>KAKAO_NATIVE_APP_KEY</key>
 	<string>${KAKAO_NATIVE_APP_KEY}</string>
 	<key>LSApplicationQueriesSchemes</key>
@@ -43,11 +47,16 @@
 	</dict>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
+	<key>SKAdNetworkItems</key>
+	<array/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>nanum_handwriting_daheang.ttf</string>
+		<string>Roboto-Medium.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
-	<array/>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

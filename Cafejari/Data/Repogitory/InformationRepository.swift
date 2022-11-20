@@ -9,8 +9,6 @@ import Foundation
 
 protocol InformationRepository {
     
-//    func fetchRandomTip() async throws -> Tip
-//    func fetchRandomImageSaying(accessToken: String) async throws -> ImageSaying
     func fetchEvents() async throws -> Events
     func fetchPointPolicies() async throws -> [PointPolicyResponse]
     func fetchCautions() async throws -> [CautionResponse]
@@ -26,20 +24,6 @@ final class InformationRepositoryImpl: InformationRepository {
     
     @Inject var httpRoute: HttpRoute
     @Inject var customUrlRequest: CustomURLRequest
-    
-//    func fetchRandomTip() async throws -> Tip {
-//        let urlSession = URLSession.shared
-//        let request = customUrlRequest.get(urlString: httpRoute.randomSaying())
-//        let (data, _) = try await urlSession.data(for: request)
-//        return try JSONDecoder().decode(Tip.self, from: data)
-//    }
-    
-//    func fetchRandomImageSaying(accessToken: String) async throws -> ImageSaying {
-//        let urlSession = URLSession.shared
-//        let request = customUrlRequest.get(urlString: httpRoute.randomImageSaying(), accessToken: accessToken)
-//        let (data, _) = try await urlSession.data(for: request)
-//        return try JSONDecoder().decode(ImageSaying.self, from: data)
-//    }
     
     func fetchEvents() async throws -> Events {
         do {
