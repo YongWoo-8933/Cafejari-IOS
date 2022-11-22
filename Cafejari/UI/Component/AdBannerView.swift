@@ -12,12 +12,7 @@ import GoogleMobileAds
 
 struct AdBannerView: UIViewControllerRepresentable {
     
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
-    }
-    
     func makeUIViewController(context: Context) -> UIViewController {
-        
         let viewController = UIViewController()
         let bannerSize = GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width)
         let banner = GADBannerView(adSize: bannerSize)
@@ -31,21 +26,6 @@ struct AdBannerView: UIViewControllerRepresentable {
     
     func updateUIViewController(_ viewController: UIViewController, context: Context) {
         
-    }
-    
-    
-    
-    class Coordinator: NSObject, UINavigationControllerDelegate, GADBannerViewDelegate {
-        
-        var parent: AdBannerView
-        
-        init(parent: AdBannerView) {
-            self.parent = parent
-        }
-        
-        func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
-            print("bannerViewDidReceiveAd")
-        }
     }
 }
 

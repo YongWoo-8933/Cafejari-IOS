@@ -8,9 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		10346A9D28F3C89300A41C6F /* CafejariApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10346A9C28F3C89300A41C6F /* CafejariApp.swift */; };
-		10346A9F28F3C89300A41C6F /* HomeMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10346A9E28F3C89300A41C6F /* HomeMapView.swift */; };
 		10346AA128F3C89400A41C6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10346AA028F3C89400A41C6F /* Assets.xcassets */; };
-		10346AA428F3C89400A41C6F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10346AA328F3C89400A41C6F /* Preview Assets.xcassets */; };
 		10346AA628F3C89400A41C6F /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10346AA528F3C89400A41C6F /* Persistence.swift */; };
 		10346AA928F3C89400A41C6F /* Cafejari.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 10346AA728F3C89400A41C6F /* Cafejari.xcdatamodeld */; };
 		10346AB328F3E73700A41C6F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10346AB228F3E73700A41C6F /* ProfileView.swift */; };
@@ -65,6 +63,7 @@
 		1067B8CE2924FB9B008ADB4A /* CrowdedColorBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8CD2924FB9A008ADB4A /* CrowdedColorBar.swift */; };
 		1067B8D029264B2C008ADB4A /* NavigationTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8CF29264B2C008ADB4A /* NavigationTitle.swift */; };
 		1067B8D22927480D008ADB4A /* SecondaryDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8D12927480D008ADB4A /* SecondaryDivider.swift */; };
+		1067B8DA292B37CE008ADB4A /* PermissionRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */; };
 		10A4298728F7C8B000D5E6BC /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4298628F7C8B000D5E6BC /* Navigation.swift */; };
 		10A4299528FBC04D00D5E6BC /* FloorTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4299428FBC04D00D5E6BC /* FloorTap.swift */; };
 		10A4299728FC104100D5E6BC /* SplachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4299628FC104100D5E6BC /* SplachView.swift */; };
@@ -124,9 +123,7 @@
 /* Begin PBXFileReference section */
 		10346A9928F3C89300A41C6F /* Cafejari.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cafejari.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10346A9C28F3C89300A41C6F /* CafejariApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafejariApp.swift; sourceTree = "<group>"; };
-		10346A9E28F3C89300A41C6F /* HomeMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMapView.swift; sourceTree = "<group>"; };
 		10346AA028F3C89400A41C6F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		10346AA328F3C89400A41C6F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		10346AA528F3C89400A41C6F /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		10346AA828F3C89400A41C6F /* Cafejari.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Cafejari.xcdatamodel; sourceTree = "<group>"; };
 		10346AB228F3E73700A41C6F /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -181,6 +178,8 @@
 		1067B8CD2924FB9A008ADB4A /* CrowdedColorBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrowdedColorBar.swift; sourceTree = "<group>"; };
 		1067B8CF29264B2C008ADB4A /* NavigationTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTitle.swift; sourceTree = "<group>"; };
 		1067B8D12927480D008ADB4A /* SecondaryDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryDivider.swift; sourceTree = "<group>"; };
+		1067B8D8292A117F008ADB4A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequestView.swift; sourceTree = "<group>"; };
 		10A4298628F7C8B000D5E6BC /* Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		10A4299428FBC04D00D5E6BC /* FloorTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorTap.swift; sourceTree = "<group>"; };
 		10A4299628FC104100D5E6BC /* SplachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplachView.swift; sourceTree = "<group>"; };
@@ -275,8 +274,6 @@
 		10346A9B28F3C89300A41C6F /* Cafejari */ = {
 			isa = PBXGroup;
 			children = (
-				10F4C867290EAE4A0039881A /* Cafejari.entitlements */,
-				10F4C863290E48E10039881A /* GoogleService-Info.plist */,
 				10A429BB28FE6FAD00D5E6BC /* DI */,
 				10A429AD28FD9A6A00D5E6BC /* Resource */,
 				10A429A628FD6C1100D5E6BC /* Data */,
@@ -284,18 +281,11 @@
 				10346AD728F6723B00A41C6F /* Utility */,
 				10346A9C28F3C89300A41C6F /* CafejariApp.swift */,
 				10346AA528F3C89400A41C6F /* Persistence.swift */,
-				10346AA228F3C89400A41C6F /* Preview Content */,
 				10A429DC2900FC1C00D5E6BC /* AppDelegate.swift */,
+				10F4C867290EAE4A0039881A /* Cafejari.entitlements */,
+				1067B8D7292A117F008ADB4A /* Preview Content */,
 			);
 			path = Cafejari;
-			sourceTree = "<group>";
-		};
-		10346AA228F3C89400A41C6F /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				10346AA328F3C89400A41C6F /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		10346AAF28F3CDEE00A41C6F /* UI */ = {
@@ -347,6 +337,7 @@
 				10A4299628FC104100D5E6BC /* SplachView.swift */,
 				10346AC828F3EA0F00A41C6F /* LoginView.swift */,
 				10346ACC28F3EAE700A41C6F /* AuthView.swift */,
+				1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */,
 				10F4C87E29150EFB0039881A /* MapView.swift */,
 				10F4C8962919FAE70039881A /* PointResultView.swift */,
 				10346AC628F3E87600A41C6F /* MasterRoomView.swift */,
@@ -363,7 +354,6 @@
 				10346ABE28F3E7F000A41C6F /* GuideView.swift */,
 				10F4C88A29161DD50039881A /* PatchNoteView.swift */,
 				10F4C88E29162C0D0039881A /* InquiryView.swift */,
-				10346A9E28F3C89300A41C6F /* HomeMapView.swift */,
 			);
 			path = Screen;
 			sourceTree = "<group>";
@@ -387,11 +377,11 @@
 				106130CC2907B1440023C22E /* CustomURLRequest.swift */,
 				106130D029090B810023C22E /* Time.swift */,
 				10F4C861290E40590039881A /* ApplicationUtility.swift */,
-				10F4C886291515E40039881A /* Laboratory.swift */,
 				10F4C8942918B0940039881A /* CustomError.swift */,
 				10F4C898291B60930039881A /* SocialUserType.swift */,
 				10F4C89A291BCC320039881A /* PointResultViewType.swift */,
 				1067B882291F8134008ADB4A /* AdUnit.swift */,
+				10F4C886291515E40039881A /* Laboratory.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -409,6 +399,14 @@
 				1067B884291F911E008ADB4A /* MiniGoogleMapView.swift */,
 			);
 			path = SubView;
+			sourceTree = "<group>";
+		};
+		1067B8D7292A117F008ADB4A /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				1067B8D8292A117F008ADB4A /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		10A429A628FD6C1100D5E6BC /* Data */ = {
@@ -445,6 +443,7 @@
 				10346AA028F3C89400A41C6F /* Assets.xcassets */,
 				10346AA728F3C89400A41C6F /* Cafejari.xcdatamodeld */,
 				10346AD528F540D200A41C6F /* Info.plist */,
+				10F4C863290E48E10039881A /* GoogleService-Info.plist */,
 			);
 			path = Resource;
 			sourceTree = "<group>";
@@ -590,7 +589,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1067B8B329226697008ADB4A /* Roboto-Medium.ttf in Resources */,
-				10346AA428F3C89400A41C6F /* Preview Assets.xcassets in Resources */,
 				10F4C864290E48E10039881A /* GoogleService-Info.plist in Resources */,
 				10346AA128F3C89400A41C6F /* Assets.xcassets in Resources */,
 			);
@@ -667,7 +665,6 @@
 				106130DA290B9B6D0023C22E /* CalendarView.swift in Sources */,
 				10A429D728FFBC9C00D5E6BC /* CoreState.swift in Sources */,
 				106130AD290240A10023C22E /* CafeDto.swift in Sources */,
-				10346A9F28F3C89300A41C6F /* HomeMapView.swift in Sources */,
 				10F4C87F29150EFB0039881A /* MapView.swift in Sources */,
 				10F4C883291513D10039881A /* MapSheetCafeInfoView.swift in Sources */,
 				1067B889291FA6C8008ADB4A /* LoginViewModel.swift in Sources */,
@@ -759,6 +756,7 @@
 				106130BF290660520023C22E /* FullScreenLoadingView.swift in Sources */,
 				10A429D528FECFCB00D5E6BC /* UserViewModel.swift in Sources */,
 				1067B8CC2924AF8B008ADB4A /* MenuItem.swift in Sources */,
+				1067B8DA292B37CE008ADB4A /* PermissionRequestView.swift in Sources */,
 				106130B1290247510023C22E /* CafeRepository.swift in Sources */,
 				10A429B528FE545400D5E6BC /* ShopViewModel.swift in Sources */,
 			);
@@ -898,10 +896,11 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Cafejari/Resource/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치권한을 허용해주세요. 위치 정보를 허용하지 않으시면 서비스 이용에 차질이 있을 수 있습니다.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "앨범 접근을 위해 저장소 접근권한을 허용해주세요.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "앨범 접근을 위해 저장소 접근권한을 허용해주세요.";
-				INFOPLIST_KEY_NSUserTrackingUsageDescription = "적절한 광고를 제공하기 위해 권한을 허용해주세요";
+				INFOPLIST_KEY_CFBundleDisplayName = "카페자리";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "정확한 위치권한을 허용해주세요. 대략적인 위치정보만 허용하거나, 위치 정보를 허용하지 않으시면 서비스 이용에 차질이 있을 수 있습니다.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "카페자리는 광고수익만으로 운영됩니다. 권한을 허용하고 맞춤 광고를 받아보세요!";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -914,7 +913,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -941,10 +940,11 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Cafejari/Resource/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치권한을 허용해주세요. 위치 정보를 허용하지 않으시면 서비스 이용에 차질이 있을 수 있습니다.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "앨범 접근을 위해 저장소 접근권한을 허용해주세요.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "앨범 접근을 위해 저장소 접근권한을 허용해주세요.";
-				INFOPLIST_KEY_NSUserTrackingUsageDescription = "적절한 광고를 제공하기 위해 권한을 허용해주세요";
+				INFOPLIST_KEY_CFBundleDisplayName = "카페자리";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "정확한 위치권한을 허용해주세요. 대략적인 위치정보만 허용하거나, 위치 정보를 허용하지 않으시면 서비스 이용에 차질이 있을 수 있습니다.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "카페자리는 광고수익만으로 운영됩니다. 권한을 허용하고 맞춤 광고를 받아보세요!";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -957,7 +957,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

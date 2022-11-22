@@ -8,17 +8,13 @@
 import SwiftUI
 import KakaoSDKCommon
 import KakaoSDKAuth
-import GoogleMaps
-import CoreData
 import GoogleSignIn
 
 @main
 struct CafejariApp: App {
-    let kakaoNativeAppKey = Bundle.main.infoDictionary?["KAKAO_NATIVE_APP_KEY"] ?? ""
     let dependencies = Dependencies()
     
     @StateObject var coreState = CoreState()
-    
     @StateObject var loginViewModel = LoginViewModel()
     @StateObject var userViewModel = UserViewModel()
     @StateObject var cafeViewModel = CafeViewModel()
@@ -26,16 +22,13 @@ struct CafejariApp: App {
     @StateObject var informationViewModel = InformationViewModel()
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    init() {
-        // Kakao SDK 초기화
-        KakaoSDK.initSDK(appKey: kakaoNativeAppKey as! String)
-    }
         
     var body: some Scene {
         WindowGroup {
             MapView()
                 .font(.body)
+                .animation(.easeInOut, value: coreState.isSplashFinished)
+                .animation(.easeInOut, value: coreState.isAppInitiated)
                 .environmentObject(coreState)
                 .environmentObject(loginViewModel)
                 .environmentObject(userViewModel)
@@ -47,7 +40,7 @@ struct CafejariApp: App {
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
                         _ = AuthController.handleOpenUrl(url: url)
                     } else {
-                        GIDSignIn.sharedInstance.handle(url)
+                        _ = GIDSignIn.sharedInstance.handle(url)
                     }
                 }
         }

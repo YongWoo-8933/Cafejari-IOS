@@ -42,7 +42,12 @@ final class LoginViewModel: BaseViewModel {
                 await onSuccess()
                 await self.updateFcmToken(coreState: coreState)
                 isKakaoLoginLoading = false
-                coreState.clearStack()
+                if !coreState.isPermissionCheckFinished() {
+                    coreState.navigate(Screen.PermissionRequest.route)
+                } else {
+                    coreState.isPermissionChecked = true
+                    coreState.clearStack()
+                }
                 coreState.showSnackBar(message: "로그인 성공")
             } else {
                 self.kakaoAccessToken = kakaoAccessToken
@@ -96,7 +101,12 @@ final class LoginViewModel: BaseViewModel {
                 await onSuccess()
                 await self.updateFcmToken(coreState: coreState)
                 isGoogleLoginLoading = false
-                coreState.clearStack()
+                if !coreState.isPermissionCheckFinished() {
+                    coreState.navigate(Screen.PermissionRequest.route)
+                    coreState.isPermissionChecked = true
+                } else {
+                    coreState.clearStack()
+                }
                 coreState.showSnackBar(message: "로그인 성공")
             } else {
                 self.googleCode = googleLoginRes.code
@@ -153,7 +163,12 @@ final class LoginViewModel: BaseViewModel {
                 await onSuccess()
                 await self.updateFcmToken(coreState: coreState)
                 isAppleLoginLoading = false
-                coreState.clearStack()
+                if !coreState.isPermissionCheckFinished() {
+                    coreState.navigate(Screen.PermissionRequest.route)
+                    coreState.isPermissionChecked = true
+                } else {
+                    coreState.clearStack()
+                }
                 coreState.showSnackBar(message: "로그인 성공")
             } else {
                 self.appleIdToken = appleLoginRes.id_token
@@ -264,9 +279,15 @@ final class LoginViewModel: BaseViewModel {
             coreState.user = userRes.getUser()
             await onSuccess()
             isAuthorizeLoading = false
-            coreState.clearStack()
-            coreState.showSnackBar(message: "가입이 완료되었습니다. 카페자리의 모든 서비스를 이용해보세요!")
-        } catch CustomError.errorMessage(let msg){
+            if !coreState.isPermissionCheckFinished() {
+                coreState.navigate(Screen.PermissionRequest.route)
+                coreState.showSnackBar(message: "가입이 완료되었습니다. 앱 사용을 위한 권한을 허용하고 서비스를 이용해보세요!")
+            } else {
+                coreState.isPermissionChecked = true
+                coreState.clearStack()
+                coreState.showSnackBar(message: "가입이 완료되었습니다. 카페자리의 모든 서비스를 이용해보세요!")
+            }
+        } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)
             isAuthorizeLoading = false
         } catch {

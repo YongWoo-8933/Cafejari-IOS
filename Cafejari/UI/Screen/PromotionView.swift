@@ -82,6 +82,7 @@ struct PromotionView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
             AdBannerView()
                 .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
                 .offset(x: 0, y: .moreLarge)

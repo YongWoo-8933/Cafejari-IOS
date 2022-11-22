@@ -54,6 +54,8 @@ struct GoogleMapView: UIViewRepresentable {
      func updateUIView(_ uiView: GMSMapView, context: Context) {
          if markerRefreshTrigger {
              uiView.clear()
+//             uiView.isMyLocationEnabled = coreState.locationAuthorizationStatus == .authorizedAlways || coreState.locationAuthorizationStatus == .authorizedWhenInUse
+//             uiView.settings.myLocationButton = coreState.locationAuthorizationStatus == .authorizedAlways || coreState.locationAuthorizationStatus == .authorizedWhenInUse
              DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.001) {
                  _ = self.drawMarkers(mapView: uiView)
                  markerRefreshTrigger = false

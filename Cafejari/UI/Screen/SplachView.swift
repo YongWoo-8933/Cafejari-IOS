@@ -43,16 +43,23 @@ struct SplachView: View {
                     isLightOn = true
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) {
+                    // 스플래쉬 끝난시점에서, 앱 시동이 끝나있다면
                     if coreState.isAppInitiated {
+                        // 로그인 상태라면
                         if coreState.isLogedIn {
-                            coreState.clearStack()
+                            // 앱 권한 체크가 되어있는지 확인
+                            if !coreState.isPermissionCheckFinished() {
+                                coreState.navigate(Screen.PermissionRequest.route)
+                            } else {
+                                coreState.isPermissionChecked = true
+                                coreState.clearStack()
+                            }
                         } else {
+                            // 로그인 안됐으면 로그인 화면으로
                             coreState.navigate(Screen.Login.route)
                         }
                     }
-                    withAnimation {
-                        coreState.isSplashFinished = true
-                    }
+                    coreState.isSplashFinished = true
                 }
             }
             if coreState.isSplashFinished {

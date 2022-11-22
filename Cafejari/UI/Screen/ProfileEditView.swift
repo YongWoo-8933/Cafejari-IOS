@@ -23,6 +23,7 @@ struct ProfileEditView: View {
     @State private var isImagePickerOpened = false
     @State private var uiImage: UIImage? = nil
     @State private var isPhotoLibraryPermitted: Bool = false
+    @State private var isSettingNavigateDialogOpened: Bool = false
     
     @State var isGoogleLoginLoading = false
     
@@ -79,7 +80,7 @@ struct ProfileEditView: View {
                             RoundProfileImage(image: coreState.user.image, size: 100)
                             if let uiImage = uiImage {
                                 Image(systemName: "chevron.forward")
-                                    .font(.headline.bold())
+                                    .font(.headline)
                                     .foregroundColor(.primary)
                                 Image(uiImage: uiImage)
                                     .resizable()
@@ -106,19 +107,8 @@ struct ProfileEditView: View {
                                         case .authorized:
                                             isImagePickerOpened = true
                                             isPhotoLibraryPermitted = true
-                                        case .denied, .limited:
-                                            guard let url = URL(string: UIApplication.openSettingsURLString),
-                                                  UIApplication.shared.canOpenURL(url) else {
-                                                coreState.showSnackBar(message: "저장소 권한 접근 에러", type: SnackBarType.error)
-                                                return
-                                            }
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                                            }
-                                        case .notDetermined:
-                                            print("결정장애")
                                         default:
-                                            print("취소?")
+                                            isSettingNavigateDialogOpened = true
                                         }
                                     }
                                 }
@@ -159,6 +149,37 @@ struct ProfileEditView: View {
                 .animation(.easeInOut, value: isAuthenticated)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            
+            Dialog(
+                isDialogVisible: $isSettingNavigateDialogOpened,
+                positiveButtonText: "허용하러 가기",
+                negativeButtonText: "",
+                onPositivebuttonClick: {
+                    guard let url = URL(string: UIApplication.openSettingsURLString),
+                          UIApplication.shared.canOpenURL(url) else {
+                        return
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                    }
+                },
+                onNegativebuttonClick: {},
+                onDismiss: {}
+            ) {
+                Text("프로필 사진을 변경하기위해 저장소 권한이 필요합니다.\n\n")
+                    .font(.headline)
+                +
+                Text("설정에서 ")
+                +
+                Text("모든 사진 접근권한")
+                    .font(.body.bold())
+                +
+                Text("을\n허용해주세요\n\n")
+                +
+                Text("*설정 변경시 앱이 재시작됩니다")
+                    .font(.caption)
+                    .foregroundColor(.heavyGray)
+            }
             
             FullScreenLoadingView(loading: $userViewModel.isProfileEditLoading, text: "변경사항 저장중..")
         }

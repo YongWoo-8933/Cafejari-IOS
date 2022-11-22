@@ -43,35 +43,37 @@ struct MapView: View {
         } else {
             ZStack{ GeometryReader { geo in
                 NavigationStack(path: $coreState.navigationPath) {
-                    TabView(selection: $coreState.selectedBottomBarItem){
+                    TabView(selection: $coreState.selectedBottomBarItem) {
                         // Map tap
                         ZStack {
-                            GoogleMapView(
-                                markerRefreshTrigger: $cafeViewModel.markerRefeshTrigger,
-                                animateTo: $animateTo,
-                                mapType: $coreState.mapType,
-                                startCameraPosition: GMSCameraPosition.camera(
-                                    withLatitude: coreState.userLastLocation?.coordinate.latitude ?? GMSCameraPosition.sinchon.target.latitude,
-                                    longitude: coreState.userLastLocation?.coordinate.longitude ?? GMSCameraPosition.sinchon.target.longitude,
-                                    zoom: GlobalZoom.Default.rawValue
-                                ),
-                                onMarkerTap: { cafeInfo in
-                                    cafeViewModel.clearModal()
-                                    cafeViewModel.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
-                                    cafeViewModel.modalCafeInfo = cafeInfo
-                                    isBottomSheetOpened = true
-                                },
-                                onMarkerInfoWindowTap: {
-                                    isBottomSheetOpened = true
-                                },
-                                onCameraChanged: {
-                                    isMenuButtonOpened = false
-                                },
-                                onMapTap: {
-                                    isMenuButtonOpened = false
-                                }
-                            )
-                            .ignoresSafeArea(edges: .top)
+                            if coreState.isLogedIn && coreState.isPermissionChecked {
+                                GoogleMapView(
+                                    markerRefreshTrigger: $cafeViewModel.markerRefeshTrigger,
+                                    animateTo: $animateTo,
+                                    mapType: $coreState.mapType,
+                                    startCameraPosition: GMSCameraPosition.camera(
+                                        withLatitude: coreState.userLastLocation?.coordinate.latitude ?? GMSCameraPosition.sinchon.target.latitude,
+                                        longitude: coreState.userLastLocation?.coordinate.longitude ?? GMSCameraPosition.sinchon.target.longitude,
+                                        zoom: GlobalZoom.Default.rawValue
+                                    ),
+                                    onMarkerTap: { cafeInfo in
+                                        cafeViewModel.clearModal()
+                                        cafeViewModel.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
+                                        cafeViewModel.modalCafeInfo = cafeInfo
+                                        isBottomSheetOpened = true
+                                    },
+                                    onMarkerInfoWindowTap: {
+                                        isBottomSheetOpened = true
+                                    },
+                                    onCameraChanged: {
+                                        isMenuButtonOpened = false
+                                    },
+                                    onMapTap: {
+                                        isMenuButtonOpened = false
+                                    }
+                                )
+                                .ignoresSafeArea(edges: .top)
+                            }
                             
                             VStack {
                                 HStack {
@@ -386,6 +388,8 @@ struct MapView: View {
                             ShoppingBagView()
                         case Screen.PointResult.route:
                             PointResultView()
+                        case Screen.PermissionRequest.route:
+                            PermissionRequestView()
                         default:
                             EmptyView()
                         }
@@ -446,39 +450,17 @@ struct MapView: View {
                 }
             }}
             .task {
+                // 스플래쉬가 끝난 시점에서,
                 if !coreState.isLogedIn {
+                    // 로그인 안된상태(자동 로그인 실패)라면 로그인 뷰로
                     coreState.navigate(Screen.Login.route)
                 } else {
-                    ATTrackingManager.requestTrackingAuthorization {
-                            switch $0 {
-                            case .authorized:
-                                print("auth")
-                            case .denied:
-                                print("denied")
-                            case .notDetermined:
-                                print("not determind")
-                            case .restricted:
-                                print("restrict")
-                            default:
-                                print("default")
-                            }
-                        }
-//                    cafeViewModel.loadInterstitalAd()
-                    switch coreState.locationAuthorizationStatus {
-                    case .notDetermined:
-                        print("요청해야지")
-                        coreState.requestLocationPermission()
-                    case .restricted:
-                        print("제한되면 안되는데")
-                        coreState.requestLocationPermission()
-                    case .denied:
-                        print("거절이라닛")
-                        coreState.requestLocationPermission()
-                    case .authorizedAlways, .authorizedWhenInUse:
-                        print("이게 맞지")
-                        coreState.startLocationTracking()
-                    default:
-                        print("이건 무슨 상황이지")
+                    // 로그인 된상태라면 권한 체크가 됐는지 확인
+                    if !coreState.isPermissionCheckFinished() {
+                        coreState.navigate(Screen.PermissionRequest.route)
+                    } else {
+                        coreState.isPermissionChecked = true
+                        coreState.clearStack()
                     }
                     await cafeViewModel.checkMasterActivated(coreState: coreState)
                 }
@@ -487,7 +469,6 @@ struct MapView: View {
                 if newPhase == .active && coreState.isLogedIn && !coreState.accessToken.isEmpty {
                     Task {
                         UIApplication.shared.applicationIconBadgeNumber = 0
-                        
                         await cafeViewModel.checkMasterActivated(coreState: coreState)
                     }
                 }

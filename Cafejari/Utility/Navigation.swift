@@ -8,11 +8,9 @@
 import Foundation
 
 enum Screen {
-    case Profile
     case ProfileEdit
     case MasterDetail
     case Promotion
-    case Shop
     case ShoppingBag
     case GuideGrid
     case Guide
@@ -20,25 +18,21 @@ enum Screen {
     case MasterRoom
     case Login
     case Auth
-    case LeaderBoard
     case CafeInquiry
     case PatchNote
     case FAQ
     case Inquiry
     case PointResult
+    case PermissionRequest
 
     var route: String {
         switch self {
-        case .Profile:
-            return "ProfileView"
         case .ProfileEdit:
             return "ProfileEditView"
         case .MasterDetail:
             return "MasterDetailView"
         case .Promotion:
             return "PromotionView"
-        case .Shop:
-            return "ShopView"
         case .ShoppingBag:
             return "ShoppingBagView"
         case .GuideGrid:
@@ -53,8 +47,6 @@ enum Screen {
             return "LoginView"
         case .Auth:
             return "RegisterView"
-        case .LeaderBoard:
-            return "LeaderBoardView"
         case .CafeInquiry:
             return "CafeInquiryView"
         case .PatchNote:
@@ -65,6 +57,8 @@ enum Screen {
             return "InquiryView"
         case .PointResult:
             return "PointResultView"
+        case .PermissionRequest:
+            return "PermissionRequestView"
         }
     }
 }
