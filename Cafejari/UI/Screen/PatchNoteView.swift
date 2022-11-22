@@ -69,6 +69,7 @@ struct Update {
 
 extension Update {
     static let histories = [
-        Update(order: 0, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 0, date: "22.11.22", content: "아이폰 카페자리 앱 알파버전 출시")
+        Update(order: 0, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 0, date: "22.11.22", content: "아이폰 카페자리 앱 알파버전 출시"),
+        Update(order: 1, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 1, date: "22.11.22", content: "앱 추적권한요청 삭제")
     ]
 }

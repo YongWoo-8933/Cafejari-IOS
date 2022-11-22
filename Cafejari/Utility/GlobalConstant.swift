@@ -20,5 +20,5 @@ enum GlobalZoom: Float {
 
 let RELEASE_VERSION_CODE = 0
 let MAJOR_VERSION_CODE = 0
-let MINOR_VERSION_CODE = 0
+let MINOR_VERSION_CODE = 1
 
