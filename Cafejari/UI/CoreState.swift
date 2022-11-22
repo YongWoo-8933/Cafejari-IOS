@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 import CoreLocation
-import AppTrackingTransparency
 import PhotosUI
 
 class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -64,9 +63,7 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func isPermissionCheckFinished() -> Bool {
-        return locationAuthorizationStatus != .notDetermined ||
-        ATTrackingManager.trackingAuthorizationStatus != .notDetermined ||
-        PHPhotoLibrary.authorizationStatus() != .notDetermined
+        return locationAuthorizationStatus != .notDetermined || PHPhotoLibrary.authorizationStatus() != .notDetermined
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -87,30 +84,18 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
                 default:
                     notiCenter.requestAuthorization(
                         options: [.alert, .sound, .badge], completionHandler: { didAllow, Error in
-                            switch ATTrackingManager.trackingAuthorizationStatus {
-                            case .authorized:
+                            if PHPhotoLibrary.authorizationStatus() != .authorized {
+                                PHPhotoLibrary.requestAuthorization(for: .readWrite) { _ in
+                                    DispatchQueue.main.sync {
+                                        self.tapToMap()
+                                        self.clearStack()
+                                        self.isPermissionChecked = true
+                                        self.showSnackBar(message: "권한 설정이 완료되었습니다. 카페자리 서비스를 모두 활용해보세요!")
+                                    }
+                                }
+                            } else {
                                 DispatchQueue.main.sync {
                                     self.isPermissionChecked = true
-                                }
-                                return
-                            default:
-                                DispatchQueue.main.asyncAfter(deadline: .now() + .long) {
-                                    ATTrackingManager.requestTrackingAuthorization { _ in
-                                        if PHPhotoLibrary.authorizationStatus() != .authorized {
-                                            PHPhotoLibrary.requestAuthorization(for: .readWrite) { _ in
-                                                DispatchQueue.main.sync {
-                                                    self.tapToMap()
-                                                    self.clearStack()
-                                                    self.isPermissionChecked = true
-                                                    self.showSnackBar(message: "권한 설정이 완료되었습니다. 카페자리 서비스를 모두 활용해보세요!")
-                                                }
-                                            }
-                                        } else {
-                                            DispatchQueue.main.sync {
-                                                self.isPermissionChecked = true
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }

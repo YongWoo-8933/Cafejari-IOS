@@ -87,13 +87,6 @@ struct PermissionRequestView: View {
                         Divider()
                         
                         PermissionRow(
-                            isDescriptionOpened: $isTrackingPermissionDiscriptionOpened,
-                            iconSystemName: "location.magnifyingglass",
-                            text: "앱 추적",
-                            description: "해당 권한은 앱 사용시 표기되는 광고가 사용자에게 맞춤 제공될 수 있도록 하는데에만 사용됩니다. 광고수익으로 유지되는 무료앱인만큼, 권한을 허용하셔서 앱을 운영하는데 도움을 주시면 감사드리겠습니다."
-                        )
-                        
-                        PermissionRow(
                             isDescriptionOpened: $isPhotoPermissionDiscriptionOpened,
                             iconSystemName: "photo",
                             text: "저장소(이미지) 접근",
