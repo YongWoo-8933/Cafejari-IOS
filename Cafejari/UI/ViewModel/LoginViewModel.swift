@@ -18,6 +18,7 @@ final class LoginViewModel: BaseViewModel {
     @Published var kakaoAccessToken: String = ""
     @Published var googleEmail: String = ""
     @Published var googleCode: String = ""
+    @Published var googleAccessToken: String = ""
     @Published var appleIdToken: String = ""
     @Published var appleCode: String = ""
     @Published var socialUserType: SocialUserType? = nil
@@ -103,14 +104,15 @@ final class LoginViewModel: BaseViewModel {
                 isGoogleLoginLoading = false
                 if !coreState.isPermissionCheckFinished() {
                     coreState.navigate(Screen.PermissionRequest.route)
-                    coreState.isPermissionChecked = true
                 } else {
+                    coreState.isPermissionChecked = true
                     coreState.clearStack()
                 }
                 coreState.showSnackBar(message: "로그인 성공")
             } else {
                 self.googleCode = googleLoginRes.code
                 self.googleEmail = email
+                self.googleAccessToken = googleLoginRes.access_token
                 self.socialUserType = .google
                 isGoogleLoginLoading = false
                 coreState.navigate(Screen.Auth.route)
@@ -165,8 +167,8 @@ final class LoginViewModel: BaseViewModel {
                 isAppleLoginLoading = false
                 if !coreState.isPermissionCheckFinished() {
                     coreState.navigate(Screen.PermissionRequest.route)
-                    coreState.isPermissionChecked = true
                 } else {
+                    coreState.isPermissionChecked = true
                     coreState.clearStack()
                 }
                 coreState.showSnackBar(message: "로그인 성공")
@@ -215,7 +217,7 @@ final class LoginViewModel: BaseViewModel {
             onSuccess()
             coreState.showSnackBar(message: "인증번호를 발송하였습니다")
         } catch CustomError.errorMessage(let msg) {
-            coreState.showSnackBar(message: msg)
+            coreState.showSnackBar(message: msg, type: .error)
         } catch {
             print(error)
         }
@@ -227,7 +229,7 @@ final class LoginViewModel: BaseViewModel {
             onSuccess()
             coreState.showSnackBar(message: "인증번호가 일치합니다")
         } catch CustomError.errorMessage(let msg) {
-            coreState.showSnackBar(message: msg)
+            coreState.showSnackBar(message: msg, type: .error)
         } catch {
             print(error)
         }
@@ -250,14 +252,14 @@ final class LoginViewModel: BaseViewModel {
             case .kakao:
                 loginRes = try await loginRepogitory.requestKakaoLoginFinish(accessToken: kakaoAccessToken)
             case .google:
-                let googleLoginRes = try await loginRepogitory.requestGoogleLogin(email: googleEmail, code: googleCode)
-                loginRes =  try await loginRepogitory.requestGoogleLoginFinish(accessToken: googleLoginRes.access_token, code: googleLoginRes.code)
+                loginRes =  try await loginRepogitory.requestGoogleLoginFinish(
+                    accessToken: self.googleAccessToken, code: self.googleCode)
             case .apple:
                 loginRes =  try await loginRepogitory.requestAppleLoginFinish(idToken: appleIdToken, code: appleCode)
             }
             
             guard let loginRes = loginRes else {
-                coreState.showSnackBar(message: "잘못된 접근입니다. 뒤로가기 후 소셜 인증부터 진행해주세요")
+                coreState.showSnackBar(message: "잘못된 접근입니다. 뒤로가기 후 소셜 인증부터 진행해주세요", type: .error)
                 isAuthorizeLoading = false
                 return
             }
