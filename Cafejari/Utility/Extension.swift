@@ -112,31 +112,31 @@ extension GMSCameraPosition  {
     static var sinchon = GMSCameraPosition.camera(
         withLatitude: 37.55649747287372,
         longitude: 126.93710302643744,
-        zoom: GlobalZoom.Default.rawValue
+        zoom: Float.zoom.Default.rawValue
     )
     
     static var kwangWoon = GMSCameraPosition.camera(
         withLatitude: 37.620769,
         longitude: 127.058921,
-        zoom: GlobalZoom.Default.rawValue
+        zoom: Float.zoom.Default.rawValue
     )
     
     static var hongik = GMSCameraPosition.camera(
         withLatitude: 37.557176,
         longitude: 126.924175,
-        zoom: GlobalZoom.Default.rawValue
+        zoom: Float.zoom.Default.rawValue
     )
     
     static var ewha = GMSCameraPosition.camera(
         withLatitude: 37.557407,
         longitude: 126.945836,
-        zoom: GlobalZoom.Default.rawValue
+        zoom: Float.zoom.Default.rawValue
     )
     
     static var noryangjin = GMSCameraPosition.camera(
         withLatitude: 37.513058,
         longitude: 126.942192,
-        zoom: GlobalZoom.Default.rawValue
+        zoom: Float.zoom.Default.rawValue
     )
 }
 
@@ -215,7 +215,20 @@ extension Int {
     }
 }
 
+extension Float {
+    enum zoom: Float {
+        case Large = 18.5
+        case Default = 16.5
+        case Small = 14.5
+    }
+}
+
 extension String {
+    
+    static let None = "_none"
+    
+    static let NoneImage = "https://cafejari.shop/_none"
+    
     func toPhoneNumberWithHyphen() -> String {
         let returnNumber = self.replacingOccurrences(of: "+82 ", with: "")
         

@@ -55,6 +55,11 @@ struct ShoppingBagView: View {
                 
                 if shopViewModel.purchases.isEmpty {
                     VStack {
+                        Image("empty")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 180)
+                            .offset(x: 0, y: -.moreLarge)
                         Text("상품을 구매한 이력이 없어요")
                             .foregroundColor(.primary)
                             .font(.title.bold())

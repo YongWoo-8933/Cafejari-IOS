@@ -24,7 +24,6 @@
 		10346AD928F6726200A41C6F /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10346AD828F6726200A41C6F /* Extension.swift */; };
 		106130AB290237120023C22E /* CafeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130AA290237120023C22E /* CafeInfo.swift */; };
 		106130AD290240A10023C22E /* CafeDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130AC290240A10023C22E /* CafeDto.swift */; };
-		106130AF290245BD0023C22E /* GlobalConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130AE290245BD0023C22E /* GlobalConstant.swift */; };
 		106130B1290247510023C22E /* CafeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130B0290247510023C22E /* CafeRepository.swift */; };
 		106130B3290248840023C22E /* CafeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130B2290248840023C22E /* CafeViewModel.swift */; };
 		106130B52902C07F0023C22E /* Crowded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130B42902C07F0023C22E /* Crowded.swift */; };
@@ -37,7 +36,6 @@
 		106130CB2907A8D60023C22E /* CafeMaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130CA2907A8D60023C22E /* CafeMaster.swift */; };
 		106130CD2907B1440023C22E /* CustomURLRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130CC2907B1440023C22E /* CustomURLRequest.swift */; };
 		106130D129090B810023C22E /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130D029090B810023C22E /* Time.swift */; };
-		106130D3290A338E0023C22E /* RoundCrowdedFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130D2290A338E0023C22E /* RoundCrowdedFrame.swift */; };
 		106130D5290A5F0B0023C22E /* RoundProfileImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130D4290A5F0B0023C22E /* RoundProfileImage.swift */; };
 		106130DA290B9B6D0023C22E /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130D9290B9B6D0023C22E /* CalendarView.swift */; };
 		106130DF290BD3AA0023C22E /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 106130DE290BD3AA0023C22E /* FSCalendar */; };
@@ -46,7 +44,7 @@
 		106130E9290BFCB40023C22E /* Spacer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106130E8290BFCB40023C22E /* Spacer.swift */; };
 		1067B87D291E3E3F008ADB4A /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1067B87C291E3E3F008ADB4A /* AudioToolbox.framework */; };
 		1067B87F291E571B008ADB4A /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B87E291E571B008ADB4A /* AdBannerView.swift */; };
-		1067B881291E6CE4008ADB4A /* AdFullScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B880291E6CE4008ADB4A /* AdFullScreenView.swift */; };
+		1067B881291E6CE4008ADB4A /* AdInterstitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B880291E6CE4008ADB4A /* AdInterstitialView.swift */; };
 		1067B883291F8134008ADB4A /* AdUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B882291F8134008ADB4A /* AdUnit.swift */; };
 		1067B885291F911E008ADB4A /* MiniGoogleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B884291F911E008ADB4A /* MiniGoogleMapView.swift */; };
 		1067B887291FA59D008ADB4A /* LoginRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B886291FA59D008ADB4A /* LoginRepository.swift */; };
@@ -91,6 +89,9 @@
 		10A429DB29001AE300D5E6BC /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A429DA29001AE300D5E6BC /* Event.swift */; };
 		10A429DD2900FC1C00D5E6BC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A429DC2900FC1C00D5E6BC /* AppDelegate.swift */; };
 		10A429DF290107E000D5E6BC /* GoogleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A429DE290107DF00D5E6BC /* GoogleMapView.swift */; };
+		10D5658F29346A0B005188EA /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D5658E29346A0B005188EA /* Version.swift */; };
+		10D565932934D15D005188EA /* AdViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565922934D15D005188EA /* AdViewModel.swift */; };
+		10D565952935E01E005188EA /* AdRewardedInterstitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565942935E01E005188EA /* AdRewardedInterstitialView.swift */; };
 		10F4C862290E40590039881A /* ApplicationUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F4C861290E40590039881A /* ApplicationUtility.swift */; };
 		10F4C864290E48E10039881A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 10F4C863290E48E10039881A /* GoogleService-Info.plist */; };
 		10F4C866290E7DE80039881A /* ErrorResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F4C865290E7DE80039881A /* ErrorResponse.swift */; };
@@ -140,7 +141,6 @@
 		10346AD828F6726200A41C6F /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		106130AA290237120023C22E /* CafeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafeInfo.swift; sourceTree = "<group>"; };
 		106130AC290240A10023C22E /* CafeDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafeDto.swift; sourceTree = "<group>"; };
-		106130AE290245BD0023C22E /* GlobalConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalConstant.swift; sourceTree = "<group>"; };
 		106130B0290247510023C22E /* CafeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafeRepository.swift; sourceTree = "<group>"; };
 		106130B2290248840023C22E /* CafeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafeViewModel.swift; sourceTree = "<group>"; };
 		106130B42902C07F0023C22E /* Crowded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Crowded.swift; sourceTree = "<group>"; };
@@ -153,7 +153,6 @@
 		106130CA2907A8D60023C22E /* CafeMaster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafeMaster.swift; sourceTree = "<group>"; };
 		106130CC2907B1440023C22E /* CustomURLRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomURLRequest.swift; sourceTree = "<group>"; };
 		106130D029090B810023C22E /* Time.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
-		106130D2290A338E0023C22E /* RoundCrowdedFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundCrowdedFrame.swift; sourceTree = "<group>"; };
 		106130D4290A5F0B0023C22E /* RoundProfileImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundProfileImage.swift; sourceTree = "<group>"; };
 		106130D9290B9B6D0023C22E /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		106130E4290BE37A0023C22E /* Paragraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Paragraph.swift; sourceTree = "<group>"; };
@@ -161,7 +160,7 @@
 		106130E8290BFCB40023C22E /* Spacer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacer.swift; sourceTree = "<group>"; };
 		1067B87C291E3E3F008ADB4A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		1067B87E291E571B008ADB4A /* AdBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBannerView.swift; sourceTree = "<group>"; };
-		1067B880291E6CE4008ADB4A /* AdFullScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFullScreenView.swift; sourceTree = "<group>"; };
+		1067B880291E6CE4008ADB4A /* AdInterstitialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdInterstitialView.swift; sourceTree = "<group>"; };
 		1067B882291F8134008ADB4A /* AdUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdUnit.swift; sourceTree = "<group>"; };
 		1067B884291F911E008ADB4A /* MiniGoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniGoogleMapView.swift; sourceTree = "<group>"; };
 		1067B886291FA59D008ADB4A /* LoginRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginRepository.swift; sourceTree = "<group>"; };
@@ -201,6 +200,9 @@
 		10A429DA29001AE300D5E6BC /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		10A429DC2900FC1C00D5E6BC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		10A429DE290107DF00D5E6BC /* GoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapView.swift; sourceTree = "<group>"; };
+		10D5658E29346A0B005188EA /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
+		10D565922934D15D005188EA /* AdViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdViewModel.swift; sourceTree = "<group>"; };
+		10D565942935E01E005188EA /* AdRewardedInterstitialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdRewardedInterstitialView.swift; sourceTree = "<group>"; };
 		10F4C861290E40590039881A /* ApplicationUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationUtility.swift; sourceTree = "<group>"; };
 		10F4C863290E48E10039881A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		10F4C865290E7DE80039881A /* ErrorResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorResponse.swift; sourceTree = "<group>"; };
@@ -305,7 +307,6 @@
 			children = (
 				1067B8CF29264B2C008ADB4A /* NavigationTitle.swift */,
 				1067B8BD292343E6008ADB4A /* RoundTimeFrame.swift */,
-				106130D2290A338E0023C22E /* RoundCrowdedFrame.swift */,
 				106130D4290A5F0B0023C22E /* RoundProfileImage.swift */,
 				10A4299428FBC04D00D5E6BC /* FloorTap.swift */,
 				106130B6290402A50023C22E /* CustomMarkerInfoWindow.swift */,
@@ -326,7 +327,8 @@
 				10F4C87429122EB40039881A /* SnackBar.swift */,
 				10F4C87829129C3B0039881A /* Dialog.swift */,
 				1067B87E291E571B008ADB4A /* AdBannerView.swift */,
-				1067B880291E6CE4008ADB4A /* AdFullScreenView.swift */,
+				1067B880291E6CE4008ADB4A /* AdInterstitialView.swift */,
+				10D565942935E01E005188EA /* AdRewardedInterstitialView.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -372,7 +374,6 @@
 				10346AD828F6726200A41C6F /* Extension.swift */,
 				1067B8C1292394B2008ADB4A /* Modifier.swift */,
 				10A4298628F7C8B000D5E6BC /* Navigation.swift */,
-				106130AE290245BD0023C22E /* GlobalConstant.swift */,
 				106130B42902C07F0023C22E /* Crowded.swift */,
 				106130CC2907B1440023C22E /* CustomURLRequest.swift */,
 				106130D029090B810023C22E /* Time.swift */,
@@ -432,6 +433,7 @@
 				106130E4290BE37A0023C22E /* Paragraph.swift */,
 				10F4C868290FE1640039881A /* Purchase.swift */,
 				1067B88A291FAE40008ADB4A /* Leader.swift */,
+				10D5658E29346A0B005188EA /* Version.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -470,6 +472,7 @@
 				10A429D428FECFCB00D5E6BC /* UserViewModel.swift */,
 				106130B2290248840023C22E /* CafeViewModel.swift */,
 				1067B888291FA6C8008ADB4A /* LoginViewModel.swift */,
+				10D565922934D15D005188EA /* AdViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -670,6 +673,7 @@
 				1067B889291FA6C8008ADB4A /* LoginViewModel.swift in Sources */,
 				10F4C869290FE1640039881A /* Purchase.swift in Sources */,
 				10346ABB28F3E7A300A41C6F /* ShoppingBagView.swift in Sources */,
+				10D5658F29346A0B005188EA /* Version.swift in Sources */,
 				106130CB2907A8D60023C22E /* CafeMaster.swift in Sources */,
 				1067B87F291E571B008ADB4A /* AdBannerView.swift in Sources */,
 				10F4C881291510400039881A /* CafeInquiryView.swift in Sources */,
@@ -704,22 +708,23 @@
 				106130B7290402A50023C22E /* CustomMarkerInfoWindow.swift in Sources */,
 				1067B8BA2922759E008ADB4A /* BorderedCtaButton.swift in Sources */,
 				10A429C928FE860100D5E6BC /* BaseViewModel.swift in Sources */,
+				10D565932934D15D005188EA /* AdViewModel.swift in Sources */,
 				10F4C8972919FAE70039881A /* PointResultView.swift in Sources */,
 				106130C32906B7450023C22E /* SheetHandle.swift in Sources */,
 				106130E5290BE37A0023C22E /* Paragraph.swift in Sources */,
 				10346AC728F3E87600A41C6F /* MasterRoomView.swift in Sources */,
-				106130AF290245BD0023C22E /* GlobalConstant.swift in Sources */,
 				1067B8D22927480D008ADB4A /* SecondaryDivider.swift in Sources */,
 				10A429D228FEC20B00D5E6BC /* UserRepository.swift in Sources */,
 				1067B8CE2924FB9B008ADB4A /* CrowdedColorBar.swift in Sources */,
 				10F4C86F2910DB2C0039881A /* GoogleLoginButton.swift in Sources */,
+				10D565952935E01E005188EA /* AdRewardedInterstitialView.swift in Sources */,
 				10346AB528F3E74D00A41C6F /* ProfileEditView.swift in Sources */,
 				10A429CB28FE86B200D5E6BC /* TokenRepository.swift in Sources */,
 				10346ABD28F3E7CF00A41C6F /* GuideGridView.swift in Sources */,
 				1067B8C2292394B2008ADB4A /* Modifier.swift in Sources */,
 				10F4C887291515E40039881A /* Laboratory.swift in Sources */,
 				10A429C528FE7E5900D5E6BC /* InformationViewModel.swift in Sources */,
-				1067B881291E6CE4008ADB4A /* AdFullScreenView.swift in Sources */,
+				1067B881291E6CE4008ADB4A /* AdInterstitialView.swift in Sources */,
 				106130E7290BE4040023C22E /* InformationDto.swift in Sources */,
 				1067B883291F8134008ADB4A /* AdUnit.swift in Sources */,
 				10346ABF28F3E7F000A41C6F /* GuideView.swift in Sources */,
@@ -739,7 +744,6 @@
 				10F4C88D291623F30039881A /* FAQView.swift in Sources */,
 				10A429BD28FE6FE000D5E6BC /* DependencyInjector.swift in Sources */,
 				10346AB928F3E79200A41C6F /* ShopView.swift in Sources */,
-				106130D3290A338E0023C22E /* RoundCrowdedFrame.swift in Sources */,
 				10346ACD28F3EAE700A41C6F /* AuthView.swift in Sources */,
 				1067B8C62923A17B008ADB4A /* CheckBox.swift in Sources */,
 				10346AC928F3EA0F00A41C6F /* LoginView.swift in Sources */,
@@ -890,16 +894,16 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Cafejari/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "카페자리";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "정확한 위치권한을 허용해주세요. 대략적인 위치정보만 허용하거나, 위치 정보를 허용하지 않으시면 서비스 이용에 차질이 있을 수 있습니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "해당 권한은 지도에서 내 위치를 확인할 때, 유저가 카페에 위치해있는지 확인할 때 활용됩니다. 대략적인 위치정보만 허용하거나, 위치 정보를 허용하지 않으시면 마스터 활동을 할 수 없는 등 서비스 이용에 차질이 있을 수 있습니다.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "해당 권한은 프로필 사진 변경을 위해 필요합니다. 모든사진에 대한 접근을 허용해주세요.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -912,7 +916,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.1;
+				MARKETING_VERSION = 0.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -933,16 +937,16 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Cafejari/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "카페자리";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "정확한 위치권한을 허용해주세요. 대략적인 위치정보만 허용하거나, 위치 정보를 허용하지 않으시면 서비스 이용에 차질이 있을 수 있습니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "해당 권한은 지도에서 내 위치를 확인할 때, 유저가 카페에 위치해있는지 확인할 때 활용됩니다. 대략적인 위치정보만 허용하거나, 위치 정보를 허용하지 않으시면 마스터 활동을 할 수 없는 등 서비스 이용에 차질이 있을 수 있습니다.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "프로필 사진 변경을 위해 모든사진에 대한 접근을 허용해주세요.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "해당 권한은 프로필 사진 변경을 위해 필요합니다. 모든사진에 대한 접근을 허용해주세요.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -955,7 +959,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.1;
+				MARKETING_VERSION = 0.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

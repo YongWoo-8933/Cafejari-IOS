@@ -77,6 +77,11 @@ struct ShopView: View {
                 } else {
                     if shopViewModel.selectedCategoryItems.isEmpty {
                         VStack {
+                            Image("empty")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 180)
+                                .offset(x: 0, y: -.moreLarge)
                             Text("아직 올라온 상품이 없어요")
                                 .foregroundColor(.primary)
                                 .font(.title.bold())

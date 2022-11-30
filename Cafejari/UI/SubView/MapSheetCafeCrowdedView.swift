@@ -92,16 +92,15 @@ struct MapSheetCafeCrowdedView: View {
                 
                 VStack(spacing: .small) {
                     if cafe.hasRecentLog() {
-                        let recentLog = cafe.recentUpdatedLogs[0]
                         GeometryReader { geo in
                             HStack(spacing: 0) {
                                 ForEach(Crowded.crowdedListExceptNegative, id: \.value) { crowded in
-                                    if recentLog.crowded == crowded.value {
+                                    if cafe.recentUpdatedLogs[0].crowded == crowded.value {
                                         VStack {
                                             Text(crowded.string)
                                                 .font(.body.bold())
                                                 .foregroundColor(.primary)
-                                            Text("(\(cafeViewModel.time.getPassingHourMinuteStringFrom(timeString: recentLog.update))전)")
+                                            Text("(\(cafeViewModel.time.getPassingHourMinuteStringFrom(timeString: cafe.recentUpdatedLogs[0].update))전)")
                                                 .font(.system(size: 9, weight: .regular))
                                                 .foregroundColor(.moreHeavyGray)
                                             Image(crowded.image)
@@ -192,8 +191,7 @@ struct MapSheetCafeCrowdedView: View {
         .padding(.horizontal, .moreLarge)
         
         if !cafeViewModel.modalCafeInfo.cafes.isEmpty {
-            let recentLogs = cafeViewModel.modalCafeInfo.cafes[cafeViewModel.modalCafeIndex].recentUpdatedLogs
-            if !recentLogs.isEmpty {
+            if !cafeViewModel.modalCafeInfo.cafes[cafeViewModel.modalCafeIndex].recentUpdatedLogs.isEmpty {
                 VStack(alignment: .leading, spacing: .medium) {
                     HStack(spacing: .small) {
                         Text("최근 3시간")
@@ -205,8 +203,28 @@ struct MapSheetCafeCrowdedView: View {
                     
                     ScrollView(.horizontal) {
                         LazyHStack(spacing: .medium) {
-                            ForEach(recentLogs, id: \.id) { recentLog in
-                                RoundCrowdedFrame(crowded: recentLog.crowded.toCrowded(), timeString: recentLog.update)
+                            ForEach(
+                                cafeViewModel.modalCafeInfo.cafes[cafeViewModel.modalCafeIndex].recentUpdatedLogs, id: \.id) { recentLog in
+                                    HStack {
+                                        Text(recentLog.crowded.toCrowded().string)
+                                            .font(.caption2.bold())
+                                            .foregroundColor(recentLog.crowded.toCrowded().textColor)
+                                            .frame(width: 28, height: 28)
+                                            .background(recentLog.crowded.toCrowded().color)
+                                            .clipShape(Circle())
+                                            .clipped()
+                                        
+                                        Text("\(cafeViewModel.time.getAMPMHourMinuteStringFrom(timeString: recentLog.update))")
+                                            .font(.caption.bold())
+                                            .foregroundColor(.black)
+                                        Text("(\(cafeViewModel.time.getPassingHourMinuteStringFrom(timeString: recentLog.update))전)")
+                                            .font(.caption)
+                                    }
+                                    .padding(.leading, 4)
+                                    .padding(.trailing, 8)
+                                    .frame(height: 36)
+                                    .background(.white)
+                                    .roundBorder(cornerRadius: 18, lineWidth: 1, borderColor: .heavyGray)
                             }
                         }
                         .padding(.horizontal, .moreLarge)

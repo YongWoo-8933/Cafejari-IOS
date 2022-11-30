@@ -21,7 +21,7 @@ struct CafeInfo: Decodable {
     let cafes: Cafes
 }
 extension CafeInfo {
-    static var empty = CafeInfo(id: 0, name: "", city: "", gu: "", address: "", totalFloor: 1, floor: 1, latitude: 37.0, longitude: 126.0, googlePlaceId: GlobalString.None.rawValue, cafes: [])
+    static var empty = CafeInfo(id: 0, name: "", city: "", gu: "", address: "", totalFloor: 1, floor: 1, latitude: 37.0, longitude: 126.0, googlePlaceId: String.None, cafes: [])
     
     func getMinCrowded() -> Int {
         var minCrowded = -1

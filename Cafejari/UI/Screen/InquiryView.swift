@@ -16,6 +16,7 @@ struct InquiryView: View {
     
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var informationViewModel: InformationViewModel
+    @EnvironmentObject private var adViewModel: AdViewModel
     
     @State private var content = ""
     
@@ -64,6 +65,9 @@ struct InquiryView: View {
             AdBannerView()
                 .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
                 .offset(x: 0, y: .moreLarge)
+        }
+        .task {
+            adViewModel.loadBanner()
         }
     }
 }

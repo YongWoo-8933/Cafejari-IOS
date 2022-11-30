@@ -12,20 +12,19 @@ import GoogleMobileAds
 
 struct AdBannerView: UIViewControllerRepresentable {
     
+    @EnvironmentObject private var adViewModel: AdViewModel
+    
     func makeUIViewController(context: Context) -> UIViewController {
         let viewController = UIViewController()
-        let bannerSize = GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width)
-        let banner = GADBannerView(adSize: bannerSize)
-        banner.rootViewController = viewController
-        viewController.view.addSubview(banner)
-        viewController.view.frame = CGRect(origin: .zero, size: bannerSize.size)
-        banner.adUnitID = AdUnit.banner.id
-        banner.load(GADRequest())
+        adViewModel.banner.rootViewController = viewController
+        viewController.view.addSubview(adViewModel.banner)
+        viewController.view.frame = CGRect(origin: .zero, size: adViewModel.banner.adSize.size)
         return viewController
     }
     
-    func updateUIViewController(_ viewController: UIViewController, context: Context) {
-        
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        uiViewController.view.addSubview(adViewModel.banner)
+        uiViewController.view.frame = CGRect(origin: .zero, size: adViewModel.banner.adSize.size)
     }
 }
 

@@ -12,6 +12,7 @@ struct MasterDetailView: View {
     
     @EnvironmentObject var coreState: CoreState
     @EnvironmentObject var userViewModel: UserViewModel
+    @EnvironmentObject private var adViewModel: AdViewModel
 
     @State private var isBottomSheetOpened = false
     @State private var bottomModalDateCafeLog: DateCafeLog? = nil
@@ -140,6 +141,7 @@ struct MasterDetailView: View {
             }
         })
         .task {
+            adViewModel.loadBanner()
             userViewModel.isDateCafeLogsLoading = true
             await userViewModel.getDateCafeLogs(coreState: coreState)
         }

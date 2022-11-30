@@ -8,7 +8,5 @@
 import Foundation
 
 enum SocialUserType {
-    case kakao
-    case google
-    case apple
+    case kakao, google, apple
 }

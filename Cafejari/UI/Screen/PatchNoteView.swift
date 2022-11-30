@@ -70,6 +70,8 @@ struct Update {
 extension Update {
     static let histories = [
         Update(order: 0, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 0, date: "22.11.22", content: "아이폰 카페자리 앱 알파버전 출시"),
-        Update(order: 1, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 1, date: "22.11.22", content: "앱 추적권한요청 삭제")
+        Update(order: 1, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 1, date: "22.11.22", content: "앱 추적권한요청 삭제"),
+        Update(order: 2, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 2, date: "22.11.24", content: "가이드 이미지 변경, 앱권한 문구 수정, 테스트 배너광고 실제 광고로 전환"),
+        Update(order: 3, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 3, date: "22.11.30", content: "광고 배치 완료, 내 랭킹 확인하기 기능 추가, 버그수정")
     ]
 }

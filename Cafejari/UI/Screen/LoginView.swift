@@ -35,6 +35,13 @@ struct LoginView: View {
                     isScreenTouched = true
                 }
             }
+            ZStack {
+                
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.opacity(0.5))
+            .opacity(isScreenTouched ? 1 : 0)
+            
             if isScreenTouched {
                 VStack(spacing: .large) {
                     Text("카페 혼잡도 확인하고 싶다면?")

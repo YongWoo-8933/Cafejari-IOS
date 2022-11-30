@@ -10,9 +10,6 @@ import UIKit
 import GoogleMaps
 import CachedAsyncImage
 import UserNotifications
-import GoogleMobileAds
-
-import AppTrackingTransparency
 
 struct MapView: View {
     
@@ -22,10 +19,12 @@ struct MapView: View {
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var informationViewModel: InformationViewModel
     @EnvironmentObject private var cafeViewModel: CafeViewModel
+    @EnvironmentObject private var adViewModel: AdViewModel
     
     @State private var isBottomSheetOpened = false
     @State private var animateTo: GMSCameraPosition? = nil
     @State private var isMenuButtonOpened = false
+    @State private var interstitialAdCounter = 0
     
     init() {
         let appearance = UITabBarAppearance()
@@ -41,7 +40,7 @@ struct MapView: View {
         if !coreState.isSplashFinished || !coreState.isAppInitiated {
             SplachView()
         } else {
-            ZStack{ GeometryReader { geo in
+            ZStack { GeometryReader { geo in
                 NavigationStack(path: $coreState.navigationPath) {
                     TabView(selection: $coreState.selectedBottomBarItem) {
                         // Map tap
@@ -54,9 +53,12 @@ struct MapView: View {
                                     startCameraPosition: GMSCameraPosition.camera(
                                         withLatitude: coreState.userLastLocation?.coordinate.latitude ?? GMSCameraPosition.sinchon.target.latitude,
                                         longitude: coreState.userLastLocation?.coordinate.longitude ?? GMSCameraPosition.sinchon.target.longitude,
-                                        zoom: GlobalZoom.Default.rawValue
+                                        zoom: Float.zoom.Default.rawValue
                                     ),
                                     onMarkerTap: { cafeInfo in
+                                        if cafeInfo.id != cafeViewModel.modalCafeInfo.id {
+                                            interstitialAdCounter += 1
+                                        }
                                         cafeViewModel.clearModal()
                                         cafeViewModel.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
                                         cafeViewModel.modalCafeInfo = cafeInfo
@@ -98,9 +100,7 @@ struct MapView: View {
                                 .background(.white)
                                 .cornerRadius(.medium)
                                 .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: .lightGray)
-                                .onTapGesture {
-                                    coreState.navigate(Screen.Promotion.route)
-                                }
+                                .onTapGesture { coreState.navigate(Screen.Promotion.route) }
                                 
                                 HStack {
                                     MapTypeButton(
@@ -134,13 +134,21 @@ struct MapView: View {
                                     .cornerRadius(.medium)
                                     .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: isMenuButtonOpened ? .black : .lightGray)
                                     .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                    .onTapGesture {
-                                        isMenuButtonOpened.toggle()
-                                    }
+                                    .onTapGesture { isMenuButtonOpened.toggle() }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 
-                                HStack {
+                                HStack(alignment: .top) {
+                                    if adViewModel.isInterstitialAdNoticeVisible {
+                                        Text("\(adViewModel.interstitialAdNoticeSecond)초 후에 광고가 표시됩니다")
+                                            .font(.body.bold())
+                                            .foregroundColor(.white)
+                                            .padding(.medium)
+                                            .background(Color.black.opacity(0.5))
+                                            .cornerRadius(.medium)
+                                            .offset(x: 0, y: .moreLarge)
+                                    }
+                                    Spacer()
                                     VStack(spacing: 0) {
                                         if isMenuButtonOpened {
                                             ScrollView {
@@ -182,7 +190,7 @@ struct MapView: View {
                                     .background(Color.white)
                                     .cornerRadius(.large)
                                 }
-                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .frame(maxWidth: .infinity)
                                 .frame(height: isMenuButtonOpened ? 216 : 0)
                                 .animation(Animation.easeInOut, value: isMenuButtonOpened)
                                 
@@ -233,10 +241,14 @@ struct MapView: View {
                                 loading: $cafeViewModel.cafeInfoLoading,
                                 text: "주변 카페 찾는중.."
                             )
-//                            AdFullScreenView(interstitial: $cafeViewModel.interstitial)
                         }
+                        .onChange(of: interstitialAdCounter, perform: { newValue in
+                            if newValue > 4 {
+                                adViewModel.showInterstital(willShowInterstitial: { isBottomSheetOpened = false })
+                                interstitialAdCounter = 0
+                            }
+                        })
                         .sheet(isPresented: $isBottomSheetOpened) {
-                        
                             ZStack(alignment: .bottom) {
                                 ScrollView {
                                     if !cafeViewModel.modalCafeInfo.cafes.isEmpty {
@@ -265,14 +277,23 @@ struct MapView: View {
                                     positiveButtonText: "빨리 볼게요",
                                     negativeButtonText: "그냥 추천할래요",
                                     onPositivebuttonClick: {
-                                        Task {
-                                            await cafeViewModel.thumbsUp (
-                                                coreState: coreState,
-                                                recentLogId: cafeViewModel.thumbsUpRecentLog.id,
-                                                isAdWatched: true,
-                                                onSuccess: { isBottomSheetOpened = false }
-                                            )
-                                        }
+                                        adViewModel.showRewardedInterstitial(
+                                            willShowRewardedInterstitial: { isBottomSheetOpened = false },
+                                            onAdWatched: {
+                                                Task {
+                                                    await cafeViewModel.thumbsUp (
+                                                        coreState: coreState,
+                                                        recentLogId: cafeViewModel.thumbsUpRecentLog.id,
+                                                        isAdWatched: true,
+                                                        onSuccess: { isBottomSheetOpened = false }
+                                                    )
+                                                }
+                                            },
+                                            onFail: {
+                                                cafeViewModel.showModalSnackBar(
+                                                    message: "광고가 준비중입니다. 잠시후에 시도하시거나 일반 추천을 활용해주세요", type: .error)
+                                            }
+                                        )
                                     },
                                     onNegativebuttonClick: {
                                         Task {
@@ -447,6 +468,33 @@ struct MapView: View {
                     } else {
                         return Text("")
                     }
+                }
+                Dialog(
+                    isDialogVisible: $coreState.isWelcomeDialogOpened,
+                    positiveButtonText: "가이드 보기",
+                    negativeButtonText: "바로 시작",
+                    onPositivebuttonClick: { coreState.navigate(Screen.GuideGrid.route) },
+                    onNegativebuttonClick: {
+                        coreState.showSnackBar(message: "가이드북은 프로필 > 사용가이드북 보기에서 언제든지 확인할 수 있어요!", type: .info) },
+                    onDismiss: { coreState.showSnackBar(message: "가이드북은 프로필 > 사용가이드북 보기에서 언제든지 확인할 수 있어요!", type: .info) }
+                ) {
+                    Text("카페자리")
+                        .font(.headline.bold())
+                    +
+                    Text("에 오신것을 환영합니다!!\n")
+                        .font(.headline)
+                    +
+                    Text("가이드를 통해 카페자리를\n")
+                        .baselineOffset(-.medium)
+                        .font(.body)
+                    +
+                    Text("200%")
+                        .baselineOffset(-.small)
+                        .font(.body.bold())
+                    +
+                    Text(" 활용해보세요!")
+                        .baselineOffset(-.small)
+                        .font(.body)
                 }
             }}
             .task {

@@ -10,15 +10,13 @@ import SwiftUI
 import CoreLocation
 import GoogleMobileAds
 
-
+@MainActor
 class BaseViewModel: ObservableObject {
     
     @Inject var tokenRepository: TokenRepository
     @Inject var userRepository: UserRepository
     @Inject var time: Time
     @Inject var httpRoute: HttpRoute
-    
-    @Published var interstitial: GADInterstitial? = nil
     
     func getSavedRefreshToken() async throws -> String {
         return await tokenRepository.getSavedRefreshToken()
@@ -35,9 +33,7 @@ class BaseViewModel: ObservableObject {
     func refreshAccessToken(coreState: CoreState, jobWithNewAccessToken: (String) async throws -> Void) async {
         do {
             let accessTokenResponse = try await tokenRepository.refreshAccessToken(refreshToken: coreState.refreshToken)
-            DispatchQueue.main.sync {
-                coreState.accessToken = accessTokenResponse.access
-            }
+            coreState.accessToken = accessTokenResponse.access
             try await jobWithNewAccessToken(accessTokenResponse.access)
         } catch CustomError.refreshTokenExpired {
             await self.logout(coreState: coreState)
@@ -51,36 +47,27 @@ class BaseViewModel: ObservableObject {
     
     func logout(coreState: CoreState) async {
         do {
-            try await userRepository.logout(refreshToken: coreState.refreshToken)
+            let access = coreState.accessToken
+            let refresh = coreState.refreshToken
+            let id = coreState.user.profileId
+            _ = try await userRepository.putFcmToken(accessToken: access, profileId: id, fcmToken: String.None)
+            
+            try await userRepository.logout(refreshToken: refresh)
             self.tokenRepository.deleteSavedRefreshToken()
-            self.tokenRepository.deleteSavedFcmToken()
             
-            _ = try await userRepository.putFcmToken(
-                accessToken: coreState.accessToken,
-                profileId: coreState.user.profileId,
-                fcmToken: GlobalString.None.rawValue
-            )
-            
-            DispatchQueue.main.sync {
-                coreState.isLogedIn = false
-                coreState.user = User.empty
-                coreState.accessToken = ""
-                coreState.refreshToken = ""
-                coreState.mapType = MapType.crowded
-                coreState.isMasterActivated = false
-                coreState.masterRoomCafeLog = CafeLog.empty
-                coreState.navigateWithClear(Screen.Login.route)
-                coreState.tapToMap()
-            }
+            coreState.isLogedIn = false
+            coreState.user = User.empty
+            coreState.accessToken = ""
+            coreState.refreshToken = ""
+            coreState.mapType = MapType.crowded
+            coreState.isMasterActivated = false
+            coreState.masterRoomCafeLog = CafeLog.empty
+            coreState.navigateWithClear(Screen.Login.route)
+            coreState.tapToMap()
         } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: .error)
         } catch {
             print(error)
         }
-    }
-    
-    func loadInterstitalAd() {
-        interstitial = GADInterstitial(adUnitID: AdUnit.interstitial.id)
-        interstitial?.load(GADRequest())
     }
 }

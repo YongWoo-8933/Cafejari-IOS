@@ -171,7 +171,7 @@ final class CafeViewModel: BaseViewModel {
     
     func getModalCafePlaceInfo(googlePlaceId: String) {
         
-        if googlePlaceId != GlobalString.None.rawValue {
+        if googlePlaceId != String.None {
             googlePlaceClient.fetchPlace(
                 fromPlaceID: googlePlaceId,
                 placeFields: GMSPlaceField(rawValue: UInt(GMSPlaceField.photos.rawValue) | UInt(GMSPlaceField.phoneNumber.rawValue)),
@@ -251,7 +251,7 @@ final class CafeViewModel: BaseViewModel {
                 accessToken: coreState.accessToken, recentLogId: recentLogId, isAdWatched: isAdWatched)
             coreState.user = userRes.getUser()
             onSuccess()
-            coreState.pointResultPoint = 10
+            coreState.pointResultPoint = 25
             coreState.pointResultViewType = isAdWatched ? PointResultViewType.thumbsUpWithAd : PointResultViewType.thumbsUp
             coreState.navigate(Screen.PointResult.route)
         } catch CustomError.accessTokenExpired {
@@ -261,6 +261,7 @@ final class CafeViewModel: BaseViewModel {
             })
         } catch CustomError.errorMessage(let msg){
             self.showModalSnackBar(message: msg, type: SnackBarType.error)
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
         } catch {
             print(error.localizedDescription)
         }

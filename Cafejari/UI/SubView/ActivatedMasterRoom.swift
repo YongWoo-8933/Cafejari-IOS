@@ -120,11 +120,30 @@ struct ActivatedMasterRoom: View {
         
         ScrollView(.horizontal) {
             LazyHStack(spacing: .medium) {
-                ForEach(coreState.masterRoomCafeLog.cafeDetailLogs, id: \.id) {cafeDetailLog in
+                ForEach(coreState.masterRoomCafeLog.cafeDetailLogs, id: \.id) { cafeDetailLog in
                     Button {
                         onDetailLogClick(cafeDetailLog)
                     } label: {
-                        RoundCrowdedFrame(crowded: cafeDetailLog.crowded.toCrowded(), timeString: cafeDetailLog.update)
+                        HStack {
+                            Text(cafeDetailLog.crowded.toCrowded().string)
+                                .font(.caption2.bold())
+                                .foregroundColor(cafeDetailLog.crowded.toCrowded().textColor)
+                                .frame(width: 28, height: 28)
+                                .background(cafeDetailLog.crowded.toCrowded().color)
+                                .clipShape(Circle())
+                                .clipped()
+                            
+                            Text("\(cafeViewModel.time.getAMPMHourMinuteStringFrom(timeString: cafeDetailLog.update))")
+                                .font(.caption.bold())
+                                .foregroundColor(.black)
+                            Text("(\(cafeViewModel.time.getPassingHourMinuteStringFrom(timeString: cafeDetailLog.update))전)")
+                                .font(.caption)
+                        }
+                        .padding(.leading, 4)
+                        .padding(.trailing, 8)
+                        .frame(height: 36)
+                        .background(.white)
+                        .roundBorder(cornerRadius: 18, lineWidth: 1, borderColor: .heavyGray)
                     }
                 }
             }

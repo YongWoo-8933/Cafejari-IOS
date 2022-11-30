@@ -12,7 +12,7 @@ final class ShopViewModel: BaseViewModel {
     
     @Published var items: Items = []
     @Published var selectedCategoryItems: Items = []
-    @Published var itemLoading = false
+    @Published var itemLoading = true
     @Published var selectedShopCategoty = ""
     @Published var purchases: Purchases = []
     

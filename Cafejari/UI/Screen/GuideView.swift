@@ -14,29 +14,23 @@ struct GuideView: View {
     let guideImages: [String]
     
     var body: some View {
-        ZStack{
-            TabView(selection: $currentPageIndex) {
-                ForEach(0 ..< guideImages.count, id: \.self){ index in
-                    Image(guideImages[index])
-                        .resizable()
-                        .scaledToFit()
-                        .tag(index)
-                }
-            }
-            .tabViewStyle(.page)
-            .accentColor(.black)
-            .navigationBarBackButtonHidden()
-            VStack{
-                HStack{
-                    Spacer()
-                    Button{
-                        dismiss()
-                    }label: {
-                        Image(systemName: "x.circle.fill")
-                            .font(.title.weight(.bold))
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 0) {
+                TabView(selection: $currentPageIndex) {
+                    ForEach(0 ..< guideImages.count, id: \.self){ index in
+                        Image(guideImages[index])
+                            .resizable()
+                            .scaledToFit()
+                            .tag(index)
                     }
                 }
+                .frame(maxHeight: .infinity)
+                .tabViewStyle(.page)
+                .accentColor(.black)
+                .navigationBarBackButtonHidden()
+                
                 Spacer()
+                
                 HStack {
                     ForEach(0 ..< guideImages.count, id: \.self){ index in
                         if(index == currentPageIndex){
@@ -51,7 +45,20 @@ struct GuideView: View {
                     }
                 }
             }
-            .padding()
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "x.circle.fill")
+                    .font(.system(size: 36, weight: .bold))
+                    .background(Color.white)
+                    .frame(width: 36, height: 36)
+                    .cornerRadius(18)
+            }
+            .padding(.moreLarge)
+        }
+        .onAppear {
+            UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color.white.opacity(0.0001))
+            UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color.white.opacity(0.0001))
         }
     }
 }

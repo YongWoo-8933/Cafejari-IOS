@@ -24,6 +24,11 @@ final class UserViewModel: BaseViewModel {
     @Published var monthLeaders: Leaders = []
     @Published var isLeaderLoading: Bool = true
     
+    @Published var myWeekRanking: Leader? = nil
+    @Published var isMyWeekRankingVisible: Bool = false
+    @Published var myMonthRanking: Leader? = nil
+    @Published var isMyMonthRankingVisible: Bool = false
+    
     func appInit(coreState: CoreState) async {
         do {
             let savedtoken = await tokenRepository.getSavedRefreshToken()
@@ -186,24 +191,14 @@ final class UserViewModel: BaseViewModel {
             let weekLeaderResList = try await userRepository.fetchWeekLeader(accessToken: coreState.accessToken).sorted(by: {$0.ranking < $1.ranking})
             var leaders: Leaders = []
             weekLeaderResList.forEach { leaderRes in
-                leaders.append(Leader(
-                    nickname: leaderRes.user.profile?.nickname ?? "",
-                    image: leaderRes.user.profile?.image ?? "",
-                    ranking: leaderRes.ranking,
-                    activity: leaderRes.activity
-                ))
+                leaders.append(leaderRes.getLeader())
             }
             self.weekLeaders = leaders
             
             let monthLeaderResList = try await userRepository.fetchMonthLeader(accessToken: coreState.accessToken).sorted(by: {$0.ranking < $1.ranking})
             leaders = []
             monthLeaderResList.forEach { leaderRes in
-                leaders.append(Leader(
-                    nickname: leaderRes.user.profile?.nickname ?? "",
-                    image: leaderRes.user.profile?.image ?? "",
-                    ranking: leaderRes.ranking,
-                    activity: leaderRes.activity
-                ))
+                leaders.append(leaderRes.getLeader())
             }
             self.monthLeaders = leaders
             self.isLeaderLoading = false
@@ -217,6 +212,54 @@ final class UserViewModel: BaseViewModel {
         } catch {
             print(error)
             self.isLeaderLoading = false
+        }
+    }
+    
+    func getMyMonthRanking(coreState: CoreState) async {
+        do {
+            let res = try await userRepository.fetchMyMonthRanking(accessToken: coreState.accessToken)
+            if res.isEmpty {
+                coreState.showSnackBar(message: "이번달 마스터 활동 이력이 없습니다")
+                self.myMonthRanking = nil
+            } else {
+                self.myMonthRanking = res[0].getLeader()
+            }
+            self.isMyMonthRankingVisible = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1200) {
+                self.isMyMonthRankingVisible = false
+            }
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState) { newAccessToken in
+                await getMyMonthRanking(coreState: coreState)
+            }
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+        } catch {
+            print(error)
+        }
+    }
+    
+    func getMyWeekRanking(coreState: CoreState) async {
+        do {
+            let res = try await userRepository.fetchMyWeekRanking(accessToken: coreState.accessToken)
+            if res.isEmpty {
+                coreState.showSnackBar(message: "이번주 마스터 활동 이력이 없습니다")
+                self.myWeekRanking = nil
+            } else {
+                self.myWeekRanking = res[0].getLeader()
+            }
+            self.isMyWeekRankingVisible = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1200) {
+                self.isMyWeekRankingVisible = false
+            }
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState) { newAccessToken in
+                await getMyWeekRanking(coreState: coreState)
+            }
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+        } catch {
+            print(error)
         }
     }
 }

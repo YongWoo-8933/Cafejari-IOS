@@ -19,12 +19,12 @@ struct PointResultView: View {
         ZStack(alignment: .bottom) {
             VStack(spacing: .medium) {
                 VStack {
-                    Image("money")
+                    Image("coin")
                         .resizable()
                         .scaledToFit()
-                        .offset(x: 0, y: animationTrigger ? 0 : -400)
+                        .offset(x: 0, y: animationTrigger ? -.moreLarge : -400)
                 }
-                .frame(height: 120)
+                .frame(height: 100)
                 
                 switch coreState.pointResultViewType {
                 case .masterExpired:
@@ -122,9 +122,6 @@ struct PointResultView: View {
                     }
                 }
             }
-            AdBannerView()
-                .frame(width: UIScreen.main.bounds.width, height: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width).size.height)
-                .offset(x: 0, y: .moreLarge)
         }
     }
 }

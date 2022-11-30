@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import CoreLocation
 import PhotosUI
+import GoogleMobileAds
 
 class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     
@@ -34,6 +35,7 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var isMasterActivated: Bool = false
     @Published var masterRoomCafeLog: CafeLog = CafeLog.empty
     @Published var isAutoExpiredDialogOpened = false
+    @Published var isWelcomeDialogOpened = false
     @Published var autoExpiredCafeLog: AutoExpiredCafeLog? = nil
     
     @Published var pointResultPoint: Int = 0
@@ -84,17 +86,19 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
                 default:
                     notiCenter.requestAuthorization(
                         options: [.alert, .sound, .badge], completionHandler: { didAllow, Error in
-                            if PHPhotoLibrary.authorizationStatus() != .authorized {
+                            if PHPhotoLibrary.authorizationStatus() == .notDetermined {
                                 PHPhotoLibrary.requestAuthorization(for: .readWrite) { _ in
-                                    DispatchQueue.main.sync {
+                                    DispatchQueue.main.async {
                                         self.tapToMap()
                                         self.clearStack()
                                         self.isPermissionChecked = true
-                                        self.showSnackBar(message: "권한 설정이 완료되었습니다. 카페자리 서비스를 모두 활용해보세요!")
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                        self.isWelcomeDialogOpened = true
                                     }
                                 }
                             } else {
-                                DispatchQueue.main.sync {
+                                DispatchQueue.main.async {
                                     self.isPermissionChecked = true
                                 }
                             }
@@ -110,12 +114,12 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func isNearBy(latitude: Double, longitude: Double) -> Bool {
-//        if let userLocation = self.userLastLocation {
-//            return userLocation.coordinate.latitude < latitude + 0.00023 && userLocation.coordinate.latitude > latitude - 0.00023 && userLocation.coordinate.longitude < longitude + 0.00027 && userLocation.coordinate.longitude > longitude - 0.00027
-//        } else {
-//            return false
-//        }
-        return true
+        if let userLocation = self.userLastLocation {
+            return userLocation.coordinate.latitude < latitude + 0.00023 && userLocation.coordinate.latitude > latitude - 0.00023 && userLocation.coordinate.longitude < longitude + 0.00027 && userLocation.coordinate.longitude > longitude - 0.00027
+        } else {
+            return false
+        }
+//        return true
     }
     
     

@@ -271,7 +271,7 @@ final class LoginViewModel: BaseViewModel {
                 userId: loginRes.user.id,
                 nickname: preAuthRes.nickname,
                 phoneNumber: preAuthRes.phone_number,
-                fcmToken: fcmToken.isEmpty ? GlobalString.None.rawValue : fcmToken
+                fcmToken: fcmToken.isEmpty ? String.None : fcmToken
             )
             
             coreState.isLogedIn = true

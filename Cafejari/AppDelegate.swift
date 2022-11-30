@@ -65,7 +65,6 @@ extension AppDelegate : MessagingDelegate {
 
     // fcm 등록 토큰을 받았을 때
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
-        print(fcmToken)
         tokenRepogitory.saveFcmToken(fcmToken: fcmToken)
     }
 }

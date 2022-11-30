@@ -11,8 +11,10 @@ struct LeaderBoardView: View {
     
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var userViewModel: UserViewModel
+    @EnvironmentObject private var adViewModel: AdViewModel
     
     @State private var isMonthLeaderOn: Bool = false
+    @State private var isMyRankingDialogOpened: Bool = false
     
     var body: some View {
         GeometryReader { geo in
@@ -47,7 +49,7 @@ struct LeaderBoardView: View {
                                     VerticalSpacer(.small)
                                     
                                     Text(secondLeader.nickname)
-                                    Text("\(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: secondLeader.activity)) 활동")
+                                    Text("\(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: secondLeader.activity))")
                                         .font(.caption.bold())
                                 }
                                 .frame(width: 85)
@@ -64,7 +66,7 @@ struct LeaderBoardView: View {
                                     VerticalSpacer(.small)
                                     
                                     Text(firstLeader.nickname)
-                                    Text("\(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: firstLeader.activity)) 활동")
+                                    Text("\(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: firstLeader.activity))")
                                         .font(.caption.bold())
                                 }
                                 .frame(width: 105)
@@ -81,12 +83,12 @@ struct LeaderBoardView: View {
                                     VerticalSpacer(.small)
                                     
                                     Text(thirdLeader.nickname)
-                                    Text("\(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: thirdLeader.activity)) 활동")
+                                    Text("\(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: thirdLeader.activity))")
                                         .font(.caption.bold())
                                 }
                                 .frame(width: 85)
                             } else {
-                                Text(isMonthLeaderOn ? "이번달 랭커가 아직 없습니다" : "이번주 랭커가 아직 없습니다")
+                                Text(isMonthLeaderOn ? "이번달 랭커가 아직 없어요" : "이번주 랭커가 아직 없어요")
                                     .foregroundColor(.primary)
                                     .frame(height: 80)
                             }
@@ -126,12 +128,41 @@ struct LeaderBoardView: View {
                         Color.primary
                     }
                     .frame(width: geo.size.width / 2, height: .small)
+                    .cornerRadius(2)
                 }
                 .frame(width: geo.size.width, height: .small, alignment: isMonthLeaderOn ? .trailing : .leading)
                 
                 if userViewModel.isLeaderLoading {
                     ProgressView()
                 } else {
+                    if isMonthLeaderOn {
+                        if userViewModel.isMyMonthRankingVisible {
+                            if let leader = userViewModel.myMonthRanking {
+                                Text("\(leader.ranking)위  \(leader.nickname)   \(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: leader.activity))")
+                            } else {
+                                Text("이번달 활동 이력이 없어요")
+                            }
+                        } else {
+                            FilledCtaButton(text: "내 월간 랭킹 확인하기", backgroundColor: .primary) {
+                                isMyRankingDialogOpened = true
+                            }
+                            .padding(.moreLarge)
+                        }
+                        
+                    } else {
+                        if userViewModel.isMyWeekRankingVisible {
+                            if let leader = userViewModel.myWeekRanking {
+                                Text("\(leader.ranking)위  \(leader.nickname)   \(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: leader.activity))")
+                            } else {
+                                Text("이번주 활동 이력이 없어요")
+                            }
+                        } else {
+                            FilledCtaButton(text: "내 주간 랭킹 확인하기", backgroundColor: .primary) {
+                                isMyRankingDialogOpened = true
+                            }
+                            .padding(.moreLarge)
+                        }
+                    }
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             let leaders = isMonthLeaderOn ? userViewModel.monthLeaders : userViewModel.weekLeaders
@@ -159,12 +190,48 @@ struct LeaderBoardView: View {
                     .background(Color.backgroundGray)
                 }
             }
-            .animation(.easeInOut(duration: .short), value: isMonthLeaderOn)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .task {
-                if userViewModel.weekLeaders.isEmpty || userViewModel.monthLeaders.isEmpty {
-                    await userViewModel.getLeaders(coreState: coreState)
+            Dialog(
+                isDialogVisible: $isMyRankingDialogOpened,
+                positiveButtonText: "광고보고 확인하기",
+                negativeButtonText: "안볼래요",
+                onPositivebuttonClick: {
+                    adViewModel.showRewardedInterstitial(
+                        willShowRewardedInterstitial: {},
+                        onAdWatched: {
+                            Task {
+                                if isMonthLeaderOn {
+                                    await userViewModel.getMyMonthRanking(coreState: coreState)
+                                } else {
+                                    await userViewModel.getMyWeekRanking(coreState: coreState)
+                                }
+                            }
+                        },
+                        onFail: { coreState.showSnackBar(message: "광고 로드에 실패했습니다. 잠시후 다시 시도해주세요", type: .error) }
+                    )
+                },
+                onNegativebuttonClick: {},
+                onDismiss: {},
+                content: {
+                    Text("광고를 보시면 ")
+                        .font(.headline)
+                    +
+                    Text("내 등수")
+                        .font(.headline.bold())
+                    +
+                    Text("를\n")
+                        .font(.headline)
+                    +
+                    Text("확인할 수 있어요!!")
+                        .font(.headline)
+                        .baselineOffset(-.small)
                 }
+            )
+        }
+        .animation(.easeInOut(duration: .short), value: isMonthLeaderOn)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .task {
+            if userViewModel.weekLeaders.isEmpty || userViewModel.monthLeaders.isEmpty {
+                await userViewModel.getLeaders(coreState: coreState)
             }
         }
     }

@@ -18,7 +18,49 @@ final class InformationViewModel: BaseViewModel {
     @Published var faqs: Paragraphs = []
     @Published var isInformationLoading: Bool = false
     
+    @Published var isMinorUpdateDialogOpened: Bool = false
+    @Published var isMajorUpdateDialogOpened: Bool = false
+    @Published var majorUpdateDialogSecond: Int = 5
+    
     @Inject var informationRepository: InformationRepository
+    
+    func checkAppVersion() async {
+        do {
+            let latestVersionList = try await informationRepository.fetchIosVersion()
+            if !latestVersionList.isEmpty {
+                let latestVersion = latestVersionList[0]
+                if latestVersion.release > Version.current.release || latestVersion.major > Version.current.major {
+                    isMajorUpdateDialogOpened = true
+                    let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+                        DispatchQueue.main.async {
+                            self.majorUpdateDialogSecond -= 1
+                        }
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        timer.invalidate()
+                        self.majorUpdateDialogSecond = 5
+                        self.navigateToAppstore()
+                    }
+                } else if latestVersion.minor > Version.current.minor {
+                    guard let updateDisabledDate = await informationRepository.getUpdateDisabledDate() else {
+                        isMinorUpdateDialogOpened = true
+                        return
+                    }
+                    let calendar = Calendar.current
+                    let date = calendar.dateComponents([.year, .month, .day], from: updateDisabledDate)
+                    let now = calendar.dateComponents([.year, .month, .day], from: Date.now)
+                    
+                    if date.year == now.year && date.month == now.month && date.day == now.day {
+                        
+                    } else {
+                        isMinorUpdateDialogOpened = true
+                    }
+                }
+            }
+        } catch {
+            print(error)
+        }
+    }
     
     func getEvents(coreState: CoreState) async {
         do {
@@ -53,7 +95,7 @@ final class InformationViewModel: BaseViewModel {
                 self.faqs.append(Paragraph(title: res.question, content: res.answer))
             }
             pointPolicyResponses.forEach { res in
-                if res.image != GlobalString.NoneImage.rawValue {
+                if res.image != String.NoneImage {
                     self.pointPolicies.append(Paragraph(title: res.sub_title, content: res.sub_content, image: res.image))
                 } else {
                     self.pointPolicies.append(Paragraph(title: res.sub_title, content: res.sub_content))
@@ -110,6 +152,18 @@ final class InformationViewModel: BaseViewModel {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)
         } catch {
             print(error)
+        }
+    }
+    
+    func navigateToAppstore() {
+        if let url = URL(string: "itms-apps://itunes.apple.com/app/6444637809"),
+                            UIApplication.shared.canOpenURL(url)
+        {
+            if #available(iOS 10.0, *) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.openURL(url)
+            }
         }
     }
 }

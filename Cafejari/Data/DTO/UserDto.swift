@@ -81,7 +81,7 @@ struct ProfileResponse: Decodable {
     let activity: Int
 }
 extension ProfileResponse {
-    static let empty = ProfileResponse(id: 0, nickname: "", fcm_token: GlobalString.None.rawValue, phone_number: "00000000", image: "", point: 0, grade: 0, activity: 0)
+    static let empty = ProfileResponse(id: 0, nickname: "", fcm_token: String.None, phone_number: "00000000", image: "", point: 0, grade: 0, activity: 0)
 }
 
 struct SocialUserTypeResponse: Decodable {
@@ -93,4 +93,14 @@ struct LeaderResponse: Decodable {
     let user: UserResponse
     let ranking: Int
     let activity: Int
+}
+extension LeaderResponse {
+    func getLeader() -> Leader {
+        return Leader(
+            nickname: self.user.profile?.nickname ?? "",
+            image: self.user.profile?.image ?? "",
+            ranking: self.ranking,
+            activity: self.activity
+        )
+    }
 }

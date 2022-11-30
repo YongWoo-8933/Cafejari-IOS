@@ -18,7 +18,7 @@ struct MiniGoogleMapView: UIViewRepresentable {
         let startCameraPosition = GMSCameraPosition.camera(
             withLatitude: coreState.userLastLocation?.coordinate.latitude ?? GMSCameraPosition.sinchon.target.latitude,
             longitude: coreState.userLastLocation?.coordinate.longitude ?? GMSCameraPosition.sinchon.target.longitude,
-            zoom: GlobalZoom.Large.rawValue
+            zoom: Float.zoom.Large.rawValue
         )
         
         let mapView = GMSMapView(frame: CGRect.zero, camera: startCameraPosition)

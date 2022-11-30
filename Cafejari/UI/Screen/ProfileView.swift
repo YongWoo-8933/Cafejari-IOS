@@ -226,7 +226,7 @@ struct ProfileView: View {
                         VStack(spacing: .moreLarge) {
                             Divider()
                             
-                            Text("ver \(RELEASE_VERSION_CODE).\(MAJOR_VERSION_CODE).\(MINOR_VERSION_CODE)")
+                            Text("ver \(Version.current.release).\(Version.current.major).\(Version.current.minor)")
                                 .foregroundColor(.lightGray)
                         }
                         .padding(.vertical, .moreLarge)
@@ -245,6 +245,10 @@ struct ProfileView: View {
                 onNegativebuttonClick: {
                     Task {
                         await userViewModel.logout(coreState: coreState)
+                        userViewModel.myWeekRanking = nil
+                        userViewModel.myMonthRanking = nil
+                        userViewModel.isMyWeekRankingVisible = false
+                        userViewModel.isMyMonthRankingVisible = false
                     }
                 },
                 onDismiss: {}

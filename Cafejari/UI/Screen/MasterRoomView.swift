@@ -12,6 +12,7 @@ struct MasterRoomView: View {
     
     @EnvironmentObject var coreState: CoreState
     @EnvironmentObject var cafeViewModel: CafeViewModel
+    @EnvironmentObject var adViewModel: AdViewModel
     
     @State private var selectedCrowded = 1
     @State private var selectedDetailLog: CafeDetailLog? = nil
@@ -21,6 +22,8 @@ struct MasterRoomView: View {
     
     var body: some View {
         ZStack {
+            AdRewardedInterstitialView()
+            
             VStack(spacing: 0) {
                 NavigationTitle(title: coreState.masterRoomCafeLog.name, leadingIconSystemName: "xmark") {
                     cafeViewModel.cafeInfoLoading = true
@@ -48,7 +51,6 @@ struct MasterRoomView: View {
                                     selectedCrowded = coreState.masterRoomCafeLog.cafeDetailLogs[0].crowded
                                 }
                             }
-
                         } else {
                             InactivatedMasterRoom(selectedCrowded: $selectedCrowded)
                         }
@@ -63,9 +65,15 @@ struct MasterRoomView: View {
                 positiveButtonText: "광고보고 종료",
                 negativeButtonText: "그냥 종료",
                 onPositivebuttonClick: {
-                    Task {
-                        await cafeViewModel.expireMaster(coreState: coreState, adWatched: true)
-                    }
+                    adViewModel.showRewardedInterstitial(
+                        willShowRewardedInterstitial: {},
+                        onAdWatched: {
+                            Task {
+                                await cafeViewModel.expireMaster(coreState: coreState, adWatched: true)
+                            }
+                        },
+                        onFail: { coreState.showSnackBar(message: "광고 로드에 실패했습니다. 다시 시도하시거나 일반 종료를 실행해주세요", type: .error) }
+                    )
                 },
                 onNegativebuttonClick: {
                     Task {
