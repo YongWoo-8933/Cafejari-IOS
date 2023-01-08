@@ -14,6 +14,7 @@ import FirebaseMessaging
 final class UserViewModel: BaseViewModel {
     
     @Inject var cafeRepository: CafeRepository
+    @Inject var informationRepository: InformationRepository
     
     @Published var dateCafeLogs: DateCafeLogs = []
     @Published var selectedDate: Date = Date()
@@ -25,9 +26,7 @@ final class UserViewModel: BaseViewModel {
     @Published var isLeaderLoading: Bool = true
     
     @Published var myWeekRanking: Leader? = nil
-    @Published var isMyWeekRankingVisible: Bool = false
     @Published var myMonthRanking: Leader? = nil
-    @Published var isMyMonthRankingVisible: Bool = false
     
     func appInit(coreState: CoreState) async {
         do {
@@ -215,22 +214,18 @@ final class UserViewModel: BaseViewModel {
         }
     }
     
-    func getMyMonthRanking(coreState: CoreState) async {
+    func getMyMonthRanking(coreState: CoreState, onSuccess: () -> Void) async {
         do {
             let res = try await userRepository.fetchMyMonthRanking(accessToken: coreState.accessToken)
             if res.isEmpty {
-                coreState.showSnackBar(message: "이번달 마스터 활동 이력이 없습니다")
                 self.myMonthRanking = nil
             } else {
                 self.myMonthRanking = res[0].getLeader()
             }
-            self.isMyMonthRankingVisible = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1200) {
-                self.isMyMonthRankingVisible = false
-            }
+            onSuccess()
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState) { newAccessToken in
-                await getMyMonthRanking(coreState: coreState)
+                await getMyMonthRanking(coreState: coreState, onSuccess: onSuccess)
             }
         } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)
@@ -239,22 +234,57 @@ final class UserViewModel: BaseViewModel {
         }
     }
     
-    func getMyWeekRanking(coreState: CoreState) async {
+    func getMyWeekRanking(coreState: CoreState, onSuccess: () -> Void) async {
         do {
             let res = try await userRepository.fetchMyWeekRanking(accessToken: coreState.accessToken)
             if res.isEmpty {
-                coreState.showSnackBar(message: "이번주 마스터 활동 이력이 없습니다")
                 self.myWeekRanking = nil
             } else {
                 self.myWeekRanking = res[0].getLeader()
             }
-            self.isMyWeekRankingVisible = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1200) {
-                self.isMyWeekRankingVisible = false
-            }
+            onSuccess()
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState) { newAccessToken in
-                await getMyWeekRanking(coreState: coreState)
+                await getMyWeekRanking(coreState: coreState, onSuccess: onSuccess)
+            }
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+        } catch {
+            print(error)
+        }
+    }
+    
+    func deleteAcoount(coreState: CoreState) async {
+        do {
+            try await informationRepository.postInquiryEtc(
+                accessToken: coreState.accessToken,
+                email: coreState.user.email,
+                content: "회원탈퇴한대.. userId: \(coreState.user.userId), nickname: \(coreState.user.nickname)"
+            )
+            
+            let access = coreState.accessToken
+            let refresh = coreState.refreshToken
+            let id = coreState.user.profileId
+            _ = try await userRepository.putFcmToken(accessToken: access, profileId: id, fcmToken: String.None)
+            
+            try await userRepository.logout(refreshToken: refresh)
+            self.tokenRepository.deleteSavedRefreshToken()
+            
+            coreState.isLogedIn = false
+            coreState.user = User.empty
+            coreState.accessToken = ""
+            coreState.refreshToken = ""
+            coreState.mapType = MapType.crowded
+            coreState.isMasterActivated = false
+            coreState.masterRoomCafeLog = CafeLog.empty
+            self.myWeekRanking = nil
+            self.myMonthRanking = nil
+            coreState.navigateWithClear(Screen.Login.route)
+            coreState.tapToMap()
+            coreState.showSnackBar(message: "회원 탈퇴 요청을 완료했습니다")
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState) { newAccessToken in
+                await deleteAcoount(coreState: coreState)
             }
         } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)

@@ -35,7 +35,7 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var isMasterActivated: Bool = false
     @Published var masterRoomCafeLog: CafeLog = CafeLog.empty
     @Published var isAutoExpiredDialogOpened = false
-    @Published var isWelcomeDialogOpened = false
+    @Published var isOnboardingDialogOpened = false
     @Published var autoExpiredCafeLog: AutoExpiredCafeLog? = nil
     
     @Published var pointResultPoint: Int = 0
@@ -94,7 +94,7 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
                                         self.isPermissionChecked = true
                                     }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                                        self.isWelcomeDialogOpened = true
+                                        self.isOnboardingDialogOpened = true
                                     }
                                 }
                             } else {
@@ -115,7 +115,7 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func isNearBy(latitude: Double, longitude: Double) -> Bool {
         if let userLocation = self.userLastLocation {
-            return userLocation.coordinate.latitude < latitude + 0.00023 && userLocation.coordinate.latitude > latitude - 0.00023 && userLocation.coordinate.longitude < longitude + 0.00027 && userLocation.coordinate.longitude > longitude - 0.00027
+            return userLocation.coordinate.latitude < latitude + 0.00027 && userLocation.coordinate.latitude > latitude - 0.00027 && userLocation.coordinate.longitude < longitude + 0.0003 && userLocation.coordinate.longitude > longitude - 0.0003
         } else {
             return false
         }

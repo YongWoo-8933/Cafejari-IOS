@@ -54,15 +54,13 @@ struct GoogleMapView: UIViewRepresentable {
      func updateUIView(_ uiView: GMSMapView, context: Context) {
          if markerRefreshTrigger {
              uiView.clear()
-//             uiView.isMyLocationEnabled = coreState.locationAuthorizationStatus == .authorizedAlways || coreState.locationAuthorizationStatus == .authorizedWhenInUse
-//             uiView.settings.myLocationButton = coreState.locationAuthorizationStatus == .authorizedAlways || coreState.locationAuthorizationStatus == .authorizedWhenInUse
-             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.001) {
-                 _ = self.drawMarkers(mapView: uiView)
+             self.drawMarkers(mapView: uiView)
+             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.0) {
                  markerRefreshTrigger = false
              }
          }
          if animateTo != nil {
-             uiView.animate(to: animateTo ?? GMSCameraPosition.sinchon)
+             uiView.animate(to: animateTo ?? Locations.sinchon.cameraPosition)
              DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
                  animateTo = nil
              }
@@ -84,7 +82,7 @@ struct GoogleMapView: UIViewRepresentable {
        return available ? greenMarkerUIImage : redMarkerUIImage
    }
     
-    func drawMarkers(mapView: GMSMapView) -> GMSMapView {
+    func drawMarkers(mapView: GMSMapView) {
         
         switch(mapType) {
         case .crowded:
@@ -96,15 +94,12 @@ struct GoogleMapView: UIViewRepresentable {
                 )
                 marker.title = cafeInfo.name
                 marker.icon = self.getCrowdedMarkerUIImage(crowded: cafeInfo.getMinCrowded())?.resizeImageTo(size: CGSize(width: markerHeight * 0.85, height: markerHeight))
-                marker.isFlat = false
                 marker.isDraggable = false
-                marker.appearAnimation = GMSMarkerAnimation.pop
                 marker.snippet = cafeInfo.getMinCrowded().toCrowded().string
                 marker.groundAnchor = CGPoint(x: 0.5, y: 0.9)
                 marker.userData = cafeInfo
                 marker.map = mapView
             }
-            return mapView
         case .master:
             cafeViewModel.cafeInfos.forEach { cafeInfo in
 
@@ -131,15 +126,12 @@ struct GoogleMapView: UIViewRepresentable {
                 )
                 marker.title = cafeInfo.name
                 marker.icon = self.getMasterMarkerUIImage(available: cafeInfo.isMasterAvailable())?.resizeImageTo(size: CGSize(width: markerHeight * 0.85, height: markerHeight))
-                marker.isFlat = false
                 marker.isDraggable = false
-                marker.appearAnimation = GMSMarkerAnimation.pop
                 marker.snippet = masterAvailableStateString
                 marker.groundAnchor = CGPoint(x: 0.5, y: 0.9)
                 marker.userData = cafeInfo
                 marker.map = mapView
             }
-            return mapView
         }
     }
     

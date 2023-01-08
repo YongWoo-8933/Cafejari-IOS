@@ -136,7 +136,8 @@ final class CafeViewModel: BaseViewModel {
                         latitude: cafeInfoResponse.latitude,
                         longitude: cafeInfoResponse.longitude,
                         googlePlaceId: cafeInfoResponse.google_place_id,
-                        cafes: cafes
+                        cafes: cafes,
+                        moreInfo: cafeInfoResponse.more_info.isEmpty ? MoreInfo.empty : cafeInfoResponse.more_info[0]
                     )
                 )
             }
@@ -297,7 +298,7 @@ final class CafeViewModel: BaseViewModel {
             coreState.masterRoomCafeLog = cafeLog
             coreState.isMasterActivated = true
             coreState.mapType = MapType.crowded
-            self.markerRefeshTrigger = true
+            await self.getCafeInfos(coreState: coreState)
             isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "마스터등록 성공! 주기적으로 혼잡도를 업데이트 해주세요")
         } catch CustomError.accessTokenExpired {
@@ -321,7 +322,7 @@ final class CafeViewModel: BaseViewModel {
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
             coreState.mapType = MapType.crowded
-            self.markerRefeshTrigger = true
+            await self.getCafeInfos(coreState: coreState)
             isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "카페 혼잡도를 '\(crowded.toCrowded().string)'(으)로 변경하였습니다")
         } catch CustomError.masterExpired {
@@ -346,6 +347,7 @@ final class CafeViewModel: BaseViewModel {
                 accessToken: coreState.accessToken, cafeDetailLogId: cafeDetailLogId
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
+            await self.getCafeInfos(coreState: coreState)
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
                 await deleteCafeDetailLog(coreState: coreState, cafeDetailLogId: cafeDetailLogId)

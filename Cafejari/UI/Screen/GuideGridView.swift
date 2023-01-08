@@ -19,7 +19,6 @@ struct GuideGridView: View {
                 NavigationTitle(title: "유저 가이드북", leadingIconSystemName: "chevron.backward") {
                     coreState.popUp()
                 }
-                
                 LazyVGrid(columns: GridItem(.flexible()).setGridColumn(columns: 2), spacing: .large) {
                     ForEach(Guide.guides, id: \.images[0]) { guide in
                         NavigationLink {

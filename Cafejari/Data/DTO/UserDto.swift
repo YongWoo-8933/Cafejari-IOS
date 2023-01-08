@@ -59,9 +59,9 @@ extension UserResponse {
             email: self.email,
             lastLogin: self.last_login,
             authorization: self.authorization,
-            nickname: profile.nickname,
+            nickname: profile.nickname ?? "",
             fcmToken: profile.fcm_token,
-            phoneNumber: profile.phone_number,
+            phoneNumber: profile.phone_number ?? "00000000",
             image: profile.image,
             point: profile.point,
             grade: profile.grade,
@@ -72,9 +72,9 @@ extension UserResponse {
 
 struct ProfileResponse: Decodable {
     let id: Int
-    let nickname: String
+    let nickname: String?
     let fcm_token: String
-    let phone_number: String
+    let phone_number: String?
     let image: String
     let point: Int
     let grade: Int

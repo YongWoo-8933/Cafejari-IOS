@@ -16,17 +16,18 @@ struct MenuItem: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
+                Image(systemName: iconSystemName)
+                Spacer()
                 Text(text)
                 Spacer()
-                Image(systemName: iconSystemName)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, .large)
             .frame(width: 140, height: 48, alignment: .leading)
             .background(Color.white)
+            .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.lightGray)
             .onTapGesture {
                 onClick()
             }
-            Divider()
         }
     }
 }

@@ -11,7 +11,8 @@ import SwiftUI
 @MainActor
 final class InformationViewModel: BaseViewModel {
     
-    @Published var events: Events = []
+    @Published var unExpiredEvents: Events = []
+    @Published var expiredEvents: Events = []
     @Published var randomEvent: Event? = nil
     @Published var pointPolicies: Paragraphs = []
     @Published var cautions: Paragraphs = []
@@ -29,7 +30,8 @@ final class InformationViewModel: BaseViewModel {
             let latestVersionList = try await informationRepository.fetchIosVersion()
             if !latestVersionList.isEmpty {
                 let latestVersion = latestVersionList[0]
-                if latestVersion.release > Version.current.release || latestVersion.major > Version.current.major {
+                
+                if latestVersion.release > Version.current.release {
                     isMajorUpdateDialogOpened = true
                     let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
                         DispatchQueue.main.async {
@@ -41,7 +43,19 @@ final class InformationViewModel: BaseViewModel {
                         self.majorUpdateDialogSecond = 5
                         self.navigateToAppstore()
                     }
-                } else if latestVersion.minor > Version.current.minor {
+                } else if latestVersion.release == Version.current.release && latestVersion.major > Version.current.major {
+                    isMajorUpdateDialogOpened = true
+                    let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+                        DispatchQueue.main.async {
+                            self.majorUpdateDialogSecond -= 1
+                        }
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        timer.invalidate()
+                        self.majorUpdateDialogSecond = 5
+                        self.navigateToAppstore()
+                    }
+                } else if latestVersion.release == Version.current.release && latestVersion.major == Version.current.major && latestVersion.minor > Version.current.minor {
                     guard let updateDisabledDate = await informationRepository.getUpdateDisabledDate() else {
                         isMinorUpdateDialogOpened = true
                         return
@@ -64,10 +78,19 @@ final class InformationViewModel: BaseViewModel {
     
     func getEvents(coreState: CoreState) async {
         do {
-            self.events = try await informationRepository.fetchEvents()
-            if !self.events.isEmpty {
-                let randomEventIndex = Int.random(in: 0 ..< self.events.count)
-                self.randomEvent = self.events[randomEventIndex]
+            let events = try await informationRepository.fetchEvents()
+            self.unExpiredEvents = []
+            self.expiredEvents = []
+            if !events.isEmpty {
+                events.forEach { event in
+                    if time.isPast(timeString: event.finish) {
+                        self.expiredEvents.append(event)
+                    } else {
+                        self.unExpiredEvents.append(event)
+                    }
+                }
+                let randomEventIndex = Int.random(in: 0 ..< self.unExpiredEvents.count)
+                self.randomEvent = self.unExpiredEvents[randomEventIndex]
             }
         } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)

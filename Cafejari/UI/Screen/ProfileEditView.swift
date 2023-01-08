@@ -17,6 +17,7 @@ struct ProfileEditView: View {
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var userViewModel: UserViewModel
     @EnvironmentObject private var loginViewModel: LoginViewModel
+    @EnvironmentObject private var informationViewModel: InformationViewModel
     
     @State private var isAuthenticated = false
     @State private var nickname = ""
@@ -24,6 +25,7 @@ struct ProfileEditView: View {
     @State private var uiImage: UIImage? = nil
     @State private var isPhotoLibraryPermitted: Bool = false
     @State private var isSettingNavigateDialogOpened: Bool = false
+    @State private var isAccountDeleteDialogOpened: Bool = false
     
     @State var isGoogleLoginLoading = false
     
@@ -116,21 +118,23 @@ struct ProfileEditView: View {
                         
                         VerticalSpacer(32)
                         
-                        TextField("변경할 닉네임", text: $nickname)
-                            .textFieldStyle(SingleLineTextFieldStyle())
-                            .focused($focusedField, equals: Field.nickname)
-                        
-                        VerticalSpacer(.medium)
-                        
-                        VStack(spacing: .small) {
-                            Text(nickname.isNicknameLengthValid() ? "닉네임 길이가 적당합니다" : "닉네임은 2~10자로 정해주세요")
-                                .foregroundColor(nickname.isNicknameLengthValid() ? .lightGray : .textSecondary)
-                            Text(nickname.hasSpecialChar() || nickname.isEmpty ? "특수문자 및 공백이 허용되지 않습니다" : "닉네임 구성이 유효합니다")
-                                .foregroundColor(nickname.hasSpecialChar() || nickname.isEmpty ? .textSecondary : .lightGray)
+                        Group {
+                            TextField("변경할 닉네임", text: $nickname)
+                                .textFieldStyle(SingleLineTextFieldStyle())
+                                .focused($focusedField, equals: Field.nickname)
+                            
+                            VerticalSpacer(.medium)
+                            
+                            VStack(spacing: .small) {
+                                Text(nickname.isNicknameLengthValid() ? "닉네임 길이가 적당합니다" : "닉네임은 2~10자로 정해주세요")
+                                    .foregroundColor(nickname.isNicknameLengthValid() ? .lightGray : .textSecondary)
+                                Text(nickname.hasSpecialChar() || nickname.isEmpty ? "특수문자 및 공백이 허용되지 않습니다" : "닉네임 구성이 유효합니다")
+                                    .foregroundColor(nickname.hasSpecialChar() || nickname.isEmpty ? .textSecondary : .lightGray)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            VerticalSpacer(40)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        VerticalSpacer(40)
                         
                         FilledCtaButton(text: "변경사항 저장", backgroundColor: .secondary) {
                             if coreState.user.nickname == nickname && uiImage == nil {
@@ -142,6 +146,16 @@ struct ProfileEditView: View {
                                 }
                             }
                         }
+
+                        VerticalSpacer(60)
+
+                        Text("회원탈퇴")
+                            .foregroundColor(.crowdedRed)
+                            .font(.caption)
+                            .underline()
+                            .onTapGesture {
+                                isAccountDeleteDialogOpened = true
+                            }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -176,9 +190,45 @@ struct ProfileEditView: View {
                 +
                 Text("을\n허용해주세요\n\n")
                 +
-                Text("*설정 변경시 앱이 재시작됩니다")
+                Text("* 설정 변경시 앱이 재시작됩니다")
                     .font(.caption)
                     .foregroundColor(.heavyGray)
+            }
+            
+            Dialog(
+                isDialogVisible: $isAccountDeleteDialogOpened,
+                positiveButtonText: "취소",
+                negativeButtonText: "탈퇴할게요",
+                onPositivebuttonClick: {},
+                onNegativebuttonClick: {
+                    Task {
+                        await userViewModel.deleteAcoount(coreState: coreState)
+                    }
+                },
+                onDismiss: {}
+            ) {
+                Text("카페자리에서 탈퇴합니다\n")
+                    .font(.headline)
+                +
+                Text("계정 삭제는 3일 이내에 처리되며,\n")
+                    .font(.headline)
+                    .baselineOffset(-.small)
+                +
+                Text("이 기간동안 다시 로그인하여\n")
+                    .font(.headline)
+                    .baselineOffset(-.small)
+                +
+                Text("1:1문의를 통해 취소하실 수 있습니다\n\n")
+                    .font(.headline)
+                    .baselineOffset(-.small)
+                +
+                Text("* 3일이후에는 모든 회원 정보가 삭제됩니다\n")
+                    .font(.headline.bold())
+                    .foregroundColor(.crowdedRed)
+                +
+                Text("정말 탈퇴하시겠습니까?")
+                    .font(.headline.bold())
+                    .foregroundColor(.crowdedRed)
             }
             
             FullScreenLoadingView(loading: $userViewModel.isProfileEditLoading, text: "변경사항 저장중..")

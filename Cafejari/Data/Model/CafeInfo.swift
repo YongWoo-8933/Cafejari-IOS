@@ -19,9 +19,10 @@ struct CafeInfo: Decodable {
     let longitude: Double
     let googlePlaceId: String
     let cafes: Cafes
+    let moreInfo: MoreInfo
 }
 extension CafeInfo {
-    static var empty = CafeInfo(id: 0, name: "", city: "", gu: "", address: "", totalFloor: 1, floor: 1, latitude: 37.0, longitude: 126.0, googlePlaceId: String.None, cafes: [])
+    static var empty = CafeInfo(id: 0, name: "", city: "", gu: "", address: "", totalFloor: 1, floor: 1, latitude: 37.0, longitude: 126.0, googlePlaceId: String.None, cafes: [], moreInfo: MoreInfo.empty)
     
     func getMinCrowded() -> Int {
         var minCrowded = -1
@@ -92,3 +93,19 @@ extension RecentUpdatedLog {
     static var empty = RecentUpdatedLog(id: 0, master: CafeMaster.empty, update: "", crowded: -1)
 }
 typealias RecentUpdatedLogs = [RecentUpdatedLog]
+
+
+struct MoreInfo: Decodable {
+    let id: Int
+    let event1: String
+    let event2: String
+    let event3: String
+    let image: String
+    let notice1: String
+    let notice2: String
+    let notice3: String
+}
+extension MoreInfo {
+    static var empty = MoreInfo(id: 0, event1: String.None, event2: String.None, event3: String.None, image: String.None, notice1: String.None, notice2: String.None, notice3: String.None)
+}
+typealias MoreInfos = [MoreInfo]

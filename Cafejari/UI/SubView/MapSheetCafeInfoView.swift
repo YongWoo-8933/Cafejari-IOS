@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CachedAsyncImage
 
 struct MapSheetCafeInfoView: View {
     
@@ -20,6 +21,75 @@ struct MapSheetCafeInfoView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            
+            if cafeViewModel.modalCafeInfo.moreInfo.id != 0 {
+                if cafeViewModel.modalCafeInfo.moreInfo.event1 != String.None ||
+                    cafeViewModel.modalCafeInfo.moreInfo.event2 != String.None ||
+                    cafeViewModel.modalCafeInfo.moreInfo.event3 != String.None {
+                    Text("이 카페에서만 진행중인")
+                        .font(.body.bold())
+                    +
+                    Text("이벤트가 있어요!")
+                    
+                    VerticalSpacer(.large)
+                    
+                    if cafeViewModel.modalCafeInfo.moreInfo.event1 != String.None {
+                        Text("🎉  \(cafeViewModel.modalCafeInfo.moreInfo.event1)")
+                        VerticalSpacer(.small)
+                    }
+                    if cafeViewModel.modalCafeInfo.moreInfo.event2 != String.None {
+                        Text("🎉  \(cafeViewModel.modalCafeInfo.moreInfo.event2)")
+                        VerticalSpacer(.small)
+                    }
+                    if cafeViewModel.modalCafeInfo.moreInfo.event3 != String.None {
+                        Text("🎉  \(cafeViewModel.modalCafeInfo.moreInfo.event3)")
+                        VerticalSpacer(.small)
+                    }
+                    
+                    VerticalSpacer(28)
+                }
+                if cafeViewModel.modalCafeInfo.moreInfo.image != String.NoneImage {
+                    CachedAsyncImage(
+                        url: URL(string: cafeViewModel.modalCafeInfo.moreInfo.image),
+                        content: { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .cornerRadius(.medium)
+                        },
+                        placeholder: {
+                            ProgressView()
+                        }
+                    )
+                    
+                    VerticalSpacer(28)
+                }
+                if cafeViewModel.modalCafeInfo.moreInfo.notice1 != String.None ||
+                    cafeViewModel.modalCafeInfo.moreInfo.notice2 != String.None ||
+                    cafeViewModel.modalCafeInfo.moreInfo.notice3 != String.None {
+                    Text("사장님의 한마디")
+                        .font(.body.bold())
+                    
+                    VerticalSpacer(.large)
+                    
+                    if cafeViewModel.modalCafeInfo.moreInfo.notice1 != String.None {
+                        Text("☝  \(cafeViewModel.modalCafeInfo.moreInfo.notice1)")
+                        VerticalSpacer(.small)
+                    }
+                    if cafeViewModel.modalCafeInfo.moreInfo.notice2 != String.None {
+                        Text("☝  \(cafeViewModel.modalCafeInfo.moreInfo.notice2)")
+                        VerticalSpacer(.small)
+                    }
+                    if cafeViewModel.modalCafeInfo.moreInfo.notice3 != String.None {
+                        Text("☝  \(cafeViewModel.modalCafeInfo.moreInfo.notice3)")
+                        VerticalSpacer(.small)
+                    }
+                    
+                    VerticalSpacer(28)
+                }
+            }
+            
             Text("카페 매장정보")
                 .font(.body.bold())
             +

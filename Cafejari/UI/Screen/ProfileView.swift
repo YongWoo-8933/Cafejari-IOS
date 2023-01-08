@@ -123,9 +123,9 @@ struct ProfileView: View {
                         VerticalSpacer(.moreLarge)
                         
                         ZStack(alignment: .bottomTrailing) {
-                            if !informationViewModel.events.isEmpty {
+                            if !informationViewModel.unExpiredEvents.isEmpty {
                                 TabView(selection: $selectedEventTabIndex) {
-                                    ForEach(Array(informationViewModel.events.enumerated()), id: \.offset) { index, event in
+                                    ForEach(Array(informationViewModel.unExpiredEvents.enumerated()), id: \.offset) { index, event in
                                         CachedAsyncImage(
                                             url: URL(string: event.image),
                                             content: { image in
@@ -149,7 +149,7 @@ struct ProfileView: View {
                                 .indexViewStyle(.page(backgroundDisplayMode: .never))
                                 
                                 VStack {
-                                    Text("\(selectedEventTabIndex + 1) / \(informationViewModel.events.count)")
+                                    Text("\(selectedEventTabIndex + 1) / \(informationViewModel.unExpiredEvents.count)")
                                         .foregroundColor(.white)
                                         .font(.caption.bold())
                                         .padding(.medium)
@@ -247,8 +247,6 @@ struct ProfileView: View {
                         await userViewModel.logout(coreState: coreState)
                         userViewModel.myWeekRanking = nil
                         userViewModel.myMonthRanking = nil
-                        userViewModel.isMyWeekRankingVisible = false
-                        userViewModel.isMyMonthRankingVisible = false
                     }
                 },
                 onDismiss: {}
@@ -264,7 +262,7 @@ struct ProfileView: View {
         .task {
             await userViewModel.getUser(coreState: coreState)
             
-            if informationViewModel.events.isEmpty {
+            if informationViewModel.unExpiredEvents.isEmpty && informationViewModel.expiredEvents.isEmpty {
                 await informationViewModel.getEvents(coreState: coreState)
             }
         }

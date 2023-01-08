@@ -17,12 +17,33 @@ struct PointResultView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
+            ZStack(alignment: .topTrailing) {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "xmark")
+                            .font(.title.bold())
+                            .onTapGesture {
+                                coreState.popUp()
+                            }
+                    }
+                    Spacer()
+                }
+            }
+            .padding(.moreLarge)
+            
             VStack(spacing: .medium) {
                 VStack {
-                    Image("coin")
-                        .resizable()
-                        .scaledToFit()
-                        .offset(x: 0, y: animationTrigger ? -.moreLarge : -400)
+                    if coreState.pointResultViewType == .thumbsUp {
+                        Image(systemName: "hand.thumbsup.fill")
+                            .font(.system(size: 48, weight: .bold))
+                            .foregroundColor(.primary)
+                    } else {
+                        Image("coin")
+                            .resizable()
+                            .scaledToFit()
+                            .offset(x: 0, y: animationTrigger ? -.moreLarge : -400)
+                    }
                 }
                 .frame(height: 100)
                 
@@ -60,6 +81,22 @@ struct PointResultView: View {
                     Text(" 더 얻었어요!")
                         .font(.headline)
                         .foregroundColor(.primary)
+                case .thumbsUp:
+                    Text("마스터를 추천했어요")
+                        .foregroundColor(.primary)
+                    VerticalSpacer(.small)
+                    VStack(spacing: .small) {
+                        Text("광고보고 추천하시면 ")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        +
+                        Text("최대 4번")
+                            .font(.headline.bold())
+                            .foregroundColor(.primary)
+                        Text("25포인트를 얻을 수 있어요!")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                    }
                 default:
                     Text("마스터 추천하고")
                         .foregroundColor(.primary)
@@ -75,7 +112,7 @@ struct PointResultView: View {
                         Text("최대 4번")
                             .font(.headline.bold())
                             .foregroundColor(.primary)
-                        Text("포인트를 얻을 수 있어요!")
+                        Text("25포인트를 얻을 수 있어요!")
                             .font(.headline)
                             .foregroundColor(.primary)
                     }

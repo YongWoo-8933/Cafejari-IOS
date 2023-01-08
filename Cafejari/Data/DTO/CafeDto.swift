@@ -20,6 +20,7 @@ struct CafeInfoResponse: Decodable {
     let longitude: Double
     let google_place_id: String
     let cafe: [CafeInfoCafeResponse]
+    let more_info: MoreInfos
 }
 
 struct CafeInfoCafeResponse: Decodable {
@@ -46,6 +47,3 @@ struct CafeInfoCafeLog: Decodable {
     let expired: Bool
     let master: UserResponse
 }
-
-
-// cafe log

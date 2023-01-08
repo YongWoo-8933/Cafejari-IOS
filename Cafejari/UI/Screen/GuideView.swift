@@ -38,7 +38,7 @@ struct GuideView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 30)
-                        }else{
+                        } else {
                             Image(systemName: "circle")
                                 .font(.callout.weight(.bold))
                         }

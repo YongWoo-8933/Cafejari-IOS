@@ -108,38 +108,6 @@ extension GridItem {
     }
 }
 
-extension GMSCameraPosition  {
-    static var sinchon = GMSCameraPosition.camera(
-        withLatitude: 37.55649747287372,
-        longitude: 126.93710302643744,
-        zoom: Float.zoom.Default.rawValue
-    )
-    
-    static var kwangWoon = GMSCameraPosition.camera(
-        withLatitude: 37.620769,
-        longitude: 127.058921,
-        zoom: Float.zoom.Default.rawValue
-    )
-    
-    static var hongik = GMSCameraPosition.camera(
-        withLatitude: 37.557176,
-        longitude: 126.924175,
-        zoom: Float.zoom.Default.rawValue
-    )
-    
-    static var ewha = GMSCameraPosition.camera(
-        withLatitude: 37.557407,
-        longitude: 126.945836,
-        zoom: Float.zoom.Default.rawValue
-    )
-    
-    static var noryangjin = GMSCameraPosition.camera(
-        withLatitude: 37.513058,
-        longitude: 126.942192,
-        zoom: Float.zoom.Default.rawValue
-    )
-}
-
 extension UIImage {
     
     func resizeImageTo(size: CGSize) -> UIImage? {

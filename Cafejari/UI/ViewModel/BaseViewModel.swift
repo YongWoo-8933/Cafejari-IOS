@@ -62,8 +62,8 @@ class BaseViewModel: ObservableObject {
             coreState.mapType = MapType.crowded
             coreState.isMasterActivated = false
             coreState.masterRoomCafeLog = CafeLog.empty
-            coreState.navigateWithClear(Screen.Login.route)
             coreState.tapToMap()
+            coreState.navigateWithClear(Screen.Login.route)
         } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: .error)
         } catch {

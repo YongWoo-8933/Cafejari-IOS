@@ -25,7 +25,43 @@ struct PromotionView: View {
                 }
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(informationViewModel.events, id: \.id) { event in
+                        ForEach(informationViewModel.unExpiredEvents, id: \.id) { event in
+                            Button {
+                                openURL(URL(string: event.url)!)
+                            } label: {
+                                ZStack {
+                                    VStack(alignment: .leading, spacing: .medium) {
+                                        CachedAsyncImage(
+                                            url: URL(string: event.image),
+                                            content: { image in
+                                                image
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(maxWidth: .infinity)
+                                                    .cornerRadius(.medium)
+                                            },
+                                            placeholder: {
+                                                ProgressView()
+                                            }
+                                        )
+                                        VerticalSpacer(.medium)
+                                        Text(event.name)
+                                            .font(.headline.bold())
+                                        Text(event.preview)
+                                            .font(.caption)
+                                        Text("\(informationViewModel.time.parseYearFrom(timeString: event.start)).\(informationViewModel.time.parseMonthFrom(timeString: event.start)).\(informationViewModel.time.parseDayFrom(timeString: event.start)) ~ \(informationViewModel.time.parseYearFrom(timeString: event.finish)).\(informationViewModel.time.parseMonthFrom(timeString: event.finish)).\(informationViewModel.time.parseDayFrom(timeString: event.finish))")
+                                            .font(.caption)
+                                            .foregroundColor(.heavyGray)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.moreLarge)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 240)
+                            }
+                            Divider()
+                        }
+                        ForEach(informationViewModel.expiredEvents, id: \.id) { event in
                             Button {
                                 openURL(URL(string: event.url)!)
                             } label: {
@@ -56,15 +92,13 @@ struct PromotionView: View {
                                     .frame(maxWidth: .infinity)
                                     .padding(.moreLarge)
                                     
-                                    if informationViewModel.time.isPast(timeString: event.finish) {
-                                        HStack {
-                                            Color.black.opacity(0.5)
-                                        }
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        Text("종료된 이벤트입니다")
-                                            .font(.headline.bold())
-                                            .foregroundColor(.white)
+                                    HStack {
+                                        Color.black.opacity(0.5)
                                     }
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    Text("종료된 이벤트입니다")
+                                        .font(.headline.bold())
+                                        .foregroundColor(.white)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 240)
@@ -78,7 +112,7 @@ struct PromotionView: View {
             }
             .navigationBarBackButtonHidden()
             .task {
-                if informationViewModel.events.isEmpty {
+                if informationViewModel.expiredEvents.isEmpty && informationViewModel.unExpiredEvents.isEmpty {
                     await informationViewModel.getEvents(coreState: coreState)
                 }
             }

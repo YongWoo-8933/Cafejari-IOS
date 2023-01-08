@@ -56,7 +56,6 @@
 		1067B8BE292343E6008ADB4A /* RoundTimeFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8BD292343E6008ADB4A /* RoundTimeFrame.swift */; };
 		1067B8C2292394B2008ADB4A /* Modifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8C1292394B2008ADB4A /* Modifier.swift */; };
 		1067B8C62923A17B008ADB4A /* CheckBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8C52923A17B008ADB4A /* CheckBox.swift */; };
-		1067B8C82924A0E4008ADB4A /* MapTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8C72924A0E3008ADB4A /* MapTypeButton.swift */; };
 		1067B8CC2924AF8B008ADB4A /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8CB2924AF8B008ADB4A /* MenuItem.swift */; };
 		1067B8CE2924FB9B008ADB4A /* CrowdedColorBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8CD2924FB9A008ADB4A /* CrowdedColorBar.swift */; };
 		1067B8D029264B2C008ADB4A /* NavigationTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8CF29264B2C008ADB4A /* NavigationTitle.swift */; };
@@ -92,6 +91,8 @@
 		10D5658F29346A0B005188EA /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D5658E29346A0B005188EA /* Version.swift */; };
 		10D565932934D15D005188EA /* AdViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565922934D15D005188EA /* AdViewModel.swift */; };
 		10D565952935E01E005188EA /* AdRewardedInterstitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565942935E01E005188EA /* AdRewardedInterstitialView.swift */; };
+		10D56599294ED257005188EA /* OnboardingDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D56598294ED257005188EA /* OnboardingDialog.swift */; };
+		10D5659B29530FAD005188EA /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D5659A29530FAD005188EA /* Locations.swift */; };
 		10F4C862290E40590039881A /* ApplicationUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F4C861290E40590039881A /* ApplicationUtility.swift */; };
 		10F4C864290E48E10039881A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 10F4C863290E48E10039881A /* GoogleService-Info.plist */; };
 		10F4C866290E7DE80039881A /* ErrorResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F4C865290E7DE80039881A /* ErrorResponse.swift */; };
@@ -172,7 +173,6 @@
 		1067B8BD292343E6008ADB4A /* RoundTimeFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundTimeFrame.swift; sourceTree = "<group>"; };
 		1067B8C1292394B2008ADB4A /* Modifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifier.swift; sourceTree = "<group>"; };
 		1067B8C52923A17B008ADB4A /* CheckBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBox.swift; sourceTree = "<group>"; };
-		1067B8C72924A0E3008ADB4A /* MapTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapTypeButton.swift; sourceTree = "<group>"; };
 		1067B8CB2924AF8B008ADB4A /* MenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		1067B8CD2924FB9A008ADB4A /* CrowdedColorBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrowdedColorBar.swift; sourceTree = "<group>"; };
 		1067B8CF29264B2C008ADB4A /* NavigationTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTitle.swift; sourceTree = "<group>"; };
@@ -203,6 +203,8 @@
 		10D5658E29346A0B005188EA /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		10D565922934D15D005188EA /* AdViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdViewModel.swift; sourceTree = "<group>"; };
 		10D565942935E01E005188EA /* AdRewardedInterstitialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdRewardedInterstitialView.swift; sourceTree = "<group>"; };
+		10D56598294ED257005188EA /* OnboardingDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDialog.swift; sourceTree = "<group>"; };
+		10D5659A29530FAD005188EA /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
 		10F4C861290E40590039881A /* ApplicationUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationUtility.swift; sourceTree = "<group>"; };
 		10F4C863290E48E10039881A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		10F4C865290E7DE80039881A /* ErrorResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorResponse.swift; sourceTree = "<group>"; };
@@ -320,7 +322,6 @@
 				10F4C86C2910DA100039881A /* KakaoLoginButton.swift */,
 				10F4C86E2910DB2C0039881A /* GoogleLoginButton.swift */,
 				10F4C8702910DE450039881A /* AppleLoginButton.swift */,
-				1067B8C72924A0E3008ADB4A /* MapTypeButton.swift */,
 				1067B8C52923A17B008ADB4A /* CheckBox.swift */,
 				1067B8CB2924AF8B008ADB4A /* MenuItem.swift */,
 				1067B8CD2924FB9A008ADB4A /* CrowdedColorBar.swift */,
@@ -329,6 +330,7 @@
 				1067B87E291E571B008ADB4A /* AdBannerView.swift */,
 				1067B880291E6CE4008ADB4A /* AdInterstitialView.swift */,
 				10D565942935E01E005188EA /* AdRewardedInterstitialView.swift */,
+				10D56598294ED257005188EA /* OnboardingDialog.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -383,6 +385,7 @@
 				10F4C89A291BCC320039881A /* PointResultViewType.swift */,
 				1067B882291F8134008ADB4A /* AdUnit.swift */,
 				10F4C886291515E40039881A /* Laboratory.swift */,
+				10D5659A29530FAD005188EA /* Locations.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -681,10 +684,10 @@
 				10F4C899291B60930039881A /* SocialUserType.swift in Sources */,
 				1067B887291FA59D008ADB4A /* LoginRepository.swift in Sources */,
 				10F4C862290E40590039881A /* ApplicationUtility.swift in Sources */,
+				10D5659B29530FAD005188EA /* Locations.swift in Sources */,
 				10F4C8932917B04E0039881A /* InactivatedMasterRoom.swift in Sources */,
 				10A429BF28FE76FE00D5E6BC /* Dependencies.swift in Sources */,
 				10346AB728F3E77300A41C6F /* PromotionView.swift in Sources */,
-				1067B8C82924A0E4008ADB4A /* MapTypeButton.swift in Sources */,
 				10A429AA28FD6C5200D5E6BC /* Item.swift in Sources */,
 				10A429DB29001AE300D5E6BC /* Event.swift in Sources */,
 				10F4C8952918B0940039881A /* CustomError.swift in Sources */,
@@ -751,6 +754,7 @@
 				106130C72907A5E00023C22E /* CafeLogDto.swift in Sources */,
 				106130B52902C07F0023C22E /* Crowded.swift in Sources */,
 				106130C92907A8410023C22E /* CafeLog.swift in Sources */,
+				10D56599294ED257005188EA /* OnboardingDialog.swift in Sources */,
 				10A4298728F7C8B000D5E6BC /* Navigation.swift in Sources */,
 				10F4C88F29162C0D0039881A /* InquiryView.swift in Sources */,
 				10F4C885291514060039881A /* MapSheetCafeCrowdedView.swift in Sources */,
@@ -894,7 +898,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
@@ -916,7 +920,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 1.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -937,7 +941,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
@@ -959,7 +963,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 1.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

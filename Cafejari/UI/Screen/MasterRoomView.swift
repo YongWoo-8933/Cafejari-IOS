@@ -26,10 +26,6 @@ struct MasterRoomView: View {
             
             VStack(spacing: 0) {
                 NavigationTitle(title: coreState.masterRoomCafeLog.name, leadingIconSystemName: "xmark") {
-                    cafeViewModel.cafeInfoLoading = true
-                    Task {
-                        await cafeViewModel.getCafeInfos(coreState: coreState)
-                    }
                     coreState.popUp()
                 }
                 

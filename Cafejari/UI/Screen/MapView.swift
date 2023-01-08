@@ -24,6 +24,7 @@ struct MapView: View {
     @State private var isBottomSheetOpened = false
     @State private var animateTo: GMSCameraPosition? = nil
     @State private var isMenuButtonOpened = false
+    @State private var isMapTypeTransitionProgress = false
     @State private var interstitialAdCounter = 0
     
     init() {
@@ -51,8 +52,8 @@ struct MapView: View {
                                     animateTo: $animateTo,
                                     mapType: $coreState.mapType,
                                     startCameraPosition: GMSCameraPosition.camera(
-                                        withLatitude: coreState.userLastLocation?.coordinate.latitude ?? GMSCameraPosition.sinchon.target.latitude,
-                                        longitude: coreState.userLastLocation?.coordinate.longitude ?? GMSCameraPosition.sinchon.target.longitude,
+                                        withLatitude: coreState.userLastLocation?.coordinate.latitude ?? Locations.sinchon.cameraPosition.target.latitude,
+                                        longitude: coreState.userLastLocation?.coordinate.longitude ?? Locations.sinchon.cameraPosition.target.longitude,
                                         zoom: Float.zoom.Default.rawValue
                                     ),
                                     onMarkerTap: { cafeInfo in
@@ -103,24 +104,43 @@ struct MapView: View {
                                 .onTapGesture { coreState.navigate(Screen.Promotion.route) }
                                 
                                 HStack {
-                                    MapTypeButton(
-                                        isSelected: coreState.mapType == .crowded,
-                                        text: "👀 혼잡도 확인"
-                                    ) {
-                                        coreState.mapType = MapType.crowded
-                                        cafeViewModel.markerRefeshTrigger = true
-                                    }
-                                    MapTypeButton(
-                                        isSelected: coreState.mapType == .master,
-                                        text: "✏️ 혼잡도 공유"
-                                    ) {
-                                        if coreState.isMasterActivated {
-                                            coreState.showSnackBar(message: "마스터 활동중에는 다른 카페의 혼잡도를 공유할 수 없습니다", type: .info)
-                                        } else {
-                                            coreState.mapType = MapType.master
-                                            cafeViewModel.markerRefeshTrigger = true
+                                    Text("👀 혼잡도 확인")
+                                        .font(.body.bold())
+                                        .foregroundColor(coreState.mapType == .crowded ? .white : .moreHeavyGray)
+                                        .padding(.horizontal, 10)
+                                        .frame(height: 32)
+                                        .background(coreState.mapType == .crowded ? Color.primary : Color.white)
+                                        .cornerRadius(.medium)
+                                        .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: coreState.mapType == .crowded ? .clear : .lightGray)
+                                        .onTapGesture {
+                                            isMapTypeTransitionProgress = true
+                                            coreState.mapType = .crowded
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                cafeViewModel.markerRefeshTrigger = true
+                                                isMapTypeTransitionProgress = false
+                                            }
                                         }
-                                    }
+                                    
+                                    Text("✏️ 혼잡도 공유")
+                                        .font(.body.bold())
+                                        .foregroundColor(coreState.mapType == .master ? .white : .moreHeavyGray)
+                                        .padding(.horizontal, 10)
+                                        .frame(height: 32)
+                                        .background(coreState.mapType == .master ? Color.primary : Color.white)
+                                        .cornerRadius(.medium)
+                                        .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: coreState.mapType == .master ? .clear : .lightGray)
+                                        .onTapGesture {
+                                            if coreState.isMasterActivated {
+                                                coreState.showSnackBar(message: "마스터 활동중에는 다른 카페의 혼잡도를 공유할 수 없습니다", type: .info)
+                                            } else {
+                                                isMapTypeTransitionProgress = true
+                                                coreState.mapType = MapType.master
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                    cafeViewModel.markerRefeshTrigger = true
+                                                    isMapTypeTransitionProgress = false
+                                                }
+                                            }
+                                        }
                                     
                                     Spacer()
                                     
@@ -138,7 +158,7 @@ struct MapView: View {
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 
-                                HStack(alignment: .top) {
+                                ZStack(alignment: .topLeading) {
                                     if adViewModel.isInterstitialAdNoticeVisible {
                                         Text("\(adViewModel.interstitialAdNoticeSecond)초 후에 광고가 표시됩니다")
                                             .font(.body.bold())
@@ -148,68 +168,78 @@ struct MapView: View {
                                             .cornerRadius(.medium)
                                             .offset(x: 0, y: .moreLarge)
                                     }
-                                    Spacer()
-                                    VStack(spacing: 0) {
-                                        if isMenuButtonOpened {
-                                            ScrollView {
-                                                VStack(spacing: 0) {
-                                                    MenuItem(text: "신촌역", iconSystemName: "flag.circle.fill") {
-                                                        isMenuButtonOpened = false
-                                                        animateTo = GMSCameraPosition.sinchon
-                                                    }
-                                                    MenuItem(text: "홍대입구역", iconSystemName: "flag.circle.fill") {
-                                                        isMenuButtonOpened = false
-                                                        animateTo = GMSCameraPosition.hongik
-                                                    }
-                                                    MenuItem(text: "이대역", iconSystemName: "flag.circle.fill") {
-                                                        isMenuButtonOpened = false
-                                                        animateTo = GMSCameraPosition.ewha
-                                                    }
-                                                    MenuItem(text: "노량진역", iconSystemName: "flag.circle.fill") {
-                                                        isMenuButtonOpened = false
-                                                        animateTo = GMSCameraPosition.noryangjin
-                                                    }
-                                                    MenuItem(text: "광운대역", iconSystemName: "flag.circle.fill") {
-                                                        isMenuButtonOpened = false
-                                                        animateTo = GMSCameraPosition.kwangWoon
+                                    
+                                    HStack(alignment: .top) {
+                                        Spacer()
+                                        VStack(spacing: 0) {
+                                            if isMenuButtonOpened {
+                                                ScrollView {
+                                                    LazyVGrid(columns: GridItem(.flexible(), spacing: 0).setGridColumn(columns: 2), spacing: 0) {
+                                                        ForEach(Locations.locationList, id: \.name) { location in
+                                                            MenuItem(
+                                                                text: location.name,
+                                                                iconSystemName: "flag.circle.fill"
+                                                            ) {
+                                                                isMenuButtonOpened = false
+                                                                animateTo = location.cameraPosition
+                                                            }
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            .scrollIndicators(.never)
-                                            .frame(height: 168)
-                                            
-                                            Divider()
-                                            MenuItem(text: "카페 추가하기", iconSystemName: "plus.circle") {
-                                                isMenuButtonOpened = false
-                                                coreState.navigate(Screen.CafeInquiry.route)
+                                                .scrollIndicators(.never)
+                                                .frame(height: 48 * 3)
+                                                
+                                                Divider()
+                                                Divider()
+                                                
+                                                HStack {
+                                                    Image(systemName: "plus.circle.fill")
+                                                    Spacer()
+                                                    Text("카페 추가하기")
+                                                        .font(.body.bold())
+                                                    Spacer()
+                                                }
+                                                .padding(.horizontal, .large)
+                                                .frame(width: 140 * 2, height: 48, alignment: .leading)
+                                                .background(Color.white)
+                                                .onTapGesture {
+                                                    isMenuButtonOpened = false
+                                                    coreState.navigate(Screen.CafeInquiry.route)
+                                                }
                                             }
                                         }
+                                        .frame(width: 140 * 2, height: isMenuButtonOpened ? 48 * 4 + 1 : 0, alignment: .top)
+                                        .animation(Animation.easeInOut, value: isMenuButtonOpened)
+                                        .background(Color.white)
+                                        .cornerRadius(.large)
+                                        .shadow(radius: 1)
                                     }
-                                    .frame(width: 140, height: isMenuButtonOpened ? 216 : 0, alignment: .top)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: isMenuButtonOpened ? 48 * 4 + 1 : 0)
                                     .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                    .background(Color.white)
-                                    .cornerRadius(.large)
+                                    
                                 }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: isMenuButtonOpened ? 216 : 0)
-                                .animation(Animation.easeInOut, value: isMenuButtonOpened)
                                 
                                 Spacer()
                                     
                                 if coreState.isMasterActivated {
-                                    Button {
-                                        coreState.navigate(Screen.MasterRoom.route)
-                                    } label: {
-                                        Text("혼잡도 공유 이어서 하기")
-                                            .font(.headline.bold())
-                                            .frame(width: 240, height: 50)
-                                            .foregroundColor(.white)
-                                            .background(Color.secondary)
-                                            .cornerRadius(25)
+                                    HStack(spacing: 0) {
+                                        Button {
+                                            coreState.navigate(Screen.MasterRoom.route)
+                                        } label: {
+                                            Text("혼잡도 공유 이어서 하기")
+                                                .font(.headline.bold())
+                                                .frame(width: 240, height: 50)
+                                                .foregroundColor(.white)
+                                                .background(Color.secondary)
+                                                .cornerRadius(25)
+                                        }
+                                        .background(Color.white)
+                                        .cornerRadius(25)
+                                        .padding(.trailing, 50)
+                                        
+                                        Spacer()
                                     }
-                                    .background(Color.white)
-                                    .cornerRadius(25)
-                                    .padding(.trailing, 50)
                                 }
                             }
                             .padding(.horizontal, .moreLarge)
@@ -240,6 +270,11 @@ struct MapView: View {
                             FullScreenLoadingView(
                                 loading: $cafeViewModel.cafeInfoLoading,
                                 text: "주변 카페 찾는중.."
+                            )
+                            
+                            FullScreenLoadingView(
+                                loading: $isMapTypeTransitionProgress,
+                                text: coreState.mapType == .crowded ? "확인 모드로 전환중.." : "공유 모드로 전환중.."
                             )
                         }
                         .onChange(of: interstitialAdCounter, perform: { newValue in
@@ -285,7 +320,12 @@ struct MapView: View {
                                                         coreState: coreState,
                                                         recentLogId: cafeViewModel.thumbsUpRecentLog.id,
                                                         isAdWatched: true,
-                                                        onSuccess: { isBottomSheetOpened = false }
+                                                        onSuccess: {
+                                                            isBottomSheetOpened = false
+                                                            Task {
+                                                                await cafeViewModel.getCafeInfos(coreState: coreState)
+                                                            }
+                                                        }
                                                     )
                                                 }
                                             },
@@ -301,7 +341,12 @@ struct MapView: View {
                                                 coreState: coreState,
                                                 recentLogId: cafeViewModel.thumbsUpRecentLog.id,
                                                 isAdWatched: false,
-                                                onSuccess: { isBottomSheetOpened = false }
+                                                onSuccess: {
+                                                    isBottomSheetOpened = false
+                                                    Task {
+                                                        await cafeViewModel.getCafeInfos(coreState: coreState)
+                                                    }
+                                                }
                                             )
                                         }
                                     },
@@ -336,7 +381,7 @@ struct MapView: View {
                             }
                         })
                         .task {
-                            if informationViewModel.events.isEmpty {
+                            if informationViewModel.unExpiredEvents.isEmpty && informationViewModel.expiredEvents.isEmpty {
                                 await informationViewModel.getEvents(coreState: coreState)
                             }
                         }
@@ -416,12 +461,14 @@ struct MapView: View {
                         }
                     }
                 }
+                // 스낵바
                 SnackBar(
                     isSnackBarOpened: $coreState.isSnackBarOpened,
                     snackBarType: $coreState.snackBarType,
                     content: $coreState.snackBarContent,
                     onCloseButtonClick: { coreState.clearSnackBar() }
                 )
+                // 자동종료 다이얼로그
                 Dialog(
                     isDialogVisible: $coreState.isAutoExpiredDialogOpened,
                     positiveButtonText: "확인",
@@ -469,33 +516,8 @@ struct MapView: View {
                         return Text("")
                     }
                 }
-                Dialog(
-                    isDialogVisible: $coreState.isWelcomeDialogOpened,
-                    positiveButtonText: "가이드 보기",
-                    negativeButtonText: "바로 시작",
-                    onPositivebuttonClick: { coreState.navigate(Screen.GuideGrid.route) },
-                    onNegativebuttonClick: {
-                        coreState.showSnackBar(message: "가이드북은 프로필 > 사용가이드북 보기에서 언제든지 확인할 수 있어요!", type: .info) },
-                    onDismiss: { coreState.showSnackBar(message: "가이드북은 프로필 > 사용가이드북 보기에서 언제든지 확인할 수 있어요!", type: .info) }
-                ) {
-                    Text("카페자리")
-                        .font(.headline.bold())
-                    +
-                    Text("에 오신것을 환영합니다!!\n")
-                        .font(.headline)
-                    +
-                    Text("가이드를 통해 카페자리를\n")
-                        .baselineOffset(-.medium)
-                        .font(.body)
-                    +
-                    Text("200%")
-                        .baselineOffset(-.small)
-                        .font(.body.bold())
-                    +
-                    Text(" 활용해보세요!")
-                        .baselineOffset(-.small)
-                        .font(.body)
-                }
+                // 온보딩
+                OnboardingDialog(isDialogVisible: $coreState.isOnboardingDialogOpened)
             }}
             .task {
                 // 스플래쉬가 끝난 시점에서,
