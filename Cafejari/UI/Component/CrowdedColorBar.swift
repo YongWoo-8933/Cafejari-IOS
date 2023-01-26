@@ -16,16 +16,16 @@ struct CrowdedColorBar: View {
                         HStack {
                             
                         }
-                        .frame(width: geo.size.width / 5, height: 10)
-                        .cornerRadius(5)
+                        .frame(width: geo.size.width / 5, height: 8)
+                        .cornerRadius(4)
                         .background(crowded.color)
+                        .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: .white)
                     }
                 }
-                .frame(width: geo.size.width, height: 10)
+                .frame(width: geo.size.width, height: 8)
                 .background(Color.white)
                 .cornerRadius(.small)
-                .roundBorder(cornerRadius: 5, lineWidth: 2, borderColor: .white)
-                .shadow(radius: 1)
+                .roundBorder(cornerRadius: 4, lineWidth: 2, borderColor: .white)
             }
                 
             HStack {

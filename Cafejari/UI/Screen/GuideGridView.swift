@@ -16,21 +16,24 @@ struct GuideGridView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                NavigationTitle(title: "유저 가이드북", leadingIconSystemName: "chevron.backward") {
-                    coreState.popUp()
-                }
+                NavigationTitle(
+                    title: "유저 가이드북",
+                    leadingIconSystemName: "chevron.backward",
+                    onLeadingIconClick: {
+                        coreState.popUp()
+                    }
+                )
                 LazyVGrid(columns: GridItem(.flexible()).setGridColumn(columns: 2), spacing: .large) {
-                    ForEach(Guide.guides, id: \.images[0]) { guide in
-                        NavigationLink {
-                            GuideView(guideImages: guide.images)
-                        } label: {
-                            Image(guide.titleImage)
-                                .resizable()
-                                .scaledToFit()
-                                .cornerRadius(.medium)
-                                .shadow(radius: 2)
-                                .padding(.medium)
-                        }
+                    ForEach(Guide.guides, id: \.titleImage) { guide in
+                        Image(guide.titleImage)
+                            .resizable()
+                            .scaledToFit()
+                            .cornerRadius(.medium)
+                            .shadow(radius: 2)
+                            .padding(.medium)
+                            .onTapGesture {
+                                coreState.navigateToWebView(guide.title, guide.url)
+                            }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -52,14 +55,15 @@ struct GuideGridView: View {
 }
 
 struct Guide {
+    let title: String
     let titleImage: String
-    let images: [String]
+    let url: String
 }
 extension Guide {
     static let guides: [Guide] = [
-        Guide(titleImage: "master_guide_0", images: [ "master_guide_1", "master_guide_2", "master_guide_3", "master_guide_4", "master_guide_5", "master_guide_6", "master_guide_7"]),
-        Guide(titleImage: "cafe_crowded_guide_0", images: ["cafe_crowded_guide_1", "cafe_crowded_guide_2", "cafe_crowded_guide_3", "cafe_crowded_guide_4", "cafe_crowded_guide_5"]),
-        Guide(titleImage: "point_use_guide_0", images: ["point_use_guide_1", "point_use_guide_2", "point_use_guide_3", "point_use_guide_4", "point_use_guide_5", "point_use_guide_5", "point_use_guide_6"]),
-        Guide(titleImage: "cafe_register_request_guide_0", images: ["cafe_register_request_guide_1", "cafe_register_request_guide_2", "cafe_register_request_guide_3", "cafe_register_request_guide_4"])
+        Guide(title: "마스터 활동 가이드", titleImage: "master_guide_0", url: HttpRoute().masterGuide()),
+        Guide(title: "혼잡도 정보 활용 가이드", titleImage: "cafe_crowded_guide_0", url: HttpRoute().crowdedGuide()),
+        Guide(title: "포인트 사용 가이드", titleImage: "point_use_guide_0", url: HttpRoute().pointGuide()),
+        Guide(title: "카페 등록 가이드", titleImage: "cafe_register_request_guide_0", url: HttpRoute().cafeRegisterGuide())
     ]
 }

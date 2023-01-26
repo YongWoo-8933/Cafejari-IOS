@@ -48,23 +48,18 @@ struct ShoppingBagView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                NavigationTitle(title: "구매 이력", leadingIconSystemName: "chevron.backward") {
-                    coreState.popUp()
-                }
+                NavigationTitle(
+                    title: "구매 이력",
+                    leadingIconSystemName: "chevron.backward",
+                    onLeadingIconClick: {
+                        coreState.popUp()
+                    }
+                )
                 Divider()
                 
                 if shopViewModel.purchases.isEmpty {
-                    VStack {
-                        Image("empty")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 180)
-                            .offset(x: 0, y: -.moreLarge)
-                        Text("상품을 구매한 이력이 없어요")
-                            .foregroundColor(.primary)
-                            .font(.title.bold())
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    EmptyImageView("구매 이력이 없어요")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {

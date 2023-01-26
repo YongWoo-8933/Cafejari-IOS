@@ -20,7 +20,7 @@ struct LeaderBoardView: View {
     var body: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
-                NavigationTitle(title: "카페자리 랭킹", leadingIconSystemName: "", onLeadingIconClick: {})
+                NavigationTitle(title: "카페자리 랭킹")
                 
                 ScrollView {
                     LazyVStack(spacing: 0) {

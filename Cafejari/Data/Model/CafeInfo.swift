@@ -59,6 +59,30 @@ extension CafeInfo {
         }
         return masterAvailableFloors
     }
+    
+    func isAssociated() -> Bool {
+        return self.moreInfo.id != 0
+    }
+    
+    func getRestroomInfoExistCafes() -> Cafes {
+        var res: Cafes = []
+        self.cafes.forEach { cafe in
+            if cafe.hasRestroomInfo() {
+                res.append(cafe)
+            }
+        }
+        return res
+    }
+    
+    func getWallSocketInfoExistCafes() -> Cafes {
+        var res: Cafes = []
+        self.cafes.forEach { cafe in
+            if cafe.hasWallSocketInfo() {
+                res.append(cafe)
+            }
+        }
+        return res
+    }
 }
 typealias CafeInfos = [CafeInfo]
 
@@ -68,11 +92,19 @@ struct Cafe: Decodable {
     let crowded: Int
     let master: CafeMaster
     let floor: Int
+    let restroom: String
+    let wallSocket: String
     let recentUpdatedLogs: RecentUpdatedLogs
 }
 extension Cafe {
-    static var empty = Cafe(id: 0, crowded: -1, master: CafeMaster.empty, floor: 1, recentUpdatedLogs: [])
+    static var empty = Cafe(id: 0, crowded: -1, master: CafeMaster.empty, floor: 1, restroom: "", wallSocket: "" ,recentUpdatedLogs: [])
     
+    func hasRestroomInfo() -> Bool {
+        return !self.restroom.isEmpty
+    }
+    func hasWallSocketInfo() -> Bool {
+        return !self.wallSocket.isEmpty
+    }
     func isMasterAvailable() -> Bool {
         return self.master.userId == 0
     }

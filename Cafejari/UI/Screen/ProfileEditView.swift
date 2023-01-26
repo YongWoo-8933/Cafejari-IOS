@@ -34,8 +34,24 @@ struct ProfileEditView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                NavigationTitle(title: "프로필 편집", leadingIconSystemName: "chevron.backward") {
-                    coreState.popUp()
+                ZStack(alignment: .trailing) {
+                    NavigationTitle(
+                        title: "프로필 편집",
+                        leadingIconSystemName: "chevron.backward",
+                        onLeadingIconClick: {
+                            coreState.popUp()
+                        }
+                    )
+                    if isAuthenticated {
+                        Text("탈퇴")
+                            .foregroundColor(.crowdedRed)
+                            .font(.caption)
+                            .underline()
+                            .padding(.trailing, .moreLarge)
+                            .onTapGesture {
+                                isAccountDeleteDialogOpened = true
+                            }
+                    }
                 }
                 VStack(spacing: 0) {
                     VerticalSpacer(.moreLarge)
@@ -132,11 +148,11 @@ struct ProfileEditView: View {
                                     .foregroundColor(nickname.hasSpecialChar() || nickname.isEmpty ? .textSecondary : .lightGray)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            VerticalSpacer(40)
                         }
                         
-                        FilledCtaButton(text: "변경사항 저장", backgroundColor: .secondary) {
+                        Spacer()
+                        
+                        FilledCtaButton(text: "변경사항 저장", backgroundColor: .primary) {
                             if coreState.user.nickname == nickname && uiImage == nil {
                                 coreState.showSnackBar(message: "변경 사항이 없습니다", type: SnackBarType.info)
                             } else {
@@ -146,16 +162,6 @@ struct ProfileEditView: View {
                                 }
                             }
                         }
-
-                        VerticalSpacer(60)
-
-                        Text("회원탈퇴")
-                            .foregroundColor(.crowdedRed)
-                            .font(.caption)
-                            .underline()
-                            .onTapGesture {
-                                isAccountDeleteDialogOpened = true
-                            }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -218,7 +224,7 @@ struct ProfileEditView: View {
                     .font(.headline)
                     .baselineOffset(-.small)
                 +
-                Text("1:1문의를 통해 취소하실 수 있습니다\n\n")
+                Text("1:1문의내역 통해 취소 가능합니다\n\n")
                     .font(.headline)
                     .baselineOffset(-.small)
                 +
@@ -232,6 +238,8 @@ struct ProfileEditView: View {
             }
             
             FullScreenLoadingView(loading: $userViewModel.isProfileEditLoading, text: "변경사항 저장중..")
+            
+            VerticalSpacer(.moreLarge)
         }
         .sheet(isPresented: $isImagePickerOpened) {
             SheetHandle()

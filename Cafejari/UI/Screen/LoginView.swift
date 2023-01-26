@@ -20,8 +20,9 @@ struct LoginView: View {
         ZStack {
             Image("login_background")
                 .resizable()
-                .scaledToFit()
-                .frame(width: UIScreen.main.bounds.size.width)
+                .scaledToFill()
+                .frame(width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height)
+                .clipped()
             ZStack {
                 Text("아무곳이나 터치해보세요!")
                     .font(.title.bold())
@@ -46,7 +47,7 @@ struct LoginView: View {
                 VStack(spacing: .large) {
                     Text("카페 혼잡도 확인하고 싶다면?")
                         .font(.headline.bold())
-                        .foregroundColor(.onPrimary)
+                        .foregroundColor(.white)
                     Text("10초 만에 회원가입 하세요")
                         .font(.title.bold())
                         .foregroundColor(.white)

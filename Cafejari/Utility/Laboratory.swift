@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import UIKit
 import GooglePlaces
-import GoogleMaps
 
 struct Laboratory: View {
     

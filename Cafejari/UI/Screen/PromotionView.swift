@@ -11,8 +11,6 @@ import GoogleMobileAds
 
 struct PromotionView: View {
     
-    @Environment(\.openURL) private var openURL
-    
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var informationViewModel: InformationViewModel
     @EnvironmentObject private var adViewModel: AdViewModel
@@ -20,14 +18,18 @@ struct PromotionView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                NavigationTitle(title: "공지 및 이벤트", leadingIconSystemName: "chevron.backward") {
-                    coreState.popUp()
-                }
+                NavigationTitle(
+                    title: "공지 및 이벤트",
+                    leadingIconSystemName: "chevron.backward",
+                    onLeadingIconClick: {
+                        coreState.popUp()
+                    }
+                )
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(informationViewModel.unExpiredEvents, id: \.id) { event in
                             Button {
-                                openURL(URL(string: event.url)!)
+                                coreState.navigateToWebView("이벤트 상세", event.url)
                             } label: {
                                 ZStack {
                                     VStack(alignment: .leading, spacing: .medium) {
@@ -48,7 +50,6 @@ struct PromotionView: View {
                                         Text(event.name)
                                             .font(.headline.bold())
                                         Text(event.preview)
-                                            .font(.caption)
                                         Text("\(informationViewModel.time.parseYearFrom(timeString: event.start)).\(informationViewModel.time.parseMonthFrom(timeString: event.start)).\(informationViewModel.time.parseDayFrom(timeString: event.start)) ~ \(informationViewModel.time.parseYearFrom(timeString: event.finish)).\(informationViewModel.time.parseMonthFrom(timeString: event.finish)).\(informationViewModel.time.parseDayFrom(timeString: event.finish))")
                                             .font(.caption)
                                             .foregroundColor(.heavyGray)
@@ -63,7 +64,7 @@ struct PromotionView: View {
                         }
                         ForEach(informationViewModel.expiredEvents, id: \.id) { event in
                             Button {
-                                openURL(URL(string: event.url)!)
+                                coreState.navigateToWebView("이벤트 상세", event.url)
                             } label: {
                                 ZStack {
                                     VStack(alignment: .leading, spacing: .medium) {
@@ -84,7 +85,6 @@ struct PromotionView: View {
                                         Text(event.name)
                                             .font(.headline.bold())
                                         Text(event.preview)
-                                            .font(.caption)
                                         Text("\(informationViewModel.time.parseYearFrom(timeString: event.start)).\(informationViewModel.time.parseMonthFrom(timeString: event.start)).\(informationViewModel.time.parseDayFrom(timeString: event.start)) ~ \(informationViewModel.time.parseYearFrom(timeString: event.finish)).\(informationViewModel.time.parseMonthFrom(timeString: event.finish)).\(informationViewModel.time.parseDayFrom(timeString: event.finish))")
                                             .font(.caption)
                                             .foregroundColor(.heavyGray)

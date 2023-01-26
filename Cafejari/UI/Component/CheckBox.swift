@@ -16,11 +16,11 @@ struct CheckBox: View {
             if isChecked {
                 Image(systemName: "checkmark")
                     .font(.caption2.bold())
-                    .foregroundColor(.secondary)
+                    .foregroundColor(isChecked ? .secondary : .primary)
             }
         }
         .frame(width: 16, height: 16)
-        .border(Color.secondary, width: 1)
+        .border(isChecked ? Color.secondary : Color.primary, width: 1)
         .onTapGesture {
             withAnimation(.easeInOut(duration: .short)) {
                 isChecked.toggle()

@@ -53,9 +53,9 @@ struct CalendarView: UIViewRepresentable {
         
         calendar.placeholderType = .none
         calendar.appearance.todayColor = UIColor.white
-        calendar.appearance.selectionColor = UIColor(Color.primary)
+        calendar.appearance.selectionColor = UIColor(Color.secondary)
         
-        calendar.appearance.headerMinimumDissolvedAlpha = 0.05
+        calendar.appearance.headerMinimumDissolvedAlpha = 0.1
         calendar.appearance.headerTitleFont = .systemFont(ofSize: 18, weight: .bold)
         calendar.appearance.headerTitleColor = UIColor(Color.primary)
         calendar.appearance.headerDateFormat = "yyyy년 MM월"

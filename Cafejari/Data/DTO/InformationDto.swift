@@ -7,21 +7,50 @@
 
 import Foundation
 
-struct PointPolicyResponse: Decodable {
-    let image: String
-    let order: Int
-    let sub_title: String
-    let sub_content: String
-}
-
-struct CautionResponse: Decodable {
-    let order: Int
-    let sub_title: String
-    let sub_content: String
-}
-
 struct FAQResponse: Decodable {
     let order: Int
     let question: String
     let answer: String
+}
+
+struct PopUpNotificationResponse: Decodable {
+    let order: Int
+    let url: String
+    let image: String
+    let cafe_info: Int?
+}
+
+struct OnSaleCafeResponse: Decodable {
+    let order: Int
+    let content: String
+    let image: String
+    let cafe_info: OnSaleCafeCafeInfoResponse
+}
+
+struct OnSaleCafeCafeInfoResponse: Decodable {
+    let id: Int
+    let name: String
+    let city: String
+    let gu: String
+    let address: String
+    let total_floor: Int
+    let floor: Int
+    let latitude: Double
+    let longitude: Double
+    let google_place_id: String
+}
+
+struct InquiryCafeResponse: Decodable {
+    let id: Int
+    let cafe_name: String
+    let cafe_address: String
+    let result: String?
+    let time: String
+}
+
+struct InquiryEtcResponse: Decodable {
+    let id: Int
+    let content: String
+    let answer: String?
+    let time: String
 }

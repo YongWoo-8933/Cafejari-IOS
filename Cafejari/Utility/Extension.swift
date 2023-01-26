@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import GoogleMaps
 import GooglePlaces
 
 extension Color {
@@ -21,13 +20,13 @@ extension Color {
     }
     
     static let primary = Color(hexString: "50342B")
-    static let onPrimary = Color(hexString: "E4947A")
+    static let onPrimary = Color(hexString: "A06C6C")
     static let secondary = Color(hexString: "C2948A")
     static let onSecondary = Color(hexString: "A06C6C")
-    static let textPrimary = Color(hexString: "9B5242")
+    static let textPrimary = Color(hexString: "A38B83")
     static let textSecondary = Color(hexString: "BC796B")
     static let background = Color(hexString: "F6EBDA")
-    static let error = Color(hexString: "f33203")
+    static let error = Color(hexString: "FF6B6B")
     
     static let backgroundGray = Color(hexString: "F5F5F5")
     static let moreLightGray = Color(hexString: "ECECEC")
@@ -180,14 +179,6 @@ extension Int {
         } else {
             return self - 12
         }
-    }
-}
-
-extension Float {
-    enum zoom: Float {
-        case Large = 18.5
-        case Default = 16.5
-        case Small = 14.5
     }
 }
 

@@ -19,23 +19,13 @@ struct ShopView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                ZStack(alignment: .trailing) {
-                    HStack {
-                        Text("상점")
-                            .font(.title.bold())
-                            .foregroundColor(.primary)
+                NavigationTitle(
+                    title: "상점",
+                    trailingIconSystemName: "list.bullet.rectangle.portrait",
+                    onTrailingIconClick: {
+                        coreState.navigate(Screen.ShoppingBag.route)
                     }
-                    .frame(maxWidth: .infinity)
-        
-                    Image(systemName: "cart")
-                        .font(.subtitle.bold())
-                        .onTapGesture {
-                            coreState.navigate(Screen.ShoppingBag.route)
-                        }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.moreLarge)
-                .background(Color.background)
+                )
                 
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: .medium) {
@@ -76,17 +66,8 @@ struct ShopView: View {
                         .frame(height: 100)
                 } else {
                     if shopViewModel.selectedCategoryItems.isEmpty {
-                        VStack {
-                            Image("empty")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 180)
-                                .offset(x: 0, y: -.moreLarge)
-                            Text("아직 올라온 상품이 없어요")
-                                .foregroundColor(.primary)
-                                .font(.title.bold())
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        EmptyImageView("아직 올라온 상품이 없어요")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         ScrollView {
                             LazyVStack(spacing: 0) {

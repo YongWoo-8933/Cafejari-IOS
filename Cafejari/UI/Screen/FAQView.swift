@@ -13,72 +13,67 @@ struct FAQView: View {
     @EnvironmentObject private var informationViewModel: InformationViewModel
     @EnvironmentObject private var coreState: CoreState
     
+    @State private var selectedFaqOrder: Int = -1
+    
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                NavigationTitle(title: "FAQ", leadingIconSystemName: "chevron.backward") {
-                    coreState.popUp()
-                }
-                
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 56) {
-                        Text("자주 물어보시는 질문 및 서비스에 대한 여러가지 정보를 확인해보세요.")
-                            .font(.headline)
-                        
-                        VStack(alignment: .leading, spacing: 28) {
-                            ForEach(informationViewModel.faqs, id: \.content) { paragraph in
-                                VStack(alignment: .leading, spacing: .large) {
-                                    Text("Q. \(paragraph.title)")
-                                        .font(.body.bold())
-                                    Text("\(paragraph.content)")
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 28) {
-                            ForEach(informationViewModel.pointPolicies, id: \.content) { paragraph in
-                                VStack(alignment: .leading, spacing: .large) {
-                                    Text("◼︎ \(paragraph.title)")
-                                        .font(.body.bold())
-                                    if let image = paragraph.image {
-                                        CachedAsyncImage(url: URL(string: image)!) { image in
-                                            image
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(maxWidth: .infinity)
-                                        } placeholder: {
-                                            Color.white
-                                        }
-                                    }
-                                    Text("\(paragraph.content)")
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 28) {
-                            ForEach(informationViewModel.cautions, id: \.content) { paragraph in
-                                VStack(alignment: .leading, spacing: .large) {
-                                    Text("◼︎ \(paragraph.title)")
-                                        .font(.body.bold())
-                                    Text("\(paragraph.content)")
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
+                NavigationTitle(
+                    title: "FAQ",
+                    leadingIconSystemName: "chevron.backward",
+                    onLeadingIconClick: {
+                        coreState.popUp()
                     }
-                    .padding(.moreLarge)
+                )
+                
+                if informationViewModel.faqs.isEmpty {
+                    EmptyImageView("등록된 질문/답변이 없어요")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(informationViewModel.faqs, id: \.content) { paragraph in
+                                VStack(alignment: .leading, spacing: .medium) {
+                                    HStack(spacing: .small) {
+                                        Text("Q. ")
+                                            .font(.subtitle.bold())
+                                        Text("\(paragraph.title)")
+                                            .font(.headline.bold())
+                                        Spacer()
+                                        Image(systemName: selectedFaqOrder == paragraph.order ? "chevron.up" : "chevron.down")
+                                            .font(.caption2.bold())
+                                    }
+                                    if selectedFaqOrder == paragraph.order {
+                                        VerticalSpacer(.medium)
+                                        Text(paragraph.content)
+                                            .foregroundColor(.moreHeavyGray)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.moreLarge)
+                                .onTapGesture {
+                                    if selectedFaqOrder == paragraph.order {
+                                        selectedFaqOrder = -1
+                                    } else {
+                                        selectedFaqOrder = paragraph.order
+                                    }
+                                }
+                                Divider()
+                            }
+                        }
+                        .animation(.easeInOut, value: selectedFaqOrder)
+                    }
+                    .scrollIndicators(.never)
                 }
             }
             .frame(maxWidth: .infinity)
             
-            FullScreenLoadingView(loading: $informationViewModel.isInformationLoading, text: "로딩중..")
+            FullScreenLoadingView(loading: $informationViewModel.isFaqsLoading, text: "로딩중..")
         }
         .navigationBarBackButtonHidden()
         .task {
-            informationViewModel.isInformationLoading = true
-            await informationViewModel.getInfomations(coreState: coreState)
+            informationViewModel.isFaqsLoading = true
+            await informationViewModel.getFaqs(coreState: coreState)
         }
     }
 }

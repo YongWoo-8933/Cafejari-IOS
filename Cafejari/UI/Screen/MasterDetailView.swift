@@ -20,9 +20,13 @@ struct MasterDetailView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                NavigationTitle(title: "내 마스터 활동", leadingIconSystemName: "chevron.backward") {
-                    coreState.popUp()
-                }
+                NavigationTitle(
+                    title: "내 마스터 활동",
+                    leadingIconSystemName: "chevron.backward",
+                    onLeadingIconClick: {
+                        coreState.popUp()
+                    }
+                )
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         VerticalSpacer(.moreLarge)

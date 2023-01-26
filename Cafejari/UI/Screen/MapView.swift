@@ -7,9 +7,10 @@
 
 import SwiftUI
 import UIKit
-import GoogleMaps
+import NMapsMap
 import CachedAsyncImage
 import UserNotifications
+import GooglePlaces
 
 struct MapView: View {
     
@@ -21,11 +22,8 @@ struct MapView: View {
     @EnvironmentObject private var cafeViewModel: CafeViewModel
     @EnvironmentObject private var adViewModel: AdViewModel
     
-    @State private var isBottomSheetOpened = false
-    @State private var animateTo: GMSCameraPosition? = nil
     @State private var isMenuButtonOpened = false
-    @State private var isMapTypeTransitionProgress = false
-    @State private var interstitialAdCounter = 0
+    @State private var isAssociatedCafeDescriptionOpened = false
     
     init() {
         let appearance = UITabBarAppearance()
@@ -41,41 +39,31 @@ struct MapView: View {
         if !coreState.isSplashFinished || !coreState.isAppInitiated {
             SplachView()
         } else {
-            ZStack { GeometryReader { geo in
+            ZStack {
                 NavigationStack(path: $coreState.navigationPath) {
                     TabView(selection: $coreState.selectedBottomBarItem) {
                         // Map tap
                         ZStack {
                             if coreState.isLogedIn && coreState.isPermissionChecked {
-                                GoogleMapView(
-                                    markerRefreshTrigger: $cafeViewModel.markerRefeshTrigger,
-                                    animateTo: $animateTo,
-                                    mapType: $coreState.mapType,
-                                    startCameraPosition: GMSCameraPosition.camera(
-                                        withLatitude: coreState.userLastLocation?.coordinate.latitude ?? Locations.sinchon.cameraPosition.target.latitude,
-                                        longitude: coreState.userLastLocation?.coordinate.longitude ?? Locations.sinchon.cameraPosition.target.longitude,
-                                        zoom: Float.zoom.Default.rawValue
+                                NaverMapView(
+                                    markers: $cafeViewModel.markers,
+                                    animateToLongDistance: $cafeViewModel.animateToLongDistance,
+                                    animateToShortDistance: $cafeViewModel.animateToShortDistance,
+                                    startCameraPosition: NMFCameraPosition(
+                                        NMGLatLng(
+                                            lat: coreState.userLastLocation?.coordinate.latitude ?? Locations.sinchon.cameraPosition.target.lat,
+                                            lng: coreState.userLastLocation?.coordinate.longitude ?? Locations.sinchon.cameraPosition.target.lng
+                                        ),
+                                        zoom: Zoom.medium
                                     ),
-                                    onMarkerTap: { cafeInfo in
-                                        if cafeInfo.id != cafeViewModel.modalCafeInfo.id {
-                                            interstitialAdCounter += 1
-                                        }
-                                        cafeViewModel.clearModal()
-                                        cafeViewModel.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
-                                        cafeViewModel.modalCafeInfo = cafeInfo
-                                        isBottomSheetOpened = true
-                                    },
-                                    onMarkerInfoWindowTap: {
-                                        isBottomSheetOpened = true
-                                    },
-                                    onCameraChanged: {
-                                        isMenuButtonOpened = false
-                                    },
-                                    onMapTap: {
-                                        isMenuButtonOpened = false
-                                    }
+                                    closeMenu: { isMenuButtonOpened = false }
                                 )
                                 .ignoresSafeArea(edges: .top)
+                                .task {
+                                    if await informationViewModel.isTodayPopUpVisible() && !informationViewModel.isPopUpTriggered {
+                                        await informationViewModel.getPopUpNotifications(coreState: coreState)
+                                    }
+                                }
                             }
                             
                             VStack {
@@ -85,168 +73,188 @@ struct MapView: View {
                                             .font(.subtitle)
                                         Text("EVENT")
                                             .font(Font.system(size: 10, weight: .bold))
-                                            .foregroundColor(.crowdedBlue)
+                                            .foregroundColor(.white)
                                     }
                                     if let event = informationViewModel.randomEvent {
                                         Text(event.preview)
                                             .font(.body)
+                                            .foregroundColor(.white)
                                     } else {
                                         Text("다양한 이벤트를 확인하고, 포인트를 얻어가세요!")
                                             .font(.body)
+                                            .foregroundColor(.white)
                                     }
                                     Spacer()
                                 }
-                                .padding(.horizontal, .moreLarge)
+                                .padding(.horizontal, .large)
                                 .frame(height: 52, alignment: .leading)
-                                .background(.white)
+                                .background(Color.black.opacity(0.5))
                                 .cornerRadius(.medium)
-                                .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: .lightGray)
                                 .onTapGesture { coreState.navigate(Screen.Promotion.route) }
                                 
                                 HStack {
-                                    Text("👀 혼잡도 확인")
-                                        .font(.body.bold())
-                                        .foregroundColor(coreState.mapType == .crowded ? .white : .moreHeavyGray)
-                                        .padding(.horizontal, 10)
-                                        .frame(height: 32)
-                                        .background(coreState.mapType == .crowded ? Color.primary : Color.white)
-                                        .cornerRadius(.medium)
-                                        .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: coreState.mapType == .crowded ? .clear : .lightGray)
-                                        .onTapGesture {
-                                            isMapTypeTransitionProgress = true
-                                            coreState.mapType = .crowded
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                                cafeViewModel.markerRefeshTrigger = true
-                                                isMapTypeTransitionProgress = false
+                                    Button {
+                                        cafeViewModel.toggleAssociatedCafeMarkersOnlyVisible()
+                                        if cafeViewModel.showAssociatedCafeMarkersOnly {
+                                            if let associatedCafeDescriptionCloseWork = cafeViewModel.associatedCafeDescriptionCloseWork {
+                                                associatedCafeDescriptionCloseWork.cancel()
                                             }
+                                            isAssociatedCafeDescriptionOpened = true
+                                            cafeViewModel.associatedCafeDescriptionCloseWork = DispatchWorkItem(block: {
+                                                isAssociatedCafeDescriptionOpened = false
+                                                cafeViewModel.associatedCafeDescriptionCloseWork = nil
+                                            })
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: cafeViewModel.associatedCafeDescriptionCloseWork!)
                                         }
+                                    } label: {
+                                        HStack(spacing: .small) {
+                                            Image(cafeViewModel.showAssociatedCafeMarkersOnly ? "reversed_stamp_icon" : "stamp_icon")
+                                                .resizable()
+                                                .frame(width: 18, height: 18)
+                                            Text("제휴카페")
+                                                .foregroundColor(cafeViewModel.showAssociatedCafeMarkersOnly ? .white : .black)
+                                        }
+                                        .padding(.leading, .medium)
+                                        .padding(.trailing, .large)
+                                        .frame(height: 32)
+                                        .background(cafeViewModel.showAssociatedCafeMarkersOnly ? Color.primary : Color.white)
+                                        .cornerRadius(16)
+                                    }
+                                    .background(Color.white)
+                                    .cornerRadius(16)
+                                    .shadow(radius: cafeViewModel.showAssociatedCafeMarkersOnly ? 0 : 1)
                                     
-                                    Text("✏️ 혼잡도 공유")
-                                        .font(.body.bold())
-                                        .foregroundColor(coreState.mapType == .master ? .white : .moreHeavyGray)
-                                        .padding(.horizontal, 10)
-                                        .frame(height: 32)
-                                        .background(coreState.mapType == .master ? Color.primary : Color.white)
-                                        .cornerRadius(.medium)
-                                        .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: coreState.mapType == .master ? .clear : .lightGray)
-                                        .onTapGesture {
-                                            if coreState.isMasterActivated {
-                                                coreState.showSnackBar(message: "마스터 활동중에는 다른 카페의 혼잡도를 공유할 수 없습니다", type: .info)
-                                            } else {
-                                                isMapTypeTransitionProgress = true
-                                                coreState.mapType = MapType.master
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                                    cafeViewModel.markerRefeshTrigger = true
-                                                    isMapTypeTransitionProgress = false
-                                                }
-                                            }
+                                    Button {
+                                        informationViewModel.isOnSaleCafeDialogOpened = true
+                                    } label: {
+                                        HStack(spacing: .small) {
+                                            Image("sale_tag")
+                                                .resizable()
+                                                .frame(width: 18, height: 18)
+                                            Text("할인중인 카페")
+                                                .foregroundColor(.black)
                                         }
+                                        .padding(.leading, .medium)
+                                        .padding(.trailing, .large)
+                                        .frame(height: 32)
+                                        .background(Color.white)
+                                        .cornerRadius(16)
+                                    }
+                                    .background(Color.white)
+                                    .cornerRadius(16)
+                                    .shadow(radius: 1)
                                     
                                     Spacer()
                                     
                                     HStack {
                                         Text("지역")
                                         Image(systemName: "chevron.\(isMenuButtonOpened ? "up" : "down")")
+                                            .font(.caption)
                                     }
                                     .padding(.horizontal, .medium)
                                     .frame(height: 32)
                                     .background(Color.white)
                                     .cornerRadius(.medium)
-                                    .roundBorder(cornerRadius: .medium, lineWidth: 1.5, borderColor: isMenuButtonOpened ? .black : .lightGray)
+                                    .roundBorder(cornerRadius: .medium, lineWidth: 1, borderColor: isMenuButtonOpened ? .black : .lightGray)
                                     .animation(Animation.easeInOut, value: isMenuButtonOpened)
                                     .onTapGesture { isMenuButtonOpened.toggle() }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 
                                 ZStack(alignment: .topLeading) {
-                                    if adViewModel.isInterstitialAdNoticeVisible {
-                                        Text("\(adViewModel.interstitialAdNoticeSecond)초 후에 광고가 표시됩니다")
-                                            .font(.body.bold())
-                                            .foregroundColor(.white)
-                                            .padding(.medium)
-                                            .background(Color.black.opacity(0.5))
+                                    VStack {
+                                        if isAssociatedCafeDescriptionOpened {
+                                            VStack(alignment: .leading, spacing: .medium) {
+                                                Text("제휴 카페란?")
+                                                    .font(.body.bold())
+                                                    .foregroundColor(.primary)
+                                                Text("카페자리와 제휴를 맺고\n매장에서 직접 혼잡도 정보를\n제공해주는 카페를 말해요")
+                                                    .font(.caption)
+                                                    .foregroundColor(.heavyGray)
+                                            }
+                                            .padding(.large)
+                                            .background(Color.white)
                                             .cornerRadius(.medium)
-                                            .offset(x: 0, y: .moreLarge)
+                                            .shadow(radius: 1)
+                                        }
+                                        
+                                        if adViewModel.isInterstitialAdNoticeVisible {
+                                            Text("\(adViewModel.interstitialAdNoticeSecond)초 후에 광고가 표시됩니다")
+                                                .font(.body.bold())
+                                                .foregroundColor(.white)
+                                                .padding(.medium)
+                                                .background(Color.black.opacity(0.5))
+                                                .cornerRadius(.medium)
+                                                .offset(x: 0, y: .small)
+                                        }
                                     }
+                                    .animation(.easeInOut, value: isAssociatedCafeDescriptionOpened)
                                     
                                     HStack(alignment: .top) {
                                         Spacer()
                                         VStack(spacing: 0) {
                                             if isMenuButtonOpened {
                                                 ScrollView {
-                                                    LazyVGrid(columns: GridItem(.flexible(), spacing: 0).setGridColumn(columns: 2), spacing: 0) {
+                                                    LazyVStack(spacing: 0) {
                                                         ForEach(Locations.locationList, id: \.name) { location in
-                                                            MenuItem(
-                                                                text: location.name,
-                                                                iconSystemName: "flag.circle.fill"
-                                                            ) {
+                                                            HStack {
+                                                                Image("gray_coffee_bean_marker")
+                                                                Spacer()
+                                                                Text(location.name)
+                                                                Spacer()
+                                                            }
+                                                            .padding(.horizontal, .large)
+                                                            .frame(width: 140, height: 48, alignment: .leading)
+                                                            .background(Color.white)
+                                                            .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.moreLightGray)
+                                                            .onTapGesture {
                                                                 isMenuButtonOpened = false
-                                                                animateTo = location.cameraPosition
+                                                                cafeViewModel.animateToLongDistance = location.cameraPosition
                                                             }
                                                         }
                                                     }
                                                 }
                                                 .scrollIndicators(.never)
-                                                .frame(height: 48 * 3)
+                                                .frame(height: 48 * 4 + 24)
                                                 
                                                 Divider()
                                                 Divider()
                                                 
                                                 HStack {
                                                     Image(systemName: "plus.circle.fill")
+                                                        .foregroundColor(.lightGray)
+                                                        .font(.headline)
                                                     Spacer()
                                                     Text("카페 추가하기")
-                                                        .font(.body.bold())
                                                     Spacer()
                                                 }
                                                 .padding(.horizontal, .large)
-                                                .frame(width: 140 * 2, height: 48, alignment: .leading)
+                                                .frame(width: 140, height: 48, alignment: .leading)
                                                 .background(Color.white)
+                                                .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.moreLightGray)
                                                 .onTapGesture {
                                                     isMenuButtonOpened = false
                                                     coreState.navigate(Screen.CafeInquiry.route)
                                                 }
                                             }
                                         }
-                                        .frame(width: 140 * 2, height: isMenuButtonOpened ? 48 * 4 + 1 : 0, alignment: .top)
+                                        .frame(width: 140, height: isMenuButtonOpened ? 48 * 5 + 24 + 1 : 0, alignment: .top)
                                         .animation(Animation.easeInOut, value: isMenuButtonOpened)
                                         .background(Color.white)
                                         .cornerRadius(.large)
                                         .shadow(radius: 1)
                                     }
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: isMenuButtonOpened ? 48 * 4 + 1 : 0)
+                                    .frame(height: isMenuButtonOpened ? 48 * 5 + 24 + 1 : 0)
                                     .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                    
                                 }
-                                
                                 Spacer()
-                                    
-                                if coreState.isMasterActivated {
-                                    HStack(spacing: 0) {
-                                        Button {
-                                            coreState.navigate(Screen.MasterRoom.route)
-                                        } label: {
-                                            Text("혼잡도 공유 이어서 하기")
-                                                .font(.headline.bold())
-                                                .frame(width: 240, height: 50)
-                                                .foregroundColor(.white)
-                                                .background(Color.secondary)
-                                                .cornerRadius(25)
-                                        }
-                                        .background(Color.white)
-                                        .cornerRadius(25)
-                                        .padding(.trailing, 50)
-                                        
-                                        Spacer()
-                                    }
-                                }
                             }
                             .padding(.horizontal, .moreLarge)
                             .padding(.vertical, .large)
                             
                             ZStack {
-                                HStack {
+                                VStack(alignment: .trailing) {
                                     HStack {
                                         Image(systemName: "arrow.clockwise")
                                             .foregroundColor(.white)
@@ -261,9 +269,44 @@ struct MapView: View {
                                             await cafeViewModel.getCafeInfos(coreState: coreState)
                                         }
                                     }
+                                    HStack {
+                                        if coreState.isMasterActivated {
+                                            Button {
+                                                coreState.navigate(Screen.MasterRoom.route)
+                                            } label: {
+                                                Text("혼잡도 공유 이어서 하기")
+                                                    .font(.headline.bold())
+                                                    .frame(width: 240, height: 52)
+                                                    .foregroundColor(.white)
+                                                    .background(Color.primary)
+                                                    .cornerRadius(26)
+                                            }
+                                            .background(Color.white)
+                                            .cornerRadius(26)
+                                        }
+                                        Spacer()
+                                        HStack {
+                                            Image(systemName: "location.fill")
+                                                .foregroundColor(.heavyGray)
+                                                .font(.subtitle.weight(.semibold))
+                                        }
+                                        .frame(width: 56, height: 56)
+                                        .background(.white)
+                                        .cornerRadius(28)
+                                        .shadow(radius: 2)
+                                        .onTapGesture {
+                                            if let clPosition = coreState.userLastLocation {
+                                                cafeViewModel.animateToLongDistance = NMFCameraPosition(
+                                                    NMGLatLng(lat: clPosition.coordinate.latitude, lng: clPosition.coordinate.longitude),
+                                                    zoom: Zoom.medium
+                                                )
+                                            } else {
+                                                coreState.requestPermissions()
+                                            }
+                                        }
+                                    }
                                 }
-                                .padding(.vertical, 72)
-                                .padding(.horizontal, .large)
+                                .padding(.moreLarge)
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                             
@@ -271,35 +314,70 @@ struct MapView: View {
                                 loading: $cafeViewModel.cafeInfoLoading,
                                 text: "주변 카페 찾는중.."
                             )
-                            
-                            FullScreenLoadingView(
-                                loading: $isMapTypeTransitionProgress,
-                                text: coreState.mapType == .crowded ? "확인 모드로 전환중.." : "공유 모드로 전환중.."
-                            )
                         }
-                        .onChange(of: interstitialAdCounter, perform: { newValue in
-                            if newValue > 4 {
-                                adViewModel.showInterstital(willShowInterstitial: { isBottomSheetOpened = false })
-                                interstitialAdCounter = 0
+                        .onChange(of: cafeViewModel.interstitialAdCounter, perform: { newValue in
+                            if newValue > 5 {
+                                adViewModel.showInterstital(willShowInterstitial: { cafeViewModel.isBottomSheetOpened = false })
+                                cafeViewModel.interstitialAdCounter = 0
                             }
                         })
-                        .sheet(isPresented: $isBottomSheetOpened) {
+                        .sheet(isPresented: $cafeViewModel.isBottomSheetOpened) {
                             ZStack(alignment: .bottom) {
-                                ScrollView {
-                                    if !cafeViewModel.modalCafeInfo.cafes.isEmpty {
-                                        LazyVStack(alignment: .leading, spacing: 0) {
-                                            MapSheetCafeCrowdedView(isBottomSheetOpened: $isBottomSheetOpened)
-                                            SecondaryDivider()
-                                            MapSheetCafeInfoView(isBottomSheetOpened: $isBottomSheetOpened)
+                                VStack(spacing: 0) {
+                                    VerticalSpacer(.moreLarge)
+                                    
+                                    // 마커, 카페 이름
+                                    HStack(spacing: .large) {
+                                        if let place = cafeViewModel.modalCafePlace {
+                                            if place.isOpen() == .closed {
+                                                Image("gray_coffee_bean_marker")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 24)
+                                                
+                                                Text(cafeViewModel.modalCafeInfo.name + " (영업종료)")
+                                                    .font(.headline.bold())
+                                                    .foregroundColor(.lightGray)
+                                            } else {
+                                                Image("coffee_bean_marker")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 24)
+                                                
+                                                Text(cafeViewModel.modalCafeInfo.name)
+                                                    .font(.headline.bold())
+                                                    .foregroundColor(.primary)
+                                            }
+                                        } else {
+                                            Image("coffee_bean_marker")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 24)
+                                            
+                                            Text(cafeViewModel.modalCafeInfo.name)
+                                                .font(.headline.bold())
+                                                .foregroundColor(.primary)
                                         }
-                                        .padding(.vertical, .large)
-                                    } else {
-                                        ProgressView()
+                                        Spacer()
                                     }
+                                    .padding(.moreLarge)
+                                    
+                                    // 내용
+                                    ScrollView {
+                                        if !cafeViewModel.modalCafeInfo.cafes.isEmpty {
+                                            LazyVStack(alignment: .leading, spacing: 0) {
+                                                MapSheetCafeCrowdedView(isBottomSheetOpened: $cafeViewModel.isBottomSheetOpened)
+                                                SecondaryDivider()
+                                                MapSheetCafeInfoView(isBottomSheetOpened: $cafeViewModel.isBottomSheetOpened)
+                                            }
+                                            .padding(.vertical, .large)
+                                        } else {
+                                            ProgressView()
+                                        }
+                                    }
+                                    .scrollIndicators(.never)
+                                    .presentationDetents([.fraction(0.48), .large])
                                 }
-                                .padding(.top, .large)
-                                .scrollIndicators(.never)
-                                .presentationDetents([.fraction(coreState.mapType == MapType.crowded ? 0.48 : 0.25), .large])
                                 
                                 SnackBar(
                                     isSnackBarOpened: $cafeViewModel.isModalSnackBarOpened,
@@ -313,7 +391,7 @@ struct MapView: View {
                                     negativeButtonText: "그냥 추천할래요",
                                     onPositivebuttonClick: {
                                         adViewModel.showRewardedInterstitial(
-                                            willShowRewardedInterstitial: { isBottomSheetOpened = false },
+                                            willShowRewardedInterstitial: { cafeViewModel.isBottomSheetOpened = false },
                                             onAdWatched: {
                                                 Task {
                                                     await cafeViewModel.thumbsUp (
@@ -321,7 +399,7 @@ struct MapView: View {
                                                         recentLogId: cafeViewModel.thumbsUpRecentLog.id,
                                                         isAdWatched: true,
                                                         onSuccess: {
-                                                            isBottomSheetOpened = false
+                                                            cafeViewModel.isBottomSheetOpened = false
                                                             Task {
                                                                 await cafeViewModel.getCafeInfos(coreState: coreState)
                                                             }
@@ -342,7 +420,7 @@ struct MapView: View {
                                                 recentLogId: cafeViewModel.thumbsUpRecentLog.id,
                                                 isAdWatched: false,
                                                 onSuccess: {
-                                                    isBottomSheetOpened = false
+                                                    cafeViewModel.isBottomSheetOpened = false
                                                     Task {
                                                         await cafeViewModel.getCafeInfos(coreState: coreState)
                                                     }
@@ -368,7 +446,7 @@ struct MapView: View {
                                 }
                             }
                         }
-                        .onChange(of: isBottomSheetOpened, perform: { _ in
+                        .onChange(of: cafeViewModel.isBottomSheetOpened, perform: { _ in
                             cafeViewModel.isThumbsUpDialogOpened = false
                         })
                         .onChange(of: coreState.selectedBottomBarItem, perform: { tapName in
@@ -438,6 +516,8 @@ struct MapView: View {
                             PromotionView()
                         case Screen.CafeInquiry.route:
                             CafeInquiryView()
+                        case Screen.CafeInquiryResult.route:
+                            CafeInquiryResultView()
                         case Screen.ProfileEdit.route:
                             ProfileEditView()
                         case Screen.MasterDetail.route:
@@ -450,12 +530,16 @@ struct MapView: View {
                             FAQView()
                         case Screen.Inquiry.route:
                             InquiryView()
+                        case Screen.InquiryAnswer.route:
+                            InquiryAnswerView()
                         case Screen.ShoppingBag.route:
                             ShoppingBagView()
                         case Screen.PointResult.route:
                             PointResultView()
                         case Screen.PermissionRequest.route:
                             PermissionRequestView()
+                        case Screen.WebView.route:
+                            WebView()
                         default:
                             EmptyView()
                         }
@@ -516,9 +600,25 @@ struct MapView: View {
                         return Text("")
                     }
                 }
+                
+                // 세일중인 카페
+                OnSaleCafeDialog(moveToConnectedCafe: { cafeInfoId in
+                    cafeViewModel.cameraMoveToCafe(cafeInfoId: cafeInfoId)
+                })
+                
+                // 팝업
+                PopUpDialog(
+                    moveToConnectedCafe: { cafeInfoId in
+                        cafeViewModel.cameraMoveToCafe(cafeInfoId: cafeInfoId)
+                    },
+                    setTodayPopUpDisabled: {
+                        informationViewModel.informationRepository.savePopUpDisabledDate()
+                    }
+                )
+                
                 // 온보딩
                 OnboardingDialog(isDialogVisible: $coreState.isOnboardingDialogOpened)
-            }}
+            }
             .task {
                 // 스플래쉬가 끝난 시점에서,
                 if !coreState.isLogedIn {
@@ -531,6 +631,7 @@ struct MapView: View {
                     } else {
                         coreState.isPermissionChecked = true
                         coreState.clearStack()
+                        await informationViewModel.getOnSaleCafes(coreState: coreState)
                     }
                     await cafeViewModel.checkMasterActivated(coreState: coreState)
                 }

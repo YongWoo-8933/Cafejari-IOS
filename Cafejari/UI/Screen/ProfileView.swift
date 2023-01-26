@@ -42,6 +42,7 @@ struct ProfileView: View {
                         HStack(spacing: .moreLarge) {
                             ZStack(alignment: .topTrailing) {
                                 RoundProfileImage(image: coreState.user.image, size: 100)
+                                
                                 VStack {
                                     Image(systemName: "pencil")
                                         .foregroundColor(.primary)
@@ -68,7 +69,7 @@ struct ProfileView: View {
                                             .font(.caption.bold())
                                             .foregroundColor(.white)
                                     }
-                                    .padding(.horizontal, .large)
+                                    .padding(.horizontal, .medium)
                                     .frame(height: 24)
                                     .background(Color.primary)
                                     .cornerRadius(12)
@@ -85,35 +86,29 @@ struct ProfileView: View {
                             Image(systemName: "p.circle.fill")
                                 .font(.title.bold())
                                 .foregroundColor(.primary)
-                            Text("모은 포인트")
-                                .font(.body.weight(.medium))
-                                .foregroundColor(.primary)
-                            Text("\(coreState.user.point)P")
+                            Text("모은 포인트 \(coreState.user.point)P")
                                 .font(.body.bold())
                                 .foregroundColor(.primary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, .large)
-                        .frame(height: 40)
+                        .frame(height: 48)
                         .background(Color.background)
                         .cornerRadius(.medium)
                         
                         VerticalSpacer(.medium)
                         
                         HStack(spacing: .medium) {
-                            Image(systemName: "mustache.fill")
+                            Image(systemName: "calendar")
                                 .font(.headline.bold())
                                 .foregroundColor(.primary)
                             Text("내 마스터 활동 보러가기")
                                 .font(.body.bold())
                                 .foregroundColor(.primary)
-                            Image(systemName: "chevron.forward")
-                                .foregroundColor(.primary)
-                                .font(.body)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, .large)
-                        .frame(height: 40)
+                        .frame(height: 48)
                         .background(Color.background)
                         .cornerRadius(.medium)
                         .onTapGesture {
@@ -135,7 +130,7 @@ struct ProfileView: View {
                                                     .frame(maxWidth: .infinity)
                                                     .cornerRadius(.medium)
                                                     .onTapGesture {
-                                                        openURL(URL(string: event.url)!)
+                                                        coreState.navigateToWebView("이벤트 상세", event.url)
                                                     }
                                             },
                                             placeholder: {
@@ -146,17 +141,6 @@ struct ProfileView: View {
                                     }
                                 }
                                 .tabViewStyle(.page)
-                                .indexViewStyle(.page(backgroundDisplayMode: .never))
-                                
-                                VStack {
-                                    Text("\(selectedEventTabIndex + 1) / \(informationViewModel.unExpiredEvents.count)")
-                                        .foregroundColor(.white)
-                                        .font(.caption.bold())
-                                        .padding(.medium)
-                                        .background(.black.opacity(0.5))
-                                        .cornerRadius(.moreLarge)
-                                }
-                                .padding(.large)
                             } else {
                                 Text("진행중인 이벤트가 없어요")
                                     .frame(maxWidth: .infinity)
@@ -198,21 +182,22 @@ struct ProfileView: View {
                                 Text("약관 및 처리방침")
                                     .font(.headline.bold())
                                 LinkRow(text: "개인정보 처리방침") {
-                                    openURL(URL(string: userViewModel.httpRoute.privacyPolicy())!)
+                                    coreState.navigateToWebView("개인정보 처리방침", userViewModel.httpRoute.privacyPolicy())
                                 }
                                 LinkRow(text: "위치정보기반 서비스 이용약관") {
-                                    openURL(URL(string: userViewModel.httpRoute.tos())!)
+                                    coreState.navigateToWebView("위치정보기반 서비스 이용약관", userViewModel.httpRoute.tos())
                                 }
                             }
-                            HStack {
-                                Text("1:1 문의")
-                                    .font(.headline.bold())
-                                Spacer()
-                                Image(systemName: "chevron.forward")
-                                    .font(.caption.bold())
-                            }
-                            .onTapGesture {
+                            Button {
                                 coreState.navigate(Screen.Inquiry.route)
+                            } label: {
+                                HStack {
+                                    Text("1:1 문의")
+                                        .font(.headline.bold())
+                                    Spacer()
+                                    Image(systemName: "chevron.forward")
+                                        .font(.caption.bold())
+                                }
                             }
                             Text("로그아웃")
                                 .foregroundColor(.moreHeavyGray)
@@ -276,14 +261,18 @@ struct LinkRow: View {
     let onTap: () -> Void
     
     var body: some View {
-        HStack {
-            Text(text)
-            Spacer()
-            Image(systemName: "chevron.forward")
-                .font(.caption.bold())
-        }
-        .onTapGesture {
+        Button {
             onTap()
+        } label: {
+            HStack {
+                Text(text)
+                Spacer()
+                Image(systemName: "chevron.forward")
+                    .font(.caption.bold())
+            }
+            .onTapGesture {
+                onTap()
+            }
         }
     }
 }

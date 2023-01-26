@@ -27,6 +27,12 @@ struct HttpRoute {
     func privacyPolicy() -> String{ return "\(infomationBaseUrl)/privacy_policy/"}
     func privacyPolicyAgreement() -> String{ return "\(infomationBaseUrl)/privacy_policy_agreement/"}
     
+    // guide
+    func masterGuide() -> String { return "https://blog.naver.com/cafejari22/222879424057" }
+    func crowdedGuide() -> String { return "https://blog.naver.com/cafejari22/222883642619" }
+    func pointGuide() -> String { return "https://blog.naver.com/cafejari22/222883663747" }
+    func cafeRegisterGuide() -> String { return "https://blog.naver.com/cafejari22/222883686897" }
+    
     // user
     func refresh() -> String { return "\(userBaseUrl)/token/refresh/" }
     func user() -> String { return "\(userBaseUrl)/user/" }
@@ -68,9 +74,11 @@ struct HttpRoute {
     // infomation
     func iosVersion() -> String { return "\(infomationBaseUrl)/ios_app_version/" }
     func event() -> String { return "\(infomationBaseUrl)/event/" }
-    func pointPolicy() -> String { return "\(infomationBaseUrl)/point_policy/" }
-    func caution() -> String { return "\(infomationBaseUrl)/caution/" }
     func faq() -> String { return "\(infomationBaseUrl)/faq/" }
+    func popUpNotification() -> String { return "\(infomationBaseUrl)/pop_up_notification/" }
+    func onSaleCafe() -> String { return "\(infomationBaseUrl)/on_sale_cafe/" }
     func inquiryEtc() -> String { return "\(infomationBaseUrl)/inquiry_etc/" }
     func inquiryCafe() -> String { return "\(infomationBaseUrl)/inquiry_cafe/" }
+    func deleteInquiryEtc(id: Int) -> String { return "\(infomationBaseUrl)/inquiry_etc/\(id)/" }
+    func deleteInquiryCafe(id: Int) -> String { return "\(infomationBaseUrl)/inquiry_cafe/\(id)/" }
 }

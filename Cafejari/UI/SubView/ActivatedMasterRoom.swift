@@ -19,34 +19,46 @@ struct ActivatedMasterRoom: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text("현재 \(coreState.user.nickname)님은 ")
-                    .font(.headline)
-                +
-                Text("\(coreState.masterRoomCafeLog.floor.toFloor())층의 마스터")
-                    .font(.headline.bold())
-                +
-                Text("입니다")
-                    .font(.headline)
+            VerticalSpacer(.moreLarge)
+            
+            HStack(alignment: .bottom, spacing: .moreLarge) {
+                Image("master_activated_person_image")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 76)
+                
+                VStack(alignment: .leading, spacing: .medium) {
+                    Text("\(coreState.user.nickname)님은 현재")
+                        .foregroundColor(.primary)
+                    Text("\(coreState.masterRoomCafeLog.floor.toFloor())층의 마스터")
+                        .font(.headline.bold())
+                        .foregroundColor(.primary)
+                    +
+                    Text("입니다")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                }
+                .frame(maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 60)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 84)
+            .padding(.horizontal, .moreLarge)
             .background(Color.moreLightGray)
             .cornerRadius(.medium)
             
-            VerticalSpacer(32)
+            VerticalSpacer(.moreLarge)
             
-            Text("혼잡도를 주기적으로 업데이트해주세요")
-                .font(.headline.weight(.medium))
+            Text("혼잡도 설정")
+                .font(.headline.bold())
             
             if !coreState.masterRoomCafeLog.cafeDetailLogs.isEmpty {
                 VerticalSpacer(.medium)
                 Text("최근 업데이트 ")
-                    .foregroundColor(.moreHeavyGray)
+                    .foregroundColor(.heavyGray)
                     .font(.caption)
                 +
                 Text("\(cafeViewModel.time.getPassingHourMinuteStringFrom(timeString: coreState.masterRoomCafeLog.cafeDetailLogs[0].update))전")
-                    .foregroundColor(.moreHeavyGray)
+                    .foregroundColor(.heavyGray)
                     .font(.caption.bold())
             }
             
@@ -85,7 +97,7 @@ struct ActivatedMasterRoom: View {
             }
             .padding(.horizontal, .large)
             .padding(.vertical, 28)
-            .roundBorder(cornerRadius: .moreLarge, lineWidth: 1.5, borderColor: .primary)
+            .roundBorder(cornerRadius: .moreLarge, lineWidth: 1.5, borderColor: .lightGray)
             .animation(.easeInOut(duration: .short), value: selectedCrowded)
                 
             VerticalSpacer(.moreLarge)
@@ -112,11 +124,11 @@ struct ActivatedMasterRoom: View {
         
         VerticalSpacer(40)
         
-        Text("이전 기록 보기")
-            .font(.headline.weight(.medium))
+        Text("혼잡도 변경 기록")
+            .font(.headline.bold())
             .padding(.horizontal, .moreLarge)
         
-        VerticalSpacer(.large)
+        VerticalSpacer(16)
         
         ScrollView(.horizontal) {
             LazyHStack(spacing: .medium) {

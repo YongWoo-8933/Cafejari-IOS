@@ -14,20 +14,18 @@ struct MenuItem: View {
     let onClick: () -> Void
     
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Image(systemName: iconSystemName)
-                Spacer()
-                Text(text)
-                Spacer()
-            }
-            .padding(.horizontal, .large)
-            .frame(width: 140, height: 48, alignment: .leading)
-            .background(Color.white)
-            .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.lightGray)
-            .onTapGesture {
-                onClick()
-            }
+        HStack {
+            Image(systemName: iconSystemName)
+            Spacer()
+            Text(text)
+            Spacer()
+        }
+        .padding(.horizontal, .large)
+        .frame(width: 140, height: 48, alignment: .leading)
+        .background(Color.white)
+        .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.moreLightGray)
+        .onTapGesture {
+            onClick()
         }
     }
 }

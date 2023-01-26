@@ -10,23 +10,48 @@ import SwiftUI
 struct NavigationTitle: View {
     
     let title: String
-    let leadingIconSystemName: String
+    let leadingIconSystemName: String?
     let onLeadingIconClick: () -> Void
+    let trailingIconSystemName: String?
+    let onTrailingIconClick: () -> Void
+    
+    init(title: String, leadingIconSystemName: String? = nil, onLeadingIconClick: @escaping () -> Void = {}, trailingIconSystemName: String? = nil, onTrailingIconClick: @escaping () -> Void = {}) {
+        self.title = title
+        self.leadingIconSystemName = leadingIconSystemName
+        self.onLeadingIconClick = onLeadingIconClick
+        self.trailingIconSystemName = trailingIconSystemName
+        self.onTrailingIconClick = onTrailingIconClick
+    }
     
     var body: some View {
-        ZStack(alignment: .leading) {
+        ZStack {
             HStack {
                 Text(title)
                     .font(.title.bold())
                     .foregroundColor(.primary)
             }
-            .frame(maxWidth: .infinity)
             
-            Image(systemName: leadingIconSystemName)
-                .font(.title)
-                .onTapGesture {
-                    onLeadingIconClick()
+            if let leadingIconSystemName = leadingIconSystemName {
+                HStack {
+                    Image(systemName: leadingIconSystemName)
+                        .font(.title)
+                        .onTapGesture {
+                            onLeadingIconClick()
+                        }
                 }
+                .frame(maxWidth: .infinity, alignment: Alignment.leading)
+            }
+            
+            if let trailingIconSystemName = trailingIconSystemName {
+                HStack {
+                    Image(systemName: trailingIconSystemName)
+                        .font(.title)
+                        .onTapGesture {
+                            onTrailingIconClick()
+                        }
+                }
+                .frame(maxWidth: .infinity, alignment: Alignment.trailing)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.moreLarge)

@@ -8,15 +8,9 @@
 import Foundation
 
 struct Paragraph {
+    let order: Int
     let title: String
     let content: String
-    var image: String?
-    
-    init(title: String, content: String, image: String? = nil) {
-        self.title = title
-        self.content = content
-        self.image = image
-    }
 }
 
 typealias Paragraphs = [Paragraph]

@@ -7,6 +7,7 @@
 
 import Foundation
 import GooglePlaces
+import NMapsMap
 import SwiftUI
 
 @MainActor
@@ -15,17 +16,24 @@ final class CafeViewModel: BaseViewModel {
     @Inject var cafeRepository: CafeRepository
     @Inject var informationRepository: InformationRepository
     
-    @Published var cafeInfos: CafeInfos = []
+    private var cafeInfos: CafeInfos = []
+    @Published var markers: [NMFMarker] = []
+    @Published var selectedMarker: NMFMarker? = nil
+    
     @Published var cafeInfoLoading: Bool = false
     @Published var cafeInfoRefreshDisabled: Bool = false
+    @Published var animateToLongDistance: NMFCameraPosition? = nil
+    @Published var animateToShortDistance: NMGLatLng? = nil
+    @Published var showAssociatedCafeMarkersOnly: Bool = false
     
+    @Published var isBottomSheetOpened = false
+    @Published var interstitialAdCounter = 0
     @Published var modalCafeInfo: CafeInfo = CafeInfo.empty
-    @Published var modalCafeIndex: Int = 0
-    @Published var modalCafePhoneNumber: String? = nil
-    
-    @Published var markerRefeshTrigger: Bool = false
+    @Published var modalCafe: Cafe = Cafe.empty
+    @Published var modalCafePlace: GMSPlace? = nil
     
     @Published var modalPreviewImages: [UIImage] = []
+    @Published var modalPreviewImagesLoading: Bool = true
     @Published var modalAttributions: String = ""
     @Published var modalMoreImages: [UIImage] = []
     @Published var modalMoreImagesLoading: Bool = false
@@ -42,6 +50,15 @@ final class CafeViewModel: BaseViewModel {
     
     private let googlePlaceClient = GMSPlacesClient.shared()
     private var snackBarWork: DispatchWorkItem? = nil
+    private var fetchImagesWork: DispatchWorkItem? = nil
+    var associatedCafeDescriptionCloseWork: DispatchWorkItem? = nil
+    
+    private let grayMarkerUIImage = UIImage(named: Crowded.crowdedNegative.image)
+    private let blueMarkerUIImage = UIImage(named: Crowded.crowdedZero.image)
+    private let greenMarkerUIImage = UIImage(named: Crowded.crowdedOne.image)
+    private let yellowMarkerUIImage = UIImage(named: Crowded.crowdedTwo.image)
+    private let orangeMarkerUIImage = UIImage(named: Crowded.crowdedThree.image)
+    private let redMarkerUIImage = UIImage(named: Crowded.crowdedFour.image)
     
     
     // core
@@ -52,7 +69,6 @@ final class CafeViewModel: BaseViewModel {
             withAnimation(.easeInOut(duration: 0.1)) {
                 coreState.isMasterActivated = !logs.isEmpty
                 if !logs.isEmpty {
-                    coreState.mapType = MapType.crowded
                     coreState.masterRoomCafeLog = logs[0].getCafeLog()
                 }
             }
@@ -75,13 +91,15 @@ final class CafeViewModel: BaseViewModel {
     
     // map
     func clearModal() {
-       modalCafeInfo = CafeInfo.empty
-       modalCafeIndex = 0
-       modalCafePhoneNumber = nil
-       modalPreviewImages = []
-       modalAttributions = ""
-       modalMoreImages = []
-       modalImageMetaData = []
+        fetchImagesWork?.cancel()
+        modalCafeInfo = CafeInfo.empty
+        modalCafe = Cafe.empty
+        modalCafePlace = nil
+        modalPreviewImages.removeAll()
+        modalPreviewImagesLoading = true
+        modalAttributions = ""
+        modalMoreImages.removeAll()
+        modalImageMetaData.removeAll()
     }
     
     func getCafeInfos(coreState: CoreState) async {
@@ -119,11 +137,12 @@ final class CafeViewModel: BaseViewModel {
                             grade: cafeInfoCafeResponse.master?.profile?.grade ?? 0
                         ),
                         floor: cafeInfoCafeResponse.floor,
+                        restroom: cafeInfoCafeResponse.restroom ?? "",
+                        wallSocket: cafeInfoCafeResponse.wall_socket ?? "",
                         recentUpdatedLogs: recentUpdatedLogs
                     )
                     cafes.append(cafe)
                 }
-                
                 newCafeInfos.append(
                     CafeInfo(
                         id: cafeInfoResponse.id,
@@ -146,8 +165,9 @@ final class CafeViewModel: BaseViewModel {
                 self.cafeInfoRefreshDisabled = false
             }
             self.cafeInfos = newCafeInfos
+            drawMarkers(cafeInfos: newCafeInfos)
+            self.showAssociatedCafeMarkersOnly = false
             self.cafeInfoLoading = false
-            self.markerRefeshTrigger = true
             
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
@@ -163,44 +183,155 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
-    func getCafeInfoFromPlace(place: GMSPlace) -> CafeInfo? {
-        let filteredCafeInfos = cafeInfos.filter { cafeInfo in
-            place.placeID == cafeInfo.googlePlaceId
+    func cameraMoveToCafe(cafeInfoId: Int) {
+        let connectedCafeInfo = self.cafeInfos.first { cafeInfo in
+            cafeInfo.id == cafeInfoId
         }
-        return filteredCafeInfos.isEmpty ? nil : filteredCafeInfos[0]
+        if let connectedCafeInfo = connectedCafeInfo {
+            self.clearModal()
+            self.getModalCafePlaceInfo(googlePlaceId: connectedCafeInfo.googlePlaceId)
+            self.modalCafeInfo = connectedCafeInfo
+            self.modalCafe = connectedCafeInfo.cafes.first ?? Cafe.empty
+            self.animateToLongDistance = NMFCameraPosition(
+                NMGLatLng(lat: connectedCafeInfo.latitude, lng: connectedCafeInfo.longitude),
+                zoom: Zoom.medium
+            )
+            self.isBottomSheetOpened = true
+        }
     }
     
-    func getModalCafePlaceInfo(googlePlaceId: String) {
+    func getCrowdedMarkerUIImage(crowded: Int) -> UIImage? {
+        switch crowded {
+        case Crowded.crowdedZero.value: return blueMarkerUIImage
+        case Crowded.crowdedOne.value: return greenMarkerUIImage
+        case Crowded.crowdedTwo.value: return yellowMarkerUIImage
+        case Crowded.crowdedThree.value: return orangeMarkerUIImage
+        case Crowded.crowdedFour.value: return redMarkerUIImage
+        default: return grayMarkerUIImage
+        }
+    }
+    
+    func drawMarkers(cafeInfos: CafeInfos) {
+        self.markers.forEach { marker in
+            marker.mapView = nil
+        }
+        self.markers.removeAll()
+        var newMarkerList: [NMFMarker] = []
         
+        cafeInfos.forEach { cafeInfo in
+            let newMarker = NMFMarker()
+            if let markerIcon = getCrowdedMarkerUIImage(crowded: cafeInfo.getMinCrowded()) {
+                newMarker.iconImage = NMFOverlayImage(image: markerIcon)
+            }
+            newMarker.tag = cafeInfo.isAssociated() ? MarkerTag.isAssociated : MarkerTag.isNotAssociated
+            newMarker.position = NMGLatLng(lat: cafeInfo.latitude, lng: cafeInfo.longitude)
+            newMarker.captionAligns = [.top]
+            newMarker.height = 36.0
+            newMarker.width = 31.0
+            newMarker.captionOffset = 4.0
+            newMarker.captionTextSize = 16.0
+            newMarker.subCaptionTextSize = 15.0
+            newMarker.subCaptionColor = cafeInfo.getMinCrowded().toCrowded().uiTextColor
+            newMarker.subCaptionHaloColor = cafeInfo.getMinCrowded().toCrowded().uiColor
+            newMarker.touchHandler = { (overlay: NMFOverlay) -> Bool in
+                self.clearModal()
+                self.animateToShortDistance = NMGLatLng(lat: cafeInfo.latitude, lng: cafeInfo.longitude)
+                if let selectedMarker = self.selectedMarker {
+                    selectedMarker.captionText = ""
+                    selectedMarker.subCaptionText = ""
+                    selectedMarker.height = 36.0
+                    selectedMarker.width = 31.0
+                    selectedMarker.zIndex = 1
+                }
+                self.selectedMarker = newMarker
+                newMarker.captionText = cafeInfo.name
+                newMarker.subCaptionText = cafeInfo.getMinCrowded().toCrowded().string
+                newMarker.height = 48.0
+                newMarker.width = 41.0
+                newMarker.zIndex = 3
+                if cafeInfo.id != self.modalCafeInfo.id {
+                    self.interstitialAdCounter += 1
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    self.modalCafeInfo = cafeInfo
+                    self.modalCafe = cafeInfo.cafes.first ?? Cafe.empty
+                    self.isBottomSheetOpened = true
+                    self.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
+                }
+                return true
+            }
+            newMarkerList.append(newMarker)
+        }
+        
+        self.markers = newMarkerList
+    }
+    
+    func toggleAssociatedCafeMarkersOnlyVisible() {
+        self.showAssociatedCafeMarkersOnly.toggle()
+        self.markers.forEach { marker in
+            marker.hidden = self.showAssociatedCafeMarkersOnly && marker.tag == MarkerTag.isNotAssociated
+        }
+    }
+    
+//    func getCafeInfoFromPlace(place: GMSPlace) -> CafeInfo? {
+//        let filteredCafeInfos = cafeInfos.filter { cafeInfo in
+//            place.placeID == cafeInfo.googlePlaceId
+//        }
+//        return filteredCafeInfos.isEmpty ? nil : filteredCafeInfos[0]
+//    }
+    
+    func getModalCafePlaceInfo(googlePlaceId: String) {
+        fetchImagesWork?.cancel()
         if googlePlaceId != String.None {
-            googlePlaceClient.fetchPlace(
+            self.googlePlaceClient.fetchPlace(
                 fromPlaceID: googlePlaceId,
-                placeFields: GMSPlaceField(rawValue: UInt(GMSPlaceField.photos.rawValue) | UInt(GMSPlaceField.phoneNumber.rawValue)),
+                placeFields: GMSPlaceField(
+                    rawValue: UInt(GMSPlaceField.photos.rawValue) |
+                    UInt(GMSPlaceField.openingHours.rawValue) |
+                    UInt(GMSPlaceField.utcOffsetMinutes.rawValue) |
+                    UInt(GMSPlaceField.businessStatus.rawValue)
+                ),
                 sessionToken: nil,
                 callback: { place, error in
                     if let error = error {
                         print("An error occurred: \(error.localizedDescription)")
+                        self.modalPreviewImagesLoading = false
                     }
                     if let place = place {
+                        self.modalImageMetaData.removeAll()
+                        self.modalPreviewImages.removeAll()
+                        self.modalCafePlace = place
                         self.modalImageMetaData = place.photos ?? []
-                        self.modalCafePhoneNumber = place.phoneNumber
-                        var photoNum = self.modalImageMetaData.count
-                        photoNum = photoNum > 2 ? 3 : photoNum
-                        self.modalImageMetaData[0 ..< photoNum].forEach { photoMetaData in
-                            self.googlePlaceClient.loadPlacePhoto(photoMetaData, callback: { photo, error in
-                                if let error = error {
-                                    print("Error loading photo metadata: \(error.localizedDescription)")
-                                } else {
-                                    self.modalPreviewImages.append(photo!)
-                                    if let attributionString = photoMetaData.attributions?.string {
-                                        self.modalAttributions += attributionString + "님, "
-                                    }
+                        
+                        if !self.modalImageMetaData.isEmpty {
+                            self.fetchImagesWork = DispatchWorkItem(block: {
+                                var photoNum = self.modalImageMetaData.count
+                                photoNum = photoNum > 2 ? 3 : photoNum
+                                self.modalImageMetaData[0 ..< photoNum].forEach { photoMetaData in
+                                    self.googlePlaceClient.loadPlacePhoto(photoMetaData, callback: { photo, error in
+                                        if let error = error {
+                                            print("Error loading photo metadata: \(error.localizedDescription)")
+                                        } else {
+                                            if self.modalCafeInfo.googlePlaceId == googlePlaceId {
+                                                self.modalPreviewImages.append(photo!)
+                                                if let attributionString = photoMetaData.attributions?.string {
+                                                    self.modalAttributions += attributionString + "님, "
+                                                }
+                                                self.modalPreviewImagesLoading = false
+                                            }
+                                        }
+                                    })
                                 }
                             })
+                            if let work = self.fetchImagesWork {
+                                DispatchQueue.main.asyncAfter(deadline: .now(), execute: work)
+                            }
                         }
                     }
                 }
             )
+        } else {
+            self.modalPreviewImagesLoading = false
         }
     }
     
@@ -227,15 +358,13 @@ final class CafeViewModel: BaseViewModel {
     }
     
     func setCafeLogInfo(coreState: CoreState) {
-        let cafeInfo = self.modalCafeInfo
-        let cafe = cafeInfo.cafes[self.modalCafeIndex]
         coreState.masterRoomCafeLog = CafeLog(
             id: 0,
-            cafeId: cafe.id,
-            name: cafeInfo.name,
-            latitude: cafeInfo.latitude,
-            longitude: cafeInfo.longitude,
-            floor: cafe.floor,
+            cafeId: self.modalCafe.id,
+            name: self.modalCafeInfo.name,
+            latitude: self.modalCafeInfo.latitude,
+            longitude: self.modalCafeInfo.longitude,
+            floor: self.modalCafe.floor,
             start: "",
             finish: "",
             expired: true,
@@ -293,11 +422,10 @@ final class CafeViewModel: BaseViewModel {
         isMasterRoomCtaProgress = true
         do {
             let cafeLog = try await cafeRepository.registerMaster(
-                accessToken: coreState.accessToken, cafeId: modalCafeInfo.cafes[modalCafeIndex].id, crowded: crowded
+                accessToken: coreState.accessToken, cafeId: modalCafe.id, crowded: crowded
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
             coreState.isMasterActivated = true
-            coreState.mapType = MapType.crowded
             await self.getCafeInfos(coreState: coreState)
             isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "마스터등록 성공! 주기적으로 혼잡도를 업데이트 해주세요")
@@ -321,7 +449,6 @@ final class CafeViewModel: BaseViewModel {
                 accessToken: coreState.accessToken, cafeLogId: coreState.masterRoomCafeLog.id, crowded: crowded
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
-            coreState.mapType = MapType.crowded
             await self.getCafeInfos(coreState: coreState)
             isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "카페 혼잡도를 '\(crowded.toCrowded().string)'(으)로 변경하였습니다")
@@ -359,13 +486,12 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
-    func expireMaster(coreState: CoreState, adWatched: Bool) async {
+    func expireMaster(coreState: CoreState, adWatched: Bool) async { 
         do {
             let cafeLog = try await cafeRepository.expireMaster(
                 accessToken: coreState.accessToken, cafeLogId: coreState.masterRoomCafeLog.id, adWatched: adWatched
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
-            coreState.mapType = MapType.crowded
             await self.getCafeInfos(coreState: coreState)
             
             coreState.isMasterActivated = false

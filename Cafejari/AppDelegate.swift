@@ -8,7 +8,6 @@
 import Foundation
 import KakaoSDKCommon
 import KakaoSDKAuth
-import GoogleMaps
 import GooglePlaces
 import GoogleSignIn
 import GoogleMobileAds
@@ -29,10 +28,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         // Kakao SDK 초기화
         KakaoSDK.initSDK(appKey: kakaoNativeAppKey as! String)
-
-        // GoogleMap SDK 초기화
-        GMSServices.provideAPIKey(googleMapApiKey as! String)
-        GMSServices.setMetalRendererEnabled(true)
 
         // GooglePlace SDK 초기화
         GMSPlacesClient.provideAPIKey(googleMapApiKey as! String)

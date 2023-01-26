@@ -25,9 +25,13 @@ struct MasterRoomView: View {
             AdRewardedInterstitialView()
             
             VStack(spacing: 0) {
-                NavigationTitle(title: coreState.masterRoomCafeLog.name, leadingIconSystemName: "xmark") {
-                    coreState.popUp()
-                }
+                NavigationTitle(
+                    title: coreState.masterRoomCafeLog.name,
+                    leadingIconSystemName: "xmark",
+                    onLeadingIconClick:  {
+                        coreState.popUp()
+                    }
+                )
                 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -86,11 +90,11 @@ struct MasterRoomView: View {
                     .font(.headline.weight(.medium))
                     .baselineOffset(.medium)
                 +
-                Text("포인트를 더 얻을 수 있어요\n")
+                Text("포인트를 1.5배로 드려요\n")
                     .font(.headline.bold())
                     .baselineOffset(.medium)
                 +
-                Text("*카페 기프티콘 구매 가능")
+                Text("*커피 기프티콘 구매 가능")
                     .font(.body.weight(.medium))
                     .foregroundColor(.moreHeavyGray)
             }
@@ -109,7 +113,7 @@ struct MasterRoomView: View {
                 onDismiss: { selectedDetailLog = nil }
             ) {
                 Text("해당 로그를 삭제하시겠어요?")
-                    .font(.headline.bold())
+                    .font(.headline)
             }
         }
         .navigationBarBackButtonHidden()

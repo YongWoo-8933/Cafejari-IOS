@@ -13,7 +13,7 @@ final class AdViewModel: ObservableObject {
     @Published var banner: GADBannerView = GADBannerView(adSize: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(UIScreen.main.bounds.width))
     
     @Published var interstitial: GADInterstitial = GADInterstitial(adUnitID: AdUnit.interstitial.id)
-    @Published var interstitialAdNoticeSecond: Int = 5
+    @Published var interstitialAdNoticeSecond: Int = 4
     @Published var isInterstitialAdNoticeVisible: Bool = false
     @Published var isInterstitialAdVisible: Bool = false
     
@@ -41,13 +41,13 @@ final class AdViewModel: ObservableObject {
                     self.interstitialAdNoticeSecond -= 1
                 }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
                 willShowInterstitial()
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.2) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                 timer.invalidate()
                 self.isInterstitialAdNoticeVisible = false
-                self.interstitialAdNoticeSecond = 4
+                self.interstitialAdNoticeSecond = 3
                 self.isInterstitialAdVisible = true
             }
         }

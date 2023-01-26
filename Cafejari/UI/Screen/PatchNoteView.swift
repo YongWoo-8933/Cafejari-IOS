@@ -15,9 +15,13 @@ struct PatchNoteView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            NavigationTitle(title: "업데이트 소식", leadingIconSystemName: "chevron.backward") {
-                coreState.popUp()
-            }
+            NavigationTitle(
+                title: "업데이트 소식",
+                leadingIconSystemName: "chevron.backward",
+                onLeadingIconClick: {
+                    coreState.popUp()
+                }
+            )
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Update.histories.reversed(), id: \.order) { update in
@@ -69,7 +73,7 @@ struct Update {
 
 extension Update {
     static let histories = [
-        Update(order: 0, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 0, date: "22.11.22", content: "아이폰 카페자리 앱 알파버전 출시"),
+        Update(order: 0, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 0, date: "22.11-22", content: "아이폰 카페자리 앱 알파버전 출시"),
         Update(order: 1, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 1, date: "22.11.22", content: "앱 추적권한요청 삭제"),
         Update(order: 2, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 2, date: "22.11.24", content: "가이드 이미지 변경, 앱권한 문구 수정, 테스트 배너광고 실제 광고로 전환"),
         Update(order: 3, releaseVersionCode: 0, majorVersionCode: 0, minorVersionCode: 3, date: "22.11.30", content: "광고 배치 완료, 업데이트 대화상자 추가, 내 랭킹 확인하기 기능 추가, 버그수정"),
@@ -80,5 +84,6 @@ extension Update {
         Update(order: 8, releaseVersionCode: 1, majorVersionCode: 1, minorVersionCode: 0, date: "22.12.26", content: "카페 홍보문구 추가"),
         Update(order: 9, releaseVersionCode: 1, majorVersionCode: 1, minorVersionCode: 1, date: "23.01.06", content: "카페 정보를 못불러오던 일시적 오류 수정, 카페 홍보란 무한로딩 오류 수정"),
         Update(order: 10, releaseVersionCode: 1, majorVersionCode: 1, minorVersionCode: 2, date: "23.01.08", content: "카페 정보 로딩속도 개선"),
+        Update(order: 11, releaseVersionCode: 1, majorVersionCode: 2, minorVersionCode: 2, date: "23.01.26", content: "UI개선(구글지도 > 네이버지도), 영업시간 정보 추가, 콘센트 정보 추가, 화장실 정보 추가, 제휴카페 보기 기능 추가, 팝업광고 추가, 이벤트 중인 카페 정리, 웹뷰 추가"),
     ]
 }

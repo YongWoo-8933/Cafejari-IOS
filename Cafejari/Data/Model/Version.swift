@@ -13,5 +13,5 @@ struct Version: Decodable {
     let minor: Int
 }
 extension Version {
-    static var current = Version(release: 1, major: 1, minor: 2)
+    static var current = Version(release: 1, major: 2, minor: 1)
 }

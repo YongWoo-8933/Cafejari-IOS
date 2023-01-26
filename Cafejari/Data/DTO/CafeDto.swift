@@ -27,6 +27,8 @@ struct CafeInfoCafeResponse: Decodable {
     let id: Int
     let floor: Int
     let master: UserResponse?
+    let restroom: String?
+    let wall_socket: String?
     let recent_updated_log: [RecentUpdatedLogResponse]
 }
 

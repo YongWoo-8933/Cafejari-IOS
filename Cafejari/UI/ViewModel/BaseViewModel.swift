@@ -59,7 +59,6 @@ class BaseViewModel: ObservableObject {
             coreState.user = User.empty
             coreState.accessToken = ""
             coreState.refreshToken = ""
-            coreState.mapType = MapType.crowded
             coreState.isMasterActivated = false
             coreState.masterRoomCafeLog = CafeLog.empty
             coreState.tapToMap()

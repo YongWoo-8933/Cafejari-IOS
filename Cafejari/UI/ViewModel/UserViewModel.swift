@@ -259,7 +259,7 @@ final class UserViewModel: BaseViewModel {
             try await informationRepository.postInquiryEtc(
                 accessToken: coreState.accessToken,
                 email: coreState.user.email,
-                content: "회원탈퇴한대.. userId: \(coreState.user.userId), nickname: \(coreState.user.nickname)"
+                content: "회원탈퇴. userEmail: \(coreState.user.email), nickname: \(coreState.user.nickname)"
             )
             
             let access = coreState.accessToken
@@ -274,7 +274,6 @@ final class UserViewModel: BaseViewModel {
             coreState.user = User.empty
             coreState.accessToken = ""
             coreState.refreshToken = ""
-            coreState.mapType = MapType.crowded
             coreState.isMasterActivated = false
             coreState.masterRoomCafeLog = CafeLog.empty
             self.myWeekRanking = nil

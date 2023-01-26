@@ -19,11 +19,14 @@ enum Screen {
     case Login
     case Auth
     case CafeInquiry
+    case CafeInquiryResult
     case PatchNote
     case FAQ
     case Inquiry
+    case InquiryAnswer
     case PointResult
     case PermissionRequest
+    case WebView
 
     var route: String {
         switch self {
@@ -49,16 +52,22 @@ enum Screen {
             return "RegisterView"
         case .CafeInquiry:
             return "CafeInquiryView"
+        case .CafeInquiryResult:
+            return "CafeInquiryResultView"
         case .PatchNote:
             return "PatchNoteView"
         case .FAQ:
             return "FAQView"
         case .Inquiry:
             return "InquiryView"
+        case .InquiryAnswer:
+            return "InquiryAnswerView"
         case .PointResult:
             return "PointResultView"
         case .PermissionRequest:
             return "PermissionRequestView"
+        case .WebView:
+            return "WebView"
         }
     }
 }

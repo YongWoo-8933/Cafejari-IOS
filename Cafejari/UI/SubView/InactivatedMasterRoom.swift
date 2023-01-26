@@ -16,13 +16,14 @@ struct InactivatedMasterRoom: View {
     
     @State private var isTouchTextVisible = false
     @State private var isCrowdedPartTouched = false
+    @State private var isLocationLoading = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Group {
                 // 층 선택
-                Text("마스터 할 층을 선택해주세요")
-                    .font(.headline.weight(.medium))
+                Text("혼잡도 공유할 층 선택")
+                    .font(.headline.bold())
                 
                 VerticalSpacer(.large)
                 
@@ -34,8 +35,8 @@ struct InactivatedMasterRoom: View {
             
             Group {
                 // 혼잡도 선택
-                Text("선택한 층의 혼잡도를 선택해주세요")
-                    .font(.headline.weight(.medium))
+                Text("선택한 층의 혼잡도 선택")
+                    .font(.headline.bold())
                 
                 VerticalSpacer(.large)
                 
@@ -86,7 +87,7 @@ struct InactivatedMasterRoom: View {
                 }
                 .padding(.horizontal, .large)
                 .padding(.vertical, 28)
-                .roundBorder(cornerRadius: .moreLarge, lineWidth: 1.5, borderColor: .primary)
+                .roundBorder(cornerRadius: .moreLarge, lineWidth: 1.5, borderColor: .lightGray)
                 .animation(.easeInOut(duration: .short), value: selectedCrowded)
                 .task {
                     withAnimation(.easeInOut(duration: 0.8).repeatForever()) {
@@ -103,40 +104,40 @@ struct InactivatedMasterRoom: View {
         VStack(alignment: .leading, spacing: 0) {
             Group {
                 // 현재 위치 확인
-                Text("현재 위치를 확인하고 마스터 등록을 완료해주세요")
+                Text("현재 위치 확인")
                     .font(.headline.bold())
                 
                 VerticalSpacer(.medium)
                 
-                Text("*현위치와 카페위치가 같아야 마스터 등록을 할 수 있어요.")
+                Text(coreState.isNearBy(latitude: coreState.masterRoomCafeLog.latitude, longitude: coreState.masterRoomCafeLog.longitude) ? "* 현재 위치와 카페위치가 동일해요!" : "* 현재 위치와 카페위치가 같아야 마스터 등록을 할 수 있어요")
                     .font(.caption)
-                    .foregroundColor(.heavyGray)
+                    .foregroundColor(.moreHeavyGray)
                 
                 VerticalSpacer(.large)
                 
-                MiniGoogleMapView()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 160)
-                    .cornerRadius(.medium)
-                
-                VerticalSpacer(.large)
-                
-                HStack(spacing: .large) {
-                    RoundButton(
-                        iconSystemName: "location",
-                        text: "위치 조정하기",
-                        foregroundColor: .white,
-                        backgroundColor: .secondary
-                    ) {
-                        coreState.startLocationTracking()
+                ZStack(alignment: .bottomTrailing) {
+                    MiniNaverMapView(cafeInfo: cafeViewModel.modalCafeInfo)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
+                    VStack {
+                        RoundButton(
+                            iconSystemName: "location.circle.fill",
+                            text: isLocationLoading ? "위치 재조정중.." : "위치 조정하기",
+                            foregroundColor: .moreHeavyGray,
+                            backgroundColor: .white
+                        ) {
+                            isLocationLoading = true
+                            coreState.startLocationTracking()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                isLocationLoading = false
+                            }
+                        }
+                        .shadow(radius: 1)
                     }
-                    Text(coreState.isNearBy(latitude: coreState.masterRoomCafeLog.latitude, longitude: coreState.masterRoomCafeLog.longitude) ? "현위치와 카페위치가 동일해요!" : "현위치가 카페와 너무 멀어요!")
-                        .font(.caption.bold())
-                        .foregroundColor(.secondary)
-                    Spacer()
+                    .padding(.medium)
                 }
                 
-                VerticalSpacer(30)
+                VerticalSpacer(40)
             }
             
             
@@ -146,7 +147,7 @@ struct InactivatedMasterRoom: View {
                         await cafeViewModel.registerMaster(coreState: coreState, crowded: selectedCrowded)
                     }
                 } else {
-                    coreState.showSnackBar(message: "현재 위치가 카페와 너무 멀어요. 위치 조정후 다시 시도해주세요!", type: SnackBarType.error)
+                    coreState.showSnackBar(message: "현재 위치가 카페와 너무 멀어요. 위치 조정후 다시 시도해주세요", type: SnackBarType.error)
                 }
             }
         }
