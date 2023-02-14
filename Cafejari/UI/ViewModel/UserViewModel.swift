@@ -17,7 +17,9 @@ final class UserViewModel: BaseViewModel {
     @Inject var informationRepository: InformationRepository
     
     @Published var dateCafeLogs: DateCafeLogs = []
+    @Published var eventPointHistorys: EventPointHistories = []
     @Published var selectedDate: Date = Date()
+    @Published var isEventHistoriesLoading: Bool = true
     @Published var isDateCafeLogsLoading: Bool = true
     @Published var isProfileEditLoading: Bool = false
     
@@ -131,6 +133,23 @@ final class UserViewModel: BaseViewModel {
         } catch {
             print(error)
             self.isDateCafeLogsLoading = false
+        }
+    }
+    
+    func getMyEventPointHistories(coreState: CoreState) async {
+        do {
+            self.eventPointHistorys = try await informationRepository.fetchEventPointHistories(accessToken: coreState.accessToken)
+            isEventHistoriesLoading = false
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState) { newAccessToken in
+                await getMyEventPointHistories(coreState: coreState)
+            }
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+            self.isEventHistoriesLoading = false
+        } catch {
+            print(error)
+            self.isEventHistoriesLoading = false
         }
     }
     

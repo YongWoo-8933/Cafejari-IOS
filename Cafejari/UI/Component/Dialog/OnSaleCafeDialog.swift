@@ -7,13 +7,13 @@
 
 import SwiftUI
 import CachedAsyncImage
+import NMapsMap
 
 struct OnSaleCafeDialog: View {
     
     @EnvironmentObject private var informationViewModel: InformationViewModel
+    @EnvironmentObject private var cafeViewModel: CafeViewModel
     @EnvironmentObject private var coreState: CoreState
-    
-    let moveToConnectedCafe: (Int) -> Void
     
     var body: some View {
         let width = UIScreen.main.bounds.size.width * 0.75
@@ -40,7 +40,21 @@ struct OnSaleCafeDialog: View {
                     ForEach(informationViewModel.onSaleCafes, id: \.order) { onSaleCafe in
                         OnSaleCafeItem(onSaleCafe: onSaleCafe) {
                             informationViewModel.isOnSaleCafeDialogOpened = false
-                            moveToConnectedCafe(onSaleCafe.cafeInfoId)
+                            Task {
+                                await cafeViewModel.getNearbyCafeInfos(
+                                    coreState: coreState,
+                                    cameraPosition: NMFCameraPosition(
+                                        NMGLatLng(
+                                            lat: onSaleCafe.cafeInfoLatitude,
+                                            lng: onSaleCafe.cafeInfoLongitude
+                                        ),
+                                        zoom: Zoom.small
+                                    ),
+                                    onSuccess: {
+                                        cafeViewModel.cameraMoveToCafe(cafeInfoId: onSaleCafe.cafeInfoId)
+                                    }
+                                )
+                            }
                         }
                         .frame(width: width)
                         Divider()
@@ -51,7 +65,21 @@ struct OnSaleCafeDialog: View {
                             ForEach(informationViewModel.onSaleCafes, id: \.order) { onSaleCafe in
                                 OnSaleCafeItem(onSaleCafe: onSaleCafe) {
                                     informationViewModel.isOnSaleCafeDialogOpened = false
-                                    moveToConnectedCafe(onSaleCafe.cafeInfoId)
+                                    Task {
+                                        await cafeViewModel.getNearbyCafeInfos(
+                                            coreState: coreState,
+                                            cameraPosition: NMFCameraPosition(
+                                                NMGLatLng(
+                                                    lat: onSaleCafe.cafeInfoLatitude,
+                                                    lng: onSaleCafe.cafeInfoLongitude
+                                                ),
+                                                zoom: Zoom.small
+                                            ),
+                                            onSuccess: {
+                                                cafeViewModel.cameraMoveToCafe(cafeInfoId: onSaleCafe.cafeInfoId)
+                                            }
+                                        )
+                                    }
                                 }
                                 .frame(width: width)
                                 Divider()
@@ -88,6 +116,8 @@ struct OnSaleCafeDialog: View {
 
 struct OnSaleCafeItem: View {
     
+    @EnvironmentObject private var coreState: CoreState
+    
     let onSaleCafe: OnSaleCafe
     let onClick: () -> Void
     
@@ -114,13 +144,37 @@ struct OnSaleCafeItem: View {
                 HStack {
                     Text(onSaleCafe.cafeInfoName)
                         .font(.body.bold())
-                    Text("이벤트")
-                        .font(.caption2)
+                    let distance = coreState.userLastLocation.getDistance(
+                        latitude: onSaleCafe.cafeInfoLatitude, longitude: onSaleCafe.cafeInfoLongitude
+                    )
+                    if distance >= 0 { // 거리 구함
+                        HStack(spacing: 2) {
+                            Image(systemName: "location.fill")
+                                .font(.caption2.bold())
+                                .foregroundColor(.white)
+                            if distance > 1000 { // km표기
+                                Text("\(distance/1000)km+")
+                                    .font(.caption2)
+                                    .foregroundColor(.white)
+                            } else { // m표기
+                                Text("\(distance)m")
+                                    .font(.caption2)
+                                    .foregroundColor(.white)
+                            }
+                        }
                         .padding(.horizontal, .small)
                         .padding(.vertical, 2)
                         .background(Color.secondary)
                         .cornerRadius(.small)
-                        .foregroundColor(.white)
+                    } else { // 거리 못구함
+                        Text("이벤트")
+                            .font(.caption2)
+                            .padding(.horizontal, .small)
+                            .padding(.vertical, 2)
+                            .background(Color.secondary)
+                            .cornerRadius(.small)
+                            .foregroundColor(.white)
+                    }
                 }
                 VerticalSpacer(.small)
                 Text("\(onSaleCafe.cafeInfoCity) \(onSaleCafe.cafeInfoGu) \(onSaleCafe.cafeInfoAddress)")

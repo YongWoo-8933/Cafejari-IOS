@@ -14,6 +14,8 @@ import GoogleMobileAds
 import FirebaseCore
 import FirebaseMessaging
 import FirebaseInAppMessaging
+import FirebaseAnalytics
+
 import AudioToolbox
 
 class AppDelegate: NSObject, UIApplicationDelegate {

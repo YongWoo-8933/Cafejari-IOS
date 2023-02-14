@@ -95,6 +95,20 @@ extension Double {
     // animation duration
     static let short = 0.1
     static let long = 0.4
+    
+    func toZoomLevel() -> Int {
+        if self >= 14.0 {
+            return 1
+        } else if self >= 12.0 {
+            return 2
+        } else if self >= 13.0 {
+            return 4
+        } else if self >= 12.0 {
+            return 8
+        } else {
+            return 16
+        }
+    }
 }
 
 extension GridItem {
@@ -251,5 +265,21 @@ extension View {
     }
     func roundBorder(cornerRadius: CGFloat, lineWidth: CGFloat, borderColor: Color) -> some View {
         modifier(RoundBorder(cornerRadius: cornerRadius, lineWidth: lineWidth, borderColor: borderColor))
+    }
+}
+
+extension CLLocation? {
+    func getDistance(latitude: Double, longitude: Double) -> Int {
+        if let location = self {
+            let earthRadius = 6371000.0
+            let rad = Double.pi / 180
+            var distance = sin(rad * latitude) * sin(rad * location.coordinate.latitude)
+            distance += cos(rad * latitude) * cos(rad * location.coordinate.latitude) * cos(rad * (longitude - location.coordinate.longitude))
+            let ret = earthRadius * acos(distance)
+            return Int(round(ret))  // 미터 단위
+            
+        } else {
+            return -1
+        }
     }
 }

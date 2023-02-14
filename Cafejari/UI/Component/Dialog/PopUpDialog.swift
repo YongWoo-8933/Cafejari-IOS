@@ -7,16 +7,15 @@
 
 import SwiftUI
 import CachedAsyncImage
+import NMapsMap
 
 struct PopUpDialog: View {
     
     @EnvironmentObject private var informationViewModel: InformationViewModel
+    @EnvironmentObject private var cafeViewModel: CafeViewModel
     @EnvironmentObject private var coreState: CoreState
     
     @State private var currentPageIndex = 0
-    
-    let moveToConnectedCafe: (Int) -> Void
-    let setTodayPopUpDisabled: () -> Void
     
     var body: some View {
         let width = UIScreen.main.bounds.size.width * 0.7
@@ -53,7 +52,21 @@ struct PopUpDialog: View {
                                     .tag(index)
                                     .onTapGesture {
                                         if popUpNotification.hasConnectedCafeInfo() {
-                                            moveToConnectedCafe(popUpNotification.cafeInfoId)
+                                            Task {
+                                                await cafeViewModel.getNearbyCafeInfos(
+                                                    coreState: coreState,
+                                                    cameraPosition: NMFCameraPosition(
+                                                        NMGLatLng(
+                                                            lat: popUpNotification.cafeInfoLatitude,
+                                                            lng: popUpNotification.cafeInfoLongitude
+                                                        ),
+                                                        zoom: Zoom.small
+                                                    ),
+                                                    onSuccess: {
+                                                        cafeViewModel.cameraMoveToCafe(cafeInfoId: popUpNotification.cafeInfoId)
+                                                    }
+                                                )
+                                            }
                                         } else {
                                             coreState.navigateToWebView("자세히 보기", popUpNotification.url)
                                         }
@@ -67,7 +80,7 @@ struct PopUpDialog: View {
                             
                             HStack(spacing: 0) {
                                 Button {
-                                    setTodayPopUpDisabled()
+                                    informationViewModel.informationRepository.savePopUpDisabledDate()
                                     informationViewModel.popUpNotifications.removeAll()
                                 } label: {
                                     Text("오늘하루보지않기")

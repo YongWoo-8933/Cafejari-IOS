@@ -16,6 +16,7 @@ protocol InformationRepository {
     func saveUpdateDisabledDate()
     func savePopUpDisabledDate()
     func fetchEvents() async throws -> Events
+    func fetchEventPointHistories(accessToken: String) async throws -> EventPointHistories
     func fetchFAQs() async throws -> [FAQResponse]
     func fetchPopUpNotifications() async throws -> [PopUpNotificationResponse]
     func fetchOnSaleCafes() async throws -> [OnSaleCafeResponse]
@@ -139,6 +140,34 @@ final class InformationRepositoryImpl: InformationRepository {
             } else {
                 throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
             }
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
+    }
+    
+    func fetchEventPointHistories(accessToken: String) async throws -> EventPointHistories {
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.get(urlString: httpRoute.event_point_history(), accessToken: accessToken)
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if httpUrlRes.statusCode == 401 {
+                _ = try JSONDecoder().decode(TokenExpiredErrorResponse.self, from: data)
+                throw CustomError.accessTokenExpired
+                
+            } else if (200..<300).contains(httpUrlRes.statusCode) {
+                return try JSONDecoder().decode(EventPointHistories.self, from: data)
+                
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+        } catch CustomError.accessTokenExpired {
+            throw CustomError.accessTokenExpired
         } catch CustomError.errorMessage(let msg) {
             throw CustomError.errorMessage(msg)
         } catch let error as NSError {

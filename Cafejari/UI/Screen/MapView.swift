@@ -24,6 +24,7 @@ struct MapView: View {
     
     @State private var isMenuButtonOpened = false
     @State private var isAssociatedCafeDescriptionOpened = false
+    @State private var isRefreshButtonVisible = false
     
     init() {
         let appearance = UITabBarAppearance()
@@ -56,7 +57,20 @@ struct MapView: View {
                                         ),
                                         zoom: Zoom.medium
                                     ),
-                                    closeMenu: { isMenuButtonOpened = false }
+                                    closeMenu: { isMenuButtonOpened = false },
+                                    onCameraPositionChanged: { cameraPosition in
+                                        cafeViewModel.lastCameraPosition = cameraPosition
+                                        
+                                        if let work = cafeViewModel.hideRefreshCafeInfoWork {
+                                            work.cancel()
+                                        }
+                                        isRefreshButtonVisible = true
+                                        cafeViewModel.hideRefreshCafeInfoWork = DispatchWorkItem(block: {
+                                            isRefreshButtonVisible = false
+                                            cafeViewModel.hideRefreshCafeInfoWork = nil
+                                        })
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: cafeViewModel.hideRefreshCafeInfoWork!)
+                                    }
                                 )
                                 .ignoresSafeArea(edges: .top)
                                 .task {
@@ -95,6 +109,10 @@ struct MapView: View {
                                 HStack {
                                     Button {
                                         cafeViewModel.toggleAssociatedCafeMarkersOnlyVisible()
+                                        isRefreshButtonVisible = false
+                                        if let work = cafeViewModel.hideRefreshCafeInfoWork {
+                                            work.cancel()
+                                        }
                                         if cafeViewModel.showAssociatedCafeMarkersOnly {
                                             if let associatedCafeDescriptionCloseWork = cafeViewModel.associatedCafeDescriptionCloseWork {
                                                 associatedCafeDescriptionCloseWork.cancel()
@@ -157,11 +175,48 @@ struct MapView: View {
                                     .cornerRadius(.medium)
                                     .roundBorder(cornerRadius: .medium, lineWidth: 1, borderColor: isMenuButtonOpened ? .black : .lightGray)
                                     .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                    .onTapGesture { isMenuButtonOpened.toggle() }
+                                    .onTapGesture {
+                                        isMenuButtonOpened.toggle()
+                                        isRefreshButtonVisible = false
+                                        if let work = cafeViewModel.hideRefreshCafeInfoWork {
+                                            work.cancel()
+                                        }
+                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 
                                 ZStack(alignment: .topLeading) {
+                                    VStack {
+                                        if isRefreshButtonVisible {
+                                            Button {
+                                                if !cafeViewModel.cafeInfoLoading {
+                                                    Task {
+                                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
+                                                    }
+                                                }
+                                            } label: {
+                                                HStack(spacing: .small) {
+                                                    Image(systemName: "arrow.clockwise")
+                                                        .foregroundColor(.primary)
+                                                        .font(.caption2.bold())
+                                                    Text(cafeViewModel.cafeInfoLoading ? "카페 정보 로드중.." : "현 지도에서 검색")
+                                                        .foregroundColor(.primary)
+                                                        .font(.caption.bold())
+                                                }
+                                                .padding(.horizontal, .large)
+                                                .frame(height: 32)
+                                                .background(Color.white)
+                                                .roundBorder(cornerRadius: 16, lineWidth: 2, borderColor: .primary)
+                                            }
+                                            .background(Color.white)
+                                            .cornerRadius(16)
+                                            .shadow(radius: 1)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .animation(.easeInOut, value: isRefreshButtonVisible)
+                                    .padding(.top, .moreLarge)
+                                    
                                     VStack {
                                         if isAssociatedCafeDescriptionOpened {
                                             VStack(alignment: .leading, spacing: .medium) {
@@ -210,12 +265,18 @@ struct MapView: View {
                                                             .onTapGesture {
                                                                 isMenuButtonOpened = false
                                                                 cafeViewModel.animateToLongDistance = location.cameraPosition
+                                                                Task {
+                                                                    await cafeViewModel.getNearbyCafeInfos(
+                                                                        coreState: coreState,
+                                                                        cameraPosition: location.cameraPosition
+                                                                    )
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
                                                 .scrollIndicators(.never)
-                                                .frame(height: 48 * 4 + 24)
+                                                .frame(height: 48 * 5 + 24)
                                                 
                                                 Divider()
                                                 Divider()
@@ -238,14 +299,14 @@ struct MapView: View {
                                                 }
                                             }
                                         }
-                                        .frame(width: 140, height: isMenuButtonOpened ? 48 * 5 + 24 + 1 : 0, alignment: .top)
+                                        .frame(width: 140, height: isMenuButtonOpened ? 48 * 6 + 24 + 1 : 0, alignment: .top)
                                         .animation(Animation.easeInOut, value: isMenuButtonOpened)
                                         .background(Color.white)
                                         .cornerRadius(.large)
                                         .shadow(radius: 1)
                                     }
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: isMenuButtonOpened ? 48 * 5 + 24 + 1 : 0)
+                                    .frame(height: isMenuButtonOpened ? 48 * 6 + 24 + 1 : 0)
                                     .animation(Animation.easeInOut, value: isMenuButtonOpened)
                                 }
                                 Spacer()
@@ -255,20 +316,6 @@ struct MapView: View {
                             
                             ZStack {
                                 VStack(alignment: .trailing) {
-                                    HStack {
-                                        Image(systemName: "arrow.clockwise")
-                                            .foregroundColor(.white)
-                                            .font(.subtitle.weight(.semibold))
-                                    }
-                                    .frame(width: 56, height: 56)
-                                    .background(Color.black.opacity(0.5))
-                                    .cornerRadius(28)
-                                    .onTapGesture {
-                                        cafeViewModel.cafeInfoLoading = true
-                                        Task {
-                                            await cafeViewModel.getCafeInfos(coreState: coreState)
-                                        }
-                                    }
                                     HStack {
                                         if coreState.isMasterActivated {
                                             Button {
@@ -300,6 +347,15 @@ struct MapView: View {
                                                     NMGLatLng(lat: clPosition.coordinate.latitude, lng: clPosition.coordinate.longitude),
                                                     zoom: Zoom.medium
                                                 )
+                                                Task {
+                                                    await cafeViewModel.getNearbyCafeInfos(
+                                                        coreState: coreState,
+                                                        cameraPosition: NMFCameraPosition(
+                                                            NMGLatLng(lat: clPosition.coordinate.latitude, lng: clPosition.coordinate.longitude),
+                                                            zoom: Zoom.small
+                                                        )
+                                                    )
+                                                }
                                             } else {
                                                 coreState.requestPermissions()
                                             }
@@ -309,11 +365,6 @@ struct MapView: View {
                                 .padding(.moreLarge)
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                            
-                            FullScreenLoadingView(
-                                loading: $cafeViewModel.cafeInfoLoading,
-                                text: "주변 카페 찾는중.."
-                            )
                         }
                         .onChange(of: cafeViewModel.interstitialAdCounter, perform: { newValue in
                             if newValue > 5 {
@@ -401,7 +452,7 @@ struct MapView: View {
                                                         onSuccess: {
                                                             cafeViewModel.isBottomSheetOpened = false
                                                             Task {
-                                                                await cafeViewModel.getCafeInfos(coreState: coreState)
+                                                                await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
                                                             }
                                                         }
                                                     )
@@ -422,7 +473,7 @@ struct MapView: View {
                                                 onSuccess: {
                                                     cafeViewModel.isBottomSheetOpened = false
                                                     Task {
-                                                        await cafeViewModel.getCafeInfos(coreState: coreState)
+                                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
                                                     }
                                                 }
                                             )
@@ -453,7 +504,7 @@ struct MapView: View {
                             if tapName == BottomTab.Map.name {
                                 if !cafeViewModel.cafeInfoRefreshDisabled {
                                     Task {
-                                        await cafeViewModel.getCafeInfos(coreState: coreState)
+                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
                                     }
                                 }
                             }
@@ -540,6 +591,8 @@ struct MapView: View {
                             PermissionRequestView()
                         case Screen.WebView.route:
                             WebView()
+                        case Screen.PointHistory.route:
+                            PointHistoryView()
                         default:
                             EmptyView()
                         }
@@ -602,19 +655,10 @@ struct MapView: View {
                 }
                 
                 // 세일중인 카페
-                OnSaleCafeDialog(moveToConnectedCafe: { cafeInfoId in
-                    cafeViewModel.cameraMoveToCafe(cafeInfoId: cafeInfoId)
-                })
+                OnSaleCafeDialog()
                 
                 // 팝업
-                PopUpDialog(
-                    moveToConnectedCafe: { cafeInfoId in
-                        cafeViewModel.cameraMoveToCafe(cafeInfoId: cafeInfoId)
-                    },
-                    setTodayPopUpDisabled: {
-                        informationViewModel.informationRepository.savePopUpDisabledDate()
-                    }
-                )
+                PopUpDialog()
                 
                 // 온보딩
                 OnboardingDialog(isDialogVisible: $coreState.isOnboardingDialogOpened)

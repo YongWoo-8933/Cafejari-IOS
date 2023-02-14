@@ -36,9 +36,9 @@ struct FAQView: View {
                                 VStack(alignment: .leading, spacing: .medium) {
                                     HStack(spacing: .small) {
                                         Text("Q. ")
-                                            .font(.subtitle.bold())
-                                        Text("\(paragraph.title)")
                                             .font(.headline.bold())
+                                        Text("\(paragraph.title)")
+                                            .font(.headline)
                                         Spacer()
                                         Image(systemName: selectedFaqOrder == paragraph.order ? "chevron.up" : "chevron.down")
                                             .font(.caption2.bold())

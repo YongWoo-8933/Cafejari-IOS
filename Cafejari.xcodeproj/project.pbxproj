@@ -59,6 +59,8 @@
 		1067B8D029264B2C008ADB4A /* NavigationTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8CF29264B2C008ADB4A /* NavigationTitle.swift */; };
 		1067B8D22927480D008ADB4A /* SecondaryDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8D12927480D008ADB4A /* SecondaryDivider.swift */; };
 		1067B8DA292B37CE008ADB4A /* PermissionRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */; };
+		10914A542999F4F100E38FC5 /* PointHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A532999F4F100E38FC5 /* PointHistoryView.swift */; };
+		10914A56299A06C000E38FC5 /* EventPointHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A55299A06C000E38FC5 /* EventPointHistory.swift */; };
 		10A4298728F7C8B000D5E6BC /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4298628F7C8B000D5E6BC /* Navigation.swift */; };
 		10A4299528FBC04D00D5E6BC /* FloorTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4299428FBC04D00D5E6BC /* FloorTap.swift */; };
 		10A4299728FC104100D5E6BC /* SplachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4299628FC104100D5E6BC /* SplachView.swift */; };
@@ -190,6 +192,8 @@
 		1067B8D12927480D008ADB4A /* SecondaryDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryDivider.swift; sourceTree = "<group>"; };
 		1067B8D8292A117F008ADB4A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequestView.swift; sourceTree = "<group>"; };
+		10914A532999F4F100E38FC5 /* PointHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointHistoryView.swift; sourceTree = "<group>"; };
+		10914A55299A06C000E38FC5 /* EventPointHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPointHistory.swift; sourceTree = "<group>"; };
 		10A4298628F7C8B000D5E6BC /* Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		10A4299428FBC04D00D5E6BC /* FloorTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorTap.swift; sourceTree = "<group>"; };
 		10A4299628FC104100D5E6BC /* SplachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplachView.swift; sourceTree = "<group>"; };
@@ -374,6 +378,7 @@
 				10346AB828F3E79200A41C6F /* ShopView.swift */,
 				10346ABA28F3E7A300A41C6F /* ShoppingBagView.swift */,
 				10346AB228F3E73700A41C6F /* ProfileView.swift */,
+				10914A532999F4F100E38FC5 /* PointHistoryView.swift */,
 				10346AB428F3E74D00A41C6F /* ProfileEditView.swift */,
 				10F4C88829153E3F0039881A /* MasterDetailView.swift */,
 				10F4C88C291623F30039881A /* FAQView.swift */,
@@ -468,6 +473,7 @@
 				10D565AA297E162B005188EA /* InquiryEtc.swift */,
 				10D565AC297E168C005188EA /* PopUpNotification.swift */,
 				10D565AE297E16F5005188EA /* OnSaleCafe.swift */,
+				10914A55299A06C000E38FC5 /* EventPointHistory.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -724,6 +730,7 @@
 				10D565B9297E8865005188EA /* DisabledDateId.swift in Sources */,
 				10346AA628F3C89400A41C6F /* Persistence.swift in Sources */,
 				106130BD290636C70023C22E /* RoundButton.swift in Sources */,
+				10914A542999F4F100E38FC5 /* PointHistoryView.swift in Sources */,
 				106130DA290B9B6D0023C22E /* CalendarView.swift in Sources */,
 				10A429D728FFBC9C00D5E6BC /* CoreState.swift in Sources */,
 				106130AD290240A10023C22E /* CafeDto.swift in Sources */,
@@ -760,6 +767,7 @@
 				10F4C8712910DE450039881A /* AppleLoginButton.swift in Sources */,
 				10F4C87529122EB40039881A /* SnackBar.swift in Sources */,
 				10D565A1297C07E1005188EA /* NaverMapView.swift in Sources */,
+				10914A56299A06C000E38FC5 /* EventPointHistory.swift in Sources */,
 				106130B3290248840023C22E /* CafeViewModel.swift in Sources */,
 				106130CD2907B1440023C22E /* CustomURLRequest.swift in Sources */,
 				106130AB290237120023C22E /* CafeInfo.swift in Sources */,
@@ -966,7 +974,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
@@ -988,7 +996,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1009,7 +1017,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
@@ -1031,7 +1039,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

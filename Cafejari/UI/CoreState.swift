@@ -10,6 +10,7 @@ import SwiftUI
 import CoreLocation
 import PhotosUI
 import GoogleMobileAds
+import NMapsMap
 
 class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     
@@ -117,7 +118,7 @@ class CoreState: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func isNearBy(latitude: Double, longitude: Double) -> Bool {
         if let userLocation = self.userLastLocation {
-            return userLocation.coordinate.latitude < latitude + 0.00029 && userLocation.coordinate.latitude > latitude - 0.00029 && userLocation.coordinate.longitude < longitude + 0.00034 && userLocation.coordinate.longitude > longitude - 0.00034
+            return userLocation.coordinate.latitude < latitude + 0.00029 && userLocation.coordinate.latitude > latitude - 0.00029 && userLocation.coordinate.longitude < longitude + 0.00036 && userLocation.coordinate.longitude > longitude - 0.00036
         } else {
             return false
         }

@@ -56,7 +56,7 @@ struct HttpRoute {
     func myMonthRanking() -> String { return "\(userBaseUrl)/month_leader/my_ranking/" }
     
     // cafe
-    func cafeInfo() -> String { return "\(cafeBaseUrl)/cafe_info/" }
+    func cafeInfo(lat: Double, lng: Double, zoomLevel: Int) -> String { return "\(cafeBaseUrl)/cafe_info/nearby_cafe_info/?latitude=\(lat)&longitude=\(lng)&zoom_level=\(zoomLevel)" }
     func masterRegistration() -> String { return "\(cafeBaseUrl)/cafe_master/registration/" }
     func crowded() -> String { return "\(cafeBaseUrl)/cafe_master/crowded/" }
     func cafeDetailLog(id: Int) -> String { return "\(cafeBaseUrl)/cafe_detail_log/\(id)/" }
@@ -74,8 +74,9 @@ struct HttpRoute {
     // infomation
     func iosVersion() -> String { return "\(infomationBaseUrl)/ios_app_version/" }
     func event() -> String { return "\(infomationBaseUrl)/event/" }
+    func event_point_history() -> String { return "\(infomationBaseUrl)/event_point_history/" }
     func faq() -> String { return "\(infomationBaseUrl)/faq/" }
-    func popUpNotification() -> String { return "\(infomationBaseUrl)/pop_up_notification/" }
+    func popUpNotification() -> String { return "\(infomationBaseUrl)/pop_up_notification_with_cafe_info/" }
     func onSaleCafe() -> String { return "\(infomationBaseUrl)/on_sale_cafe/" }
     func inquiryEtc() -> String { return "\(infomationBaseUrl)/inquiry_etc/" }
     func inquiryCafe() -> String { return "\(infomationBaseUrl)/inquiry_cafe/" }

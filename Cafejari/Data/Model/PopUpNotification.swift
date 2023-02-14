@@ -13,6 +13,8 @@ struct PopUpNotification: Decodable {
     let url: String
     let image: String
     let cafeInfoId: Int
+    let cafeInfoLatitude: Double
+    let cafeInfoLongitude: Double
 }
 extension PopUpNotification {
     func hasConnectedCafeInfo() -> Bool {

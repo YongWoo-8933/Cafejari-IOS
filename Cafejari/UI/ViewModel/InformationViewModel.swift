@@ -120,7 +120,9 @@ final class InformationViewModel: BaseViewModel {
                         order: res.order,
                         url: res.url,
                         image: res.image,
-                        cafeInfoId: res.cafe_info ?? 0
+                        cafeInfoId: res.cafe_info?.id ?? 0,
+                        cafeInfoLatitude: res.cafe_info?.latitude ?? 37.0,
+                        cafeInfoLongitude: res.cafe_info?.longitude ?? 127.0
                     )
                 )
             }

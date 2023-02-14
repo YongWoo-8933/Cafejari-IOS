@@ -129,8 +129,9 @@ struct LeaderBoardView: View {
                             HStack(spacing: 0) {
                                 Color.primary
                             }
-                            .frame(width: geo.size.width / 2, height: .small)
-                            .cornerRadius(2)
+                            .cornerRadius(1.5)
+                            .padding(.horizontal, .medium)
+                            .frame(width: geo.size.width / 2, height: 3)
                         }
                         .frame(width: geo.size.width, height: .small, alignment: isMonthLeaderOn ? .trailing : .leading)
                         

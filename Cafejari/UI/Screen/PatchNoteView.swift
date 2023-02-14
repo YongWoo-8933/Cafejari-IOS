@@ -27,11 +27,11 @@ struct PatchNoteView: View {
                     ForEach(Update.histories.reversed(), id: \.order) { update in
                         VStack(alignment: .leading, spacing: .medium) {
                             Text(update.date)
-                                .font(.headline)
+                                .font(.body)
                                 .foregroundColor(.gray)
                             HStack(spacing: 0) {
                                 Text("[ver \(update.releaseVersionCode).\(update.majorVersionCode).\(update.minorVersionCode)] 업데이트 내용을 알려드려요")
-                                    .font(.subtitle.bold())
+                                    .font(.headline.bold())
                                 Spacer()
                                 Image(systemName: selectedPatchVersionOrder == update.order ? "chevron.up" : "chevron.down")
                                     .font(.caption2.bold())
@@ -85,5 +85,7 @@ extension Update {
         Update(order: 9, releaseVersionCode: 1, majorVersionCode: 1, minorVersionCode: 1, date: "23.01.06", content: "카페 정보를 못불러오던 일시적 오류 수정, 카페 홍보란 무한로딩 오류 수정"),
         Update(order: 10, releaseVersionCode: 1, majorVersionCode: 1, minorVersionCode: 2, date: "23.01.08", content: "카페 정보 로딩속도 개선"),
         Update(order: 11, releaseVersionCode: 1, majorVersionCode: 2, minorVersionCode: 2, date: "23.01.26", content: "UI개선(구글지도 > 네이버지도), 영업시간 정보 추가, 콘센트 정보 추가, 화장실 정보 추가, 제휴카페 보기 기능 추가, 팝업광고 추가, 이벤트 중인 카페 정리, 웹뷰 추가"),
+        Update(order: 12, releaseVersionCode: 1, majorVersionCode: 2, minorVersionCode: 3, date: "23.02.03", content: "신규지역 추가: 흑석, 마커 새로고침 후 잠시 맵터치가 안되던 에러 개선"),
+        Update(order: 13, releaseVersionCode: 1, majorVersionCode: 3, minorVersionCode: 0, date: "23.02.14", content: "카페정보 로딩속도 개선, 거리제한 완화, 포인트 지급내역 확인 화면 추가, 할인중인 카페 거리순 정렬, 신규지역 추가 - 노량진/안암/신림/서울대입구/왕십리/외대앞/회기"),
     ]
 }

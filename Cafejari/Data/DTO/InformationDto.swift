@@ -17,17 +17,17 @@ struct PopUpNotificationResponse: Decodable {
     let order: Int
     let url: String
     let image: String
-    let cafe_info: Int?
+    let cafe_info: CafeInfoRepresentationResponse?
 }
 
 struct OnSaleCafeResponse: Decodable {
     let order: Int
     let content: String
     let image: String
-    let cafe_info: OnSaleCafeCafeInfoResponse
+    let cafe_info: CafeInfoRepresentationResponse
 }
 
-struct OnSaleCafeCafeInfoResponse: Decodable {
+struct CafeInfoRepresentationResponse: Decodable {
     let id: Int
     let name: String
     let city: String
@@ -52,5 +52,12 @@ struct InquiryEtcResponse: Decodable {
     let id: Int
     let content: String
     let answer: String?
+    let time: String
+}
+
+struct EventPointHistoryResponse: Decodable {
+    let id: Int
+    let content: String
+    let point: Int
     let time: String
 }

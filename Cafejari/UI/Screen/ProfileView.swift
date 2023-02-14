@@ -82,37 +82,45 @@ struct ProfileView: View {
                         
                         VerticalSpacer(.moreLarge)
                         
-                        HStack(spacing: .medium) {
-                            Image(systemName: "p.circle.fill")
-                                .font(.title.bold())
-                                .foregroundColor(.primary)
-                            Text("모은 포인트 \(coreState.user.point)P")
-                                .font(.body.bold())
-                                .foregroundColor(.primary)
+                        Button {
+                            coreState.navigate(Screen.PointHistory.route)
+                        } label: {
+                            HStack(spacing: .medium) {
+                                Image(systemName: "p.circle.fill")
+                                    .font(.title.bold())
+                                    .foregroundColor(.primary)
+                                Text("\(coreState.user.point)P")
+                                    .font(.body.bold())
+                                    .foregroundColor(.primary)
+                                Text("(내역보기)")
+                                    .font(.caption)
+                                    .foregroundColor(.primary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, .large)
+                            .frame(height: 48)
+                            .background(Color.background)
+                            .cornerRadius(.medium)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, .large)
-                        .frame(height: 48)
-                        .background(Color.background)
-                        .cornerRadius(.medium)
                         
                         VerticalSpacer(.medium)
                         
-                        HStack(spacing: .medium) {
-                            Image(systemName: "calendar")
-                                .font(.headline.bold())
-                                .foregroundColor(.primary)
-                            Text("내 마스터 활동 보러가기")
-                                .font(.body.bold())
-                                .foregroundColor(.primary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, .large)
-                        .frame(height: 48)
-                        .background(Color.background)
-                        .cornerRadius(.medium)
-                        .onTapGesture {
+                        Button {
                             coreState.navigate(Screen.MasterDetail.route)
+                        } label: {
+                            HStack(spacing: .medium) {
+                                Image(systemName: "calendar")
+                                    .font(.headline.bold())
+                                    .foregroundColor(.primary)
+                                Text("내 마스터 활동 보러가기")
+                                    .font(.body.bold())
+                                    .foregroundColor(.primary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, .large)
+                            .frame(height: 48)
+                            .background(Color.background)
+                            .cornerRadius(.medium)
                         }
                         
                         VerticalSpacer(.moreLarge)

@@ -17,6 +17,8 @@ struct MasterDetailView: View {
     @State private var isBottomSheetOpened = false
     @State private var bottomModalDateCafeLog: DateCafeLog? = nil
     
+    @Inject private var time: Time
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
@@ -39,7 +41,7 @@ struct MasterDetailView: View {
                                 .font(.headline)
                                 .foregroundColor(.primary)
                             +
-                            Text(userViewModel.time.getPassingHourMinuteStringFromSeconds(seconds: coreState.user.activity))
+                            Text(time.getPassingHourMinuteStringFromSeconds(seconds: coreState.user.activity))
                                 .font(.headline.bold())
                                 .foregroundColor(.primary)
                             +
@@ -95,7 +97,7 @@ struct MasterDetailView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 16)
-                        Text("\(userViewModel.time.parseYearFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))년  \(userViewModel.time.parseMonthFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))월  \(userViewModel.time.parseDayFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))일")
+                        Text("\(time.parseYearFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))년  \(time.parseMonthFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))월  \(time.parseDayFrom(timeString: bottomModalDateCafeLog.cafeLogs[0].start))일")
                             .font(.headline.bold())
                             .foregroundColor(.primary)
                     }
@@ -112,7 +114,7 @@ struct MasterDetailView: View {
 
                                         HStack {
                                             RoundTimeFrame(timeStringFrom: cafeLog.start, timeStringTo: cafeLog.finish)
-                                            Text("총 \(userViewModel.time.getPassingHourMinuteStringFromTo(timeStringFrom: cafeLog.start, timeStringTo: cafeLog.finish)) 활동")
+                                            Text("총 \(time.getPassingHourMinuteStringFromTo(timeStringFrom: cafeLog.start, timeStringTo: cafeLog.finish)) 활동")
                                                 .font(.caption)
                                         }
                                     }

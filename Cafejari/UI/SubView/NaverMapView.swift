@@ -16,9 +16,10 @@ struct NaverMapView: UIViewRepresentable {
     
     let startCameraPosition: NMFCameraPosition
     let closeMenu: () -> Void
+    let onCameraPositionChanged: (NMFCameraPosition) -> Void
     
     func makeCoordinator() -> Coordinator {
-        return Coordinator(closeMenu: closeMenu)
+        return Coordinator(closeMenu: closeMenu, onCameraPositionChanged: onCameraPositionChanged)
     }
     
     func makeUIView(context: Context) -> NMFNaverMapView {
@@ -80,9 +81,11 @@ struct NaverMapView: UIViewRepresentable {
     class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
         
         let closeMenu: () -> Void
+        let onCameraPositionChanged: (NMFCameraPosition) -> Void
         
-        init(closeMenu: @escaping () -> Void) {
+        init(closeMenu: @escaping () -> Void, onCameraPositionChanged: @escaping (NMFCameraPosition) -> Void) {
             self.closeMenu = closeMenu
+            self.onCameraPositionChanged = onCameraPositionChanged
         }
         
         func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
@@ -95,6 +98,10 @@ struct NaverMapView: UIViewRepresentable {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.closeMenu()
             }
+        }
+        
+        func mapView(_ mapView: NMFMapView, cameraDidChangeByReason reason: Int, animated: Bool) {
+            onCameraPositionChanged(mapView.cameraPosition)
         }
 
     }

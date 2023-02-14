@@ -9,7 +9,7 @@ import Foundation
 
 protocol CafeRepository {
     
-    func fetchCafeInfos(accessToken: String) async throws -> [CafeInfoResponse]
+    func fetchCafeInfos(accessToken: String, latitude: Double, longitude: Double, zoomLevel: Int) async throws -> [CafeInfoResponse]
     func fetchExpiredCafeLogs(accessToken: String) async throws -> [CafeLogResponse]
     func registerMaster(accessToken: String, cafeId: Int, crowded: Int) async throws -> CafeLogResponse
     func putCrowded(accessToken: String, cafeLogId: Int, crowded: Int) async throws -> CafeLogResponse
@@ -27,10 +27,10 @@ final class CafeRepositoryImpl: CafeRepository {
     @Inject var httpRoute: HttpRoute
     @Inject var customUrlRequest: CustomURLRequest
     
-    func fetchCafeInfos(accessToken: String) async throws -> [CafeInfoResponse] {
+    func fetchCafeInfos(accessToken: String, latitude: Double, longitude: Double, zoomLevel: Int) async throws -> [CafeInfoResponse] {
         do {
             let urlSession = URLSession.shared
-            let request = customUrlRequest.get(urlString: httpRoute.cafeInfo(), accessToken: accessToken)
+            let request = customUrlRequest.get(urlString: httpRoute.cafeInfo(lat: latitude, lng: longitude, zoomLevel: zoomLevel), accessToken: accessToken)
             let (data, urlRes) = try await urlSession.data(for: request)
             
             guard let httpUrlRes = urlRes as? HTTPURLResponse

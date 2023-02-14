@@ -240,7 +240,7 @@ struct AuthView: View {
                     ) {
                         Task {
                             await loginViewModel.authorize(coreState: coreState,nickname: nickname, phoneNumber: phoneNumber) {
-                                await cafeViewModel.getCafeInfos(coreState: coreState)
+                                await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
                             }
                         }
                     }

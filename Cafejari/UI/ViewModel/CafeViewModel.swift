@@ -19,6 +19,7 @@ final class CafeViewModel: BaseViewModel {
     private var cafeInfos: CafeInfos = []
     @Published var markers: [NMFMarker] = []
     @Published var selectedMarker: NMFMarker? = nil
+    var lastCameraPosition: NMFCameraPosition? = nil
     
     @Published var cafeInfoLoading: Bool = false
     @Published var cafeInfoRefreshDisabled: Bool = false
@@ -52,6 +53,7 @@ final class CafeViewModel: BaseViewModel {
     private var snackBarWork: DispatchWorkItem? = nil
     private var fetchImagesWork: DispatchWorkItem? = nil
     var associatedCafeDescriptionCloseWork: DispatchWorkItem? = nil
+    var hideRefreshCafeInfoWork: DispatchWorkItem? = nil
     
     private let grayMarkerUIImage = UIImage(named: Crowded.crowdedNegative.image)
     private let blueMarkerUIImage = UIImage(named: Crowded.crowdedZero.image)
@@ -73,7 +75,7 @@ final class CafeViewModel: BaseViewModel {
                 }
             }
             
-            await self.getCafeInfos(coreState: coreState)
+            await self.getNearbyCafeInfos(coreState: coreState)
             
             await self.checkAutoExpiredCafeLog(coreState: coreState)
             
@@ -102,10 +104,22 @@ final class CafeViewModel: BaseViewModel {
         modalImageMetaData.removeAll()
     }
     
-    func getCafeInfos(coreState: CoreState) async {
+    func getNearbyCafeInfos(
+        coreState: CoreState,
+        cameraPosition: NMFCameraPosition? = nil,
+        onSuccess: () -> Void = {}
+    ) async {
         do {
             cafeInfoLoading = true
-            let cafeInfoResponses = try await cafeRepository.fetchCafeInfos(accessToken: coreState.accessToken)
+            let lat = cameraPosition?.target.lat ?? lastCameraPosition?.target.lat ?? Locations.sinchon.cameraPosition.target.lat
+            let lng = cameraPosition?.target.lng ?? lastCameraPosition?.target.lng ?? Locations.sinchon.cameraPosition.target.lng
+            let zoom = cameraPosition?.zoom ?? lastCameraPosition?.zoom ?? Zoom.medium
+            let cafeInfoResponses = try await cafeRepository.fetchCafeInfos(
+                accessToken: coreState.accessToken,
+                latitude: lat,
+                longitude: lng,
+                zoomLevel: zoom.toZoomLevel()
+            )
             var newCafeInfos: CafeInfos = []
             
             cafeInfoResponses.forEach { cafeInfoResponse in
@@ -165,13 +179,14 @@ final class CafeViewModel: BaseViewModel {
                 self.cafeInfoRefreshDisabled = false
             }
             self.cafeInfos = newCafeInfos
-            drawMarkers(cafeInfos: newCafeInfos)
+            await drawMarkers(cafeInfos: newCafeInfos)
             self.showAssociatedCafeMarkersOnly = false
             self.cafeInfoLoading = false
+            onSuccess()
             
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
-                await getCafeInfos(coreState: coreState)
+                await getNearbyCafeInfos(coreState: coreState)
             })
             self.cafeInfoLoading = false
         } catch CustomError.errorMessage(let msg){
@@ -211,7 +226,7 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
-    func drawMarkers(cafeInfos: CafeInfos) {
+    func drawMarkers(cafeInfos: CafeInfos) async {
         self.markers.forEach { marker in
             marker.mapView = nil
         }
@@ -426,7 +441,7 @@ final class CafeViewModel: BaseViewModel {
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
             coreState.isMasterActivated = true
-            await self.getCafeInfos(coreState: coreState)
+            await self.getNearbyCafeInfos(coreState: coreState)
             isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "마스터등록 성공! 주기적으로 혼잡도를 업데이트 해주세요")
         } catch CustomError.accessTokenExpired {
@@ -449,10 +464,11 @@ final class CafeViewModel: BaseViewModel {
                 accessToken: coreState.accessToken, cafeLogId: coreState.masterRoomCafeLog.id, crowded: crowded
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
-            await self.getCafeInfos(coreState: coreState)
+            await self.getNearbyCafeInfos(coreState: coreState)
             isMasterRoomCtaProgress = false
             coreState.showSnackBar(message: "카페 혼잡도를 '\(crowded.toCrowded().string)'(으)로 변경하였습니다")
         } catch CustomError.masterExpired {
+            isMasterRoomCtaProgress = false
             coreState.isMasterActivated = false
             await checkAutoExpiredCafeLog(coreState: coreState)
         } catch CustomError.accessTokenExpired {
@@ -474,7 +490,7 @@ final class CafeViewModel: BaseViewModel {
                 accessToken: coreState.accessToken, cafeDetailLogId: cafeDetailLogId
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
-            await self.getCafeInfos(coreState: coreState)
+            await self.getNearbyCafeInfos(coreState: coreState)
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
                 await deleteCafeDetailLog(coreState: coreState, cafeDetailLogId: cafeDetailLogId)
@@ -492,7 +508,7 @@ final class CafeViewModel: BaseViewModel {
                 accessToken: coreState.accessToken, cafeLogId: coreState.masterRoomCafeLog.id, adWatched: adWatched
             ).getCafeLog()
             coreState.masterRoomCafeLog = cafeLog
-            await self.getCafeInfos(coreState: coreState)
+            await self.getNearbyCafeInfos(coreState: coreState)
             
             coreState.isMasterActivated = false
             
