@@ -14,7 +14,7 @@ struct CustomURLRequest {
 
 extension CustomURLRequest {
     func get(urlString: String, accessToken: String? = nil) -> URLRequest {
-        var request = URLRequest.init(url: URL( string: urlString )!, timeoutInterval: 10.0)
+        var request = URLRequest.init(url: URL( string: urlString.getEncodedStringFromKorean() )!, timeoutInterval: 10.0)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

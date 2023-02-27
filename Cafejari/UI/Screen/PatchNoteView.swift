@@ -87,5 +87,7 @@ extension Update {
         Update(order: 11, releaseVersionCode: 1, majorVersionCode: 2, minorVersionCode: 2, date: "23.01.26", content: "UI개선(구글지도 > 네이버지도), 영업시간 정보 추가, 콘센트 정보 추가, 화장실 정보 추가, 제휴카페 보기 기능 추가, 팝업광고 추가, 이벤트 중인 카페 정리, 웹뷰 추가"),
         Update(order: 12, releaseVersionCode: 1, majorVersionCode: 2, minorVersionCode: 3, date: "23.02.03", content: "신규지역 추가: 흑석, 마커 새로고침 후 잠시 맵터치가 안되던 에러 개선"),
         Update(order: 13, releaseVersionCode: 1, majorVersionCode: 3, minorVersionCode: 0, date: "23.02.14", content: "카페정보 로딩속도 개선, 거리제한 완화, 포인트 지급내역 확인 화면 추가, 할인중인 카페 거리순 정렬, 신규지역 추가 - 노량진/안암/신림/서울대입구/왕십리/외대앞/회기"),
+        Update(order: 14, releaseVersionCode: 1, majorVersionCode: 3, minorVersionCode: 1, date: "23.02.19", content: "메인 화면 버튼 배치 변경, 일부 ui개선"),
+        Update(order: 15, releaseVersionCode: 1, majorVersionCode: 4, minorVersionCode: 0, date: "23.02.26", content: "카페 검색 기능 추가, 추천인 이벤트 추가, 카페 정보 제보 기능 추가, 자동 종료된 마스터 활동 광고 보기 추가, 거리제한 완화, 애니메이션 및 성능개선"),
     ]
 }

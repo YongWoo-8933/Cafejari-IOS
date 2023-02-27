@@ -95,7 +95,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
       AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
 
       // Print full message.
-//      print(userInfo)
 
       return UIBackgroundFetchResult.newData
     }

@@ -17,6 +17,8 @@ protocol LoginRepository {
     func requestAppleLogin(idToken: String, code: String) async throws -> AppleLoginResponse
     func requestAppleLoginFinish(idToken: String, code: String) async throws -> LoginResponse
     func postPreAuthorization(nickname: String, phoneNumber: String) async throws -> PreAuthResponse
+    func postPreRecommendation(nickname: String) async throws -> RecommendResponse
+    func recommendation(accessToken: String, nickname: String) async throws -> UserResponse
     func makeNewProfile(accessToken: String, userId: Int, nickname: String, phoneNumber: String, fcmToken: String) async throws -> UserResponse
     func sendSms(phoneNumber: String) async throws
     func authSms(authNumber: String, phoneNumber: String) async throws
@@ -260,6 +262,79 @@ final class LoginRepositoryImpl: LoginRepository {
                 
             } else if (200..<300).contains(httpUrlRes.statusCode) {
                 return try JSONDecoder().decode(PreAuthResponse.self, from: data)
+                
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
+    }
+    
+    func postPreRecommendation(nickname: String) async throws -> RecommendResponse {
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.post(
+                urlString: httpRoute.preRecommendation(), requestBody: ["nickname" : nickname])
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if httpUrlRes.statusCode == 400 {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+                
+            } else if httpUrlRes.statusCode == 409 {
+                let errorCodeRes = try JSONDecoder().decode(ErrorCodeResponse.self, from: data)
+                switch errorCodeRes.error_code {
+                case 411:
+                    throw CustomError.errorMessage("해당 닉네임을 가진 유저가 없습니다")
+                default:
+                    throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+                }
+                
+            } else if (200..<300).contains(httpUrlRes.statusCode) {
+                return try JSONDecoder().decode(RecommendResponse.self, from: data)
+                
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
+    }
+    
+    func recommendation(accessToken: String, nickname: String) async throws -> UserResponse {
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.post(
+                urlString: httpRoute.recommendation(),
+                accessToken: accessToken,
+                requestBody: ["nickname": nickname]
+            )
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if httpUrlRes.statusCode == 401 {
+                _ = try JSONDecoder().decode(TokenExpiredErrorResponse.self, from: data)
+                throw CustomError.accessTokenExpired
+            } else if httpUrlRes.statusCode == 409 {
+                let errorCodeRes = try JSONDecoder().decode(ErrorCodeResponse.self, from: data)
+                switch errorCodeRes.error_code {
+                case 411:
+                    throw CustomError.errorMessage("해당 닉네임을 가진 유저가 없습니다")
+                default:
+                    throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+                }
+                
+            } else if (200 ..< 300).contains(httpUrlRes.statusCode) {
+                return try JSONDecoder().decode(UserResponse.self, from: data)
                 
             } else {
                 throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")

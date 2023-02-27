@@ -75,6 +75,7 @@ struct OnSaleCafeDialog: View {
                                                 ),
                                                 zoom: Zoom.small
                                             ),
+                                            selectedCafeInfoId: onSaleCafe.cafeInfoId,
                                             onSuccess: {
                                                 cafeViewModel.cameraMoveToCafe(cafeInfoId: onSaleCafe.cafeInfoId)
                                             }
@@ -144,20 +145,17 @@ struct OnSaleCafeItem: View {
                 HStack {
                     Text(onSaleCafe.cafeInfoName)
                         .font(.body.bold())
-                    let distance = coreState.userLastLocation.getDistance(
-                        latitude: onSaleCafe.cafeInfoLatitude, longitude: onSaleCafe.cafeInfoLongitude
-                    )
-                    if distance >= 0 { // 거리 구함
+                    if onSaleCafe.distance > 0 { // 거리 구함
                         HStack(spacing: 2) {
                             Image(systemName: "location.fill")
                                 .font(.caption2.bold())
                                 .foregroundColor(.white)
-                            if distance > 1000 { // km표기
-                                Text("\(distance/1000)km+")
+                            if onSaleCafe.distance > 1000 { // km표기
+                                Text("\(onSaleCafe.distance/1000)km+")
                                     .font(.caption2)
                                     .foregroundColor(.white)
                             } else { // m표기
-                                Text("\(distance)m")
+                                Text("\(onSaleCafe.distance)m")
                                     .font(.caption2)
                                     .foregroundColor(.white)
                             }

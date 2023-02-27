@@ -54,7 +54,8 @@ extension OnboardingUnit {
 }
 
 struct OnboardingDialog: View {
-    @Binding var isDialogVisible: Bool
+    
+    @EnvironmentObject private var coreState: CoreState
     
     @State private var currentPage = 0
     
@@ -66,7 +67,7 @@ struct OnboardingDialog: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black.opacity(0.5))
-            .opacity(isDialogVisible ? 1 : 0)
+            .opacity(coreState.isOnboardingDialogOpened ? 1 : 0)
             
             VStack(spacing: 0) {
                 VerticalSpacer(.moreLarge)
@@ -94,7 +95,7 @@ struct OnboardingDialog: View {
                             Image(systemName: "xmark")
                                 .font(.title.bold())
                                 .onTapGesture {
-                                    isDialogVisible = false
+                                    coreState.isOnboardingDialogOpened = false
                                 }
                         }
                     }
@@ -147,10 +148,10 @@ struct OnboardingDialog: View {
             .background(.white)
             .cornerRadius(.moreLarge)
             .shadow(radius: 3)
-            .opacity(isDialogVisible ? 1 : 0)
+            .opacity(coreState.isOnboardingDialogOpened ? 1 : 0)
         }
         .edgesIgnoringSafeArea(.all)
-        .animation(.easeInOut, value: isDialogVisible)
+        .animation(.easeInOut, value: coreState.isOnboardingDialogOpened)
     }
     
 }

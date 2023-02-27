@@ -61,6 +61,12 @@
 		1067B8DA292B37CE008ADB4A /* PermissionRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */; };
 		10914A542999F4F100E38FC5 /* PointHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A532999F4F100E38FC5 /* PointHistoryView.swift */; };
 		10914A56299A06C000E38FC5 /* EventPointHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A55299A06C000E38FC5 /* EventPointHistory.swift */; };
+		10914A5829A776B100E38FC5 /* CafeCorrectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A5729A776B100E38FC5 /* CafeCorrectionView.swift */; };
+		10914A5A29A8801A00E38FC5 /* NaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A5929A8801A00E38FC5 /* NaverMapView.swift */; };
+		10914A5C29A9BA5C00E38FC5 /* MapFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A5B29A9BA5C00E38FC5 /* MapFrameView.swift */; };
+		10914A5E29A9BD1900E38FC5 /* ThumbsUpDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A5D29A9BD1900E38FC5 /* ThumbsUpDialog.swift */; };
+		10914A6029A9BDD500E38FC5 /* AutoExpiredLogDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A5F29A9BDD500E38FC5 /* AutoExpiredLogDialog.swift */; };
+		10914A6229A9D45C00E38FC5 /* SearchModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10914A6129A9D45C00E38FC5 /* SearchModal.swift */; };
 		10A4298728F7C8B000D5E6BC /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4298628F7C8B000D5E6BC /* Navigation.swift */; };
 		10A4299528FBC04D00D5E6BC /* FloorTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4299428FBC04D00D5E6BC /* FloorTap.swift */; };
 		10A4299728FC104100D5E6BC /* SplachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A4299628FC104100D5E6BC /* SplachView.swift */; };
@@ -94,7 +100,6 @@
 		10D5659B29530FAD005188EA /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D5659A29530FAD005188EA /* Locations.swift */; };
 		10D5659D2972E3B6005188EA /* CrowdedGrayBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D5659C2972E3B6005188EA /* CrowdedGrayBar.swift */; };
 		10D5659F2972EB2C005188EA /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D5659E2972EB2C005188EA /* WebView.swift */; };
-		10D565A1297C07E1005188EA /* NaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565A0297C07E1005188EA /* NaverMapView.swift */; };
 		10D565A3297C0CA8005188EA /* Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565A2297C0CA8005188EA /* Zoom.swift */; };
 		10D565A5297D019B005188EA /* MarkerTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565A4297D019B005188EA /* MarkerTag.swift */; };
 		10D565A7297D9307005188EA /* MiniNaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D565A6297D9307005188EA /* MiniNaverMapView.swift */; };
@@ -194,6 +199,12 @@
 		1067B8D9292B37CE008ADB4A /* PermissionRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequestView.swift; sourceTree = "<group>"; };
 		10914A532999F4F100E38FC5 /* PointHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointHistoryView.swift; sourceTree = "<group>"; };
 		10914A55299A06C000E38FC5 /* EventPointHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPointHistory.swift; sourceTree = "<group>"; };
+		10914A5729A776B100E38FC5 /* CafeCorrectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CafeCorrectionView.swift; sourceTree = "<group>"; };
+		10914A5929A8801A00E38FC5 /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
+		10914A5B29A9BA5C00E38FC5 /* MapFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapFrameView.swift; sourceTree = "<group>"; };
+		10914A5D29A9BD1900E38FC5 /* ThumbsUpDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbsUpDialog.swift; sourceTree = "<group>"; };
+		10914A5F29A9BDD500E38FC5 /* AutoExpiredLogDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoExpiredLogDialog.swift; sourceTree = "<group>"; };
+		10914A6129A9D45C00E38FC5 /* SearchModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModal.swift; sourceTree = "<group>"; };
 		10A4298628F7C8B000D5E6BC /* Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		10A4299428FBC04D00D5E6BC /* FloorTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorTap.swift; sourceTree = "<group>"; };
 		10A4299628FC104100D5E6BC /* SplachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplachView.swift; sourceTree = "<group>"; };
@@ -221,7 +232,6 @@
 		10D5659A29530FAD005188EA /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
 		10D5659C2972E3B6005188EA /* CrowdedGrayBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrowdedGrayBar.swift; sourceTree = "<group>"; };
 		10D5659E2972EB2C005188EA /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
-		10D565A0297C07E1005188EA /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
 		10D565A2297C0CA8005188EA /* Zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zoom.swift; sourceTree = "<group>"; };
 		10D565A4297D019B005188EA /* MarkerTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerTag.swift; sourceTree = "<group>"; };
 		10D565A6297D9307005188EA /* MiniNaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniNaverMapView.swift; sourceTree = "<group>"; };
@@ -373,6 +383,7 @@
 				10346AC628F3E87600A41C6F /* MasterRoomView.swift */,
 				10F4C880291510400039881A /* CafeInquiryView.swift */,
 				10D565B0297E2B56005188EA /* CafeInquiryResultView.swift */,
+				10914A5729A776B100E38FC5 /* CafeCorrectionView.swift */,
 				10346AB628F3E77300A41C6F /* PromotionView.swift */,
 				10F4C87C29150E770039881A /* LeaderBoardView.swift */,
 				10346AB828F3E79200A41C6F /* ShopView.swift */,
@@ -427,12 +438,14 @@
 			children = (
 				10F4C8722910EFA20039881A /* UIImagePicker.swift */,
 				106130D9290B9B6D0023C22E /* CalendarView.swift */,
+				10914A5B29A9BA5C00E38FC5 /* MapFrameView.swift */,
 				10F4C882291513D10039881A /* MapSheetCafeInfoView.swift */,
 				10F4C884291514060039881A /* MapSheetCafeCrowdedView.swift */,
 				10F4C8902917B0330039881A /* ActivatedMasterRoom.swift */,
 				10F4C8922917B04E0039881A /* InactivatedMasterRoom.swift */,
-				10D565A0297C07E1005188EA /* NaverMapView.swift */,
 				10D565A6297D9307005188EA /* MiniNaverMapView.swift */,
+				10914A5929A8801A00E38FC5 /* NaverMapView.swift */,
+				10914A6129A9D45C00E38FC5 /* SearchModal.swift */,
 			);
 			path = SubView;
 			sourceTree = "<group>";
@@ -558,6 +571,8 @@
 				10D56598294ED257005188EA /* OnboardingDialog.swift */,
 				10D565B4297E7366005188EA /* PopUpDialog.swift */,
 				10D565BA297EA25F005188EA /* OnSaleCafeDialog.swift */,
+				10914A5D29A9BD1900E38FC5 /* ThumbsUpDialog.swift */,
+				10914A5F29A9BDD500E38FC5 /* AutoExpiredLogDialog.swift */,
 			);
 			path = Dialog;
 			sourceTree = "<group>";
@@ -752,6 +767,7 @@
 				10D5659B29530FAD005188EA /* Locations.swift in Sources */,
 				10F4C8932917B04E0039881A /* InactivatedMasterRoom.swift in Sources */,
 				10A429BF28FE76FE00D5E6BC /* Dependencies.swift in Sources */,
+				10914A5E29A9BD1900E38FC5 /* ThumbsUpDialog.swift in Sources */,
 				10346AB728F3E77300A41C6F /* PromotionView.swift in Sources */,
 				10D565AD297E168C005188EA /* PopUpNotification.swift in Sources */,
 				10A429AA28FD6C5200D5E6BC /* Item.swift in Sources */,
@@ -766,7 +782,6 @@
 				10A429C128FE7BC200D5E6BC /* InformationRepository.swift in Sources */,
 				10F4C8712910DE450039881A /* AppleLoginButton.swift in Sources */,
 				10F4C87529122EB40039881A /* SnackBar.swift in Sources */,
-				10D565A1297C07E1005188EA /* NaverMapView.swift in Sources */,
 				10914A56299A06C000E38FC5 /* EventPointHistory.swift in Sources */,
 				106130B3290248840023C22E /* CafeViewModel.swift in Sources */,
 				106130CD2907B1440023C22E /* CustomURLRequest.swift in Sources */,
@@ -796,6 +811,7 @@
 				10D565A3297C0CA8005188EA /* Zoom.swift in Sources */,
 				10346ABD28F3E7CF00A41C6F /* GuideGridView.swift in Sources */,
 				1067B8C2292394B2008ADB4A /* Modifier.swift in Sources */,
+				10914A6229A9D45C00E38FC5 /* SearchModal.swift in Sources */,
 				10F4C887291515E40039881A /* Laboratory.swift in Sources */,
 				10A429C528FE7E5900D5E6BC /* InformationViewModel.swift in Sources */,
 				10D565A9297E1589005188EA /* InquiryCafe.swift in Sources */,
@@ -808,6 +824,7 @@
 				10A4299528FBC04D00D5E6BC /* FloorTap.swift in Sources */,
 				10A4299728FC104100D5E6BC /* SplachView.swift in Sources */,
 				10A429CD28FEB5B200D5E6BC /* User.swift in Sources */,
+				10914A6029A9BDD500E38FC5 /* AutoExpiredLogDialog.swift in Sources */,
 				1067B8B7292273FA008ADB4A /* FilledCtaButton.swift in Sources */,
 				10F4C86D2910DA100039881A /* KakaoLoginButton.swift in Sources */,
 				10F4C88929153E3F0039881A /* MasterDetailView.swift in Sources */,
@@ -831,16 +848,19 @@
 				10A4298728F7C8B000D5E6BC /* Navigation.swift in Sources */,
 				10D565A7297D9307005188EA /* MiniNaverMapView.swift in Sources */,
 				10F4C88F29162C0D0039881A /* InquiryView.swift in Sources */,
+				10914A5C29A9BA5C00E38FC5 /* MapFrameView.swift in Sources */,
 				10F4C885291514060039881A /* MapSheetCafeCrowdedView.swift in Sources */,
 				10D5659F2972EB2C005188EA /* WebView.swift in Sources */,
 				1067B8BE292343E6008ADB4A /* RoundTimeFrame.swift in Sources */,
 				10F4C866290E7DE80039881A /* ErrorResponse.swift in Sources */,
 				10346A9D28F3C89300A41C6F /* CafejariApp.swift in Sources */,
 				106130BF290660520023C22E /* FullScreenLoadingView.swift in Sources */,
+				10914A5829A776B100E38FC5 /* CafeCorrectionView.swift in Sources */,
 				10A429D528FECFCB00D5E6BC /* UserViewModel.swift in Sources */,
 				1067B8CC2924AF8B008ADB4A /* MenuItem.swift in Sources */,
 				10D565AB297E162B005188EA /* InquiryEtc.swift in Sources */,
 				1067B8DA292B37CE008ADB4A /* PermissionRequestView.swift in Sources */,
+				10914A5A29A8801A00E38FC5 /* NaverMapView.swift in Sources */,
 				106130B1290247510023C22E /* CafeRepository.swift in Sources */,
 				10A429B528FE545400D5E6BC /* ShopViewModel.swift in Sources */,
 			);
@@ -974,7 +994,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
@@ -996,7 +1016,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1017,7 +1037,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Cafejari/Cafejari.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_ASSET_PATHS = "\"Cafejari/Preview Content\"";
 				DEVELOPMENT_TEAM = 59FUVDK9GN;
 				ENABLE_PREVIEWS = YES;
@@ -1039,7 +1059,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.software.Cafejari;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

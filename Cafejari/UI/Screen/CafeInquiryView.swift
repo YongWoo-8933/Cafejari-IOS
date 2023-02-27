@@ -37,39 +37,40 @@ struct CafeInquiryView: View {
                     }
                 )
                 
-                VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 0) {
                     VerticalSpacer(.moreLarge)
-                    
-                    Text("새로운 카페를 등록해보세요")
-                        .font(.headline.bold())
-                    
-                    VerticalSpacer(40)
-                    
-                    TextField("등록할 카페 이름(지점명 포함)", text: $name)
+
+                    TextField("등록할 카페(지점명 포함)", text: $name)
                         .textFieldStyle(SingleLineTextFieldStyle())
                         .focused($focusedField, equals: Field.name)
-                    
+
                     VerticalSpacer(.moreLarge)
-                    
+
                     TextField("주소(시, 구 포함)", text: $address)
                         .textFieldStyle(SingleLineTextFieldStyle())
                         .focused($focusedField, equals: Field.address)
-                    
+
+                    VerticalSpacer(.medium)
+
+                    Text("카페 지점명이 정확하다면 주소 생략 가능\nex) 스타벅스 xx역점")
+                        .foregroundColor(.lightGray)
+
                     Spacer()
-                    
+
                     FilledCtaButton(text: "카페등록 요청", backgroundColor: .primary) {
                         focusedField = nil
                         if name.isEmpty {
                             coreState.showSnackBar(message: "등록할 카페 지점명을 입력해주세요", type: .info)
-                        } else if address.isEmpty {
-                            coreState.showSnackBar(message: "등록할 카페의 주소를 입력해주세요", type: .info)
                         } else {
+                            if address.isEmpty {
+                                address = "_none"
+                            }
                             Task {
                                 await informationViewModel.submitInquiryCafe(coreState: coreState, name: name, address: address)
                             }
                         }
                     }
-                    
+
                     VerticalSpacer(.moreLarge)
                 }
                 .padding(.moreLarge)

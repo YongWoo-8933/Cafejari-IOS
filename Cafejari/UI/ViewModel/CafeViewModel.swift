@@ -17,15 +17,19 @@ final class CafeViewModel: BaseViewModel {
     @Inject var informationRepository: InformationRepository
     
     private var cafeInfos: CafeInfos = []
+    @Published var searchCafeInfos: CafeInfos = []
     @Published var markers: [NMFMarker] = []
+    @Published var isMarkerUpdateTriggered: Bool = false
     @Published var selectedMarker: NMFMarker? = nil
-    var lastCameraPosition: NMFCameraPosition? = nil
+    var lastCameraPosition: NMFCameraPosition = Locations.sinchon.cameraPosition
+    @Published var cameraPosition: NMFCameraPosition = Locations.sinchon.cameraPosition
+    @Published var isLongDCameraUpdateTriggered: Bool = false
+    @Published var isShortDCameraUpdateTriggered: Bool = false
     
     @Published var cafeInfoLoading: Bool = false
     @Published var cafeInfoRefreshDisabled: Bool = false
     @Published var animateToLongDistance: NMFCameraPosition? = nil
     @Published var animateToShortDistance: NMGLatLng? = nil
-    @Published var showAssociatedCafeMarkersOnly: Bool = false
     
     @Published var isBottomSheetOpened = false
     @Published var interstitialAdCounter = 0
@@ -104,16 +108,28 @@ final class CafeViewModel: BaseViewModel {
         modalImageMetaData.removeAll()
     }
     
+    func collapseBottomSheet(_ onAnimationFinish: @escaping () -> Void = {}) {
+        if self.isBottomSheetOpened {
+            self.isBottomSheetOpened = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                onAnimationFinish()
+            }
+        } else {
+            onAnimationFinish()
+        }
+    }
+    
     func getNearbyCafeInfos(
         coreState: CoreState,
         cameraPosition: NMFCameraPosition? = nil,
+        selectedCafeInfoId: Int = 0,
         onSuccess: () -> Void = {}
     ) async {
         do {
             cafeInfoLoading = true
-            let lat = cameraPosition?.target.lat ?? lastCameraPosition?.target.lat ?? Locations.sinchon.cameraPosition.target.lat
-            let lng = cameraPosition?.target.lng ?? lastCameraPosition?.target.lng ?? Locations.sinchon.cameraPosition.target.lng
-            let zoom = cameraPosition?.zoom ?? lastCameraPosition?.zoom ?? Zoom.medium
+            let lat = cameraPosition?.target.lat ?? lastCameraPosition.target.lat
+            let lng = cameraPosition?.target.lng ?? lastCameraPosition.target.lng
+            let zoom = cameraPosition?.zoom ?? lastCameraPosition.zoom
             let cafeInfoResponses = try await cafeRepository.fetchCafeInfos(
                 accessToken: coreState.accessToken,
                 latitude: lat,
@@ -179,8 +195,7 @@ final class CafeViewModel: BaseViewModel {
                 self.cafeInfoRefreshDisabled = false
             }
             self.cafeInfos = newCafeInfos
-            await drawMarkers(cafeInfos: newCafeInfos)
-            self.showAssociatedCafeMarkersOnly = false
+            await drawMarkers(cafeInfos: newCafeInfos, selectedCafeInfoId: selectedCafeInfoId)
             self.cafeInfoLoading = false
             onSuccess()
             
@@ -204,13 +219,15 @@ final class CafeViewModel: BaseViewModel {
         }
         if let connectedCafeInfo = connectedCafeInfo {
             self.clearModal()
-            self.getModalCafePlaceInfo(googlePlaceId: connectedCafeInfo.googlePlaceId)
             self.modalCafeInfo = connectedCafeInfo
             self.modalCafe = connectedCafeInfo.cafes.first ?? Cafe.empty
-            self.animateToLongDistance = NMFCameraPosition(
+            
+            self.updateCameraPosition(NMFCameraPosition(
                 NMGLatLng(lat: connectedCafeInfo.latitude, lng: connectedCafeInfo.longitude),
                 zoom: Zoom.medium
-            )
+            )) {
+                self.getModalCafePlaceInfo(googlePlaceId: connectedCafeInfo.googlePlaceId)
+            }
             self.isBottomSheetOpened = true
         }
     }
@@ -226,7 +243,7 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
-    func drawMarkers(cafeInfos: CafeInfos) async {
+    func drawMarkers(cafeInfos: CafeInfos, selectedCafeInfoId: Int = 0) async {
         self.markers.forEach { marker in
             marker.mapView = nil
         }
@@ -238,7 +255,6 @@ final class CafeViewModel: BaseViewModel {
             if let markerIcon = getCrowdedMarkerUIImage(crowded: cafeInfo.getMinCrowded()) {
                 newMarker.iconImage = NMFOverlayImage(image: markerIcon)
             }
-            newMarker.tag = cafeInfo.isAssociated() ? MarkerTag.isAssociated : MarkerTag.isNotAssociated
             newMarker.position = NMGLatLng(lat: cafeInfo.latitude, lng: cafeInfo.longitude)
             newMarker.captionAligns = [.top]
             newMarker.height = 36.0
@@ -248,9 +264,31 @@ final class CafeViewModel: BaseViewModel {
             newMarker.subCaptionTextSize = 15.0
             newMarker.subCaptionColor = cafeInfo.getMinCrowded().toCrowded().uiTextColor
             newMarker.subCaptionHaloColor = cafeInfo.getMinCrowded().toCrowded().uiColor
+            
+            if cafeInfo.id == selectedCafeInfoId {
+                newMarker.captionText = cafeInfo.name
+                newMarker.subCaptionText = cafeInfo.getMinCrowded().toCrowded().string
+                newMarker.height = 48.0
+                newMarker.width = 41.0
+                newMarker.zIndex = 3
+            }
+            
             newMarker.touchHandler = { (overlay: NMFOverlay) -> Bool in
+                if cafeInfo.id != self.modalCafeInfo.id {
+                    self.interstitialAdCounter += 1
+                }
                 self.clearModal()
-                self.animateToShortDistance = NMGLatLng(lat: cafeInfo.latitude, lng: cafeInfo.longitude)
+                self.modalCafeInfo = cafeInfo
+                self.modalCafe = cafeInfo.cafes.first ?? Cafe.empty
+                self.updateCameraPosition(
+                    NMFCameraPosition(
+                        NMGLatLng(lat: cafeInfo.latitude, lng: cafeInfo.longitude),
+                        zoom: self.lastCameraPosition.zoom
+                    ),
+                    isShortD: true
+                ) {
+                    self.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
+                }
                 if let selectedMarker = self.selectedMarker {
                     selectedMarker.captionText = ""
                     selectedMarker.subCaptionText = ""
@@ -264,36 +302,32 @@ final class CafeViewModel: BaseViewModel {
                 newMarker.height = 48.0
                 newMarker.width = 41.0
                 newMarker.zIndex = 3
-                if cafeInfo.id != self.modalCafeInfo.id {
-                    self.interstitialAdCounter += 1
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                    self.modalCafeInfo = cafeInfo
-                    self.modalCafe = cafeInfo.cafes.first ?? Cafe.empty
-                    self.isBottomSheetOpened = true
-                    self.getModalCafePlaceInfo(googlePlaceId: cafeInfo.googlePlaceId)
-                }
+                
+                self.isBottomSheetOpened = true
+                
                 return true
             }
             newMarkerList.append(newMarker)
         }
         
         self.markers = newMarkerList
+        self.isMarkerUpdateTriggered = true
     }
     
-    func toggleAssociatedCafeMarkersOnlyVisible() {
-        self.showAssociatedCafeMarkersOnly.toggle()
-        self.markers.forEach { marker in
-            marker.hidden = self.showAssociatedCafeMarkersOnly && marker.tag == MarkerTag.isNotAssociated
+    func updateCameraPosition(_ cameraPosition: NMFCameraPosition, isShortD: Bool = false, onMoveFinish: @escaping () -> Void = {}) {
+        self.cameraPosition = cameraPosition
+        if isShortD {
+            self.isShortDCameraUpdateTriggered = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                onMoveFinish()
+            }
+        } else {
+            self.isLongDCameraUpdateTriggered = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                onMoveFinish()
+            }
         }
     }
-    
-//    func getCafeInfoFromPlace(place: GMSPlace) -> CafeInfo? {
-//        let filteredCafeInfos = cafeInfos.filter { cafeInfo in
-//            place.placeID == cafeInfo.googlePlaceId
-//        }
-//        return filteredCafeInfos.isEmpty ? nil : filteredCafeInfos[0]
-//    }
     
     func getModalCafePlaceInfo(googlePlaceId: String) {
         fetchImagesWork?.cancel()
@@ -412,6 +446,31 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
+    func searchCafe(coreState: CoreState, query: String) async {
+        do {
+            let cafeInfoRepresentationList = try await cafeRepository.search(query: query)
+            var resList: CafeInfos = []
+            cafeInfoRepresentationList.forEach { cafeInfoRepresentationResponse in
+                resList.append(cafeInfoRepresentationResponse.getCafeInfo())
+            }
+            if !resList.isEmpty {
+                if let userLastLocation = coreState.userLastLocation {
+                    self.searchCafeInfos = resList.sorted(by: { cafeInfo1, cafeInfo2 in
+                        let dis1 = userLastLocation.distance(from: CLLocation(latitude: cafeInfo1.latitude, longitude: cafeInfo1.longitude))
+                        let dis2 = userLastLocation.distance(from: CLLocation(latitude: cafeInfo2.latitude, longitude: cafeInfo2.longitude))
+                        return dis1 < dis2
+                    })
+                } else {
+                    self.searchCafeInfos = resList
+                }
+            }
+        } catch CustomError.errorMessage(let msg){
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     func clearModalSnackBar() {
         self.isModalSnackBarOpened = false
         self.modalSnackBarType = SnackBarType.alert
@@ -502,7 +561,7 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
-    func expireMaster(coreState: CoreState, adWatched: Bool) async { 
+    func expireMaster(coreState: CoreState, adWatched: Bool) async {
         do {
             let cafeLog = try await cafeRepository.expireMaster(
                 accessToken: coreState.accessToken, cafeLogId: coreState.masterRoomCafeLog.id, adWatched: adWatched
@@ -529,6 +588,20 @@ final class CafeViewModel: BaseViewModel {
         }
     }
     
+    func addAdPoint(coreState: CoreState, cafeLogId: Int) async {
+        do {
+            coreState.user = try await cafeRepository.addAdPoint(accessToken: coreState.accessToken, cafeLogId: cafeLogId).getUser()
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in
+                await addAdPoint(coreState: coreState, cafeLogId: cafeLogId)
+            })
+        } catch CustomError.errorMessage(let msg){
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     
     
     // core
@@ -544,12 +617,8 @@ final class CafeViewModel: BaseViewModel {
                 let autoExpiredCafeLog = AutoExpiredCafeLog(
                     id: autoExpiredCafeLogRes.id, time: expiredTime, cafeLog: cafeLogRes.getCafeLog()
                 )
-                if coreState.masterRoomCafeLog.id == autoExpiredCafeLog.cafeLog.id {
-                    coreState.autoExpiredCafeLog = autoExpiredCafeLog
-                    coreState.isAutoExpiredDialogOpened = true
-                } else {
-                    await self.deleteAutoExpiredCafeLog(coreState: coreState, autoExpiredCafeLogId: autoExpiredCafeLog.id)
-                }
+                coreState.autoExpiredCafeLog = autoExpiredCafeLog
+                coreState.isAutoExpiredDialogOpened = true
             }
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState, jobWithNewAccessToken: { newAccessToken in

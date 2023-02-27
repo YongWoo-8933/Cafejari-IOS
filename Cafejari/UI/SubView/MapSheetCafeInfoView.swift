@@ -15,8 +15,6 @@ struct MapSheetCafeInfoView: View {
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var cafeViewModel: CafeViewModel
     
-    @Binding var isBottomSheetOpened: Bool
-    
     @State private var isOpeningHourOpened = false
     @State private var isWallSocketInfoOpened = false
     
@@ -173,7 +171,7 @@ struct MapSheetCafeInfoView: View {
             
             VerticalSpacer(.moreLarge)
             
-            VStack(spacing: .large) {
+            VStack(alignment: .leading, spacing: .large) {
                 HStack {
                     let address = cafeViewModel.modalCafeInfo.city + " " +  cafeViewModel.modalCafeInfo.gu + " " +  cafeViewModel.modalCafeInfo.address
                     Button {
@@ -284,14 +282,31 @@ struct MapSheetCafeInfoView: View {
                         .underline()
                         .foregroundColor(.moreHeavyGray)
                         .onTapGesture {
-                            isBottomSheetOpened = false
-                            coreState.navigateToWebView(
-                                "매장 상세 정보",
-                                "https://m.search.naver.com/search.naver?sm=mtp_hty.top&where=m&query=\(cafeViewModel.modalCafeInfo.name)"
-                            )
+                            cafeViewModel.collapseBottomSheet {
+                                coreState.navigateToWebView(
+                                    "매장 상세 정보",
+                                    "https://m.search.naver.com/search.naver?sm=mtp_hty.top&where=m&query=\(cafeViewModel.modalCafeInfo.name)"
+                                )
+                            }
                         }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                
+                VerticalSpacer(.small)
+                
+                Button {
+                    cafeViewModel.collapseBottomSheet {
+                        coreState.navigate(Screen.CafeCorrection.route)
+                    }
+                } label: {
+                    Text("매장정보 알려주고 100P 받기")
+                        .foregroundColor(.primary)
+                        .font(.caption.bold())
+                        .padding(.horizontal, .large)
+                        .frame(height: 32)
+                        .roundBorder(cornerRadius: 16, lineWidth: 2, borderColor: .primary)
+                }
+                .cornerRadius(16)
             }
         }
         .padding(.moreLarge)

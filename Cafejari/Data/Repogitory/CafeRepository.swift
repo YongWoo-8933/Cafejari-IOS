@@ -15,10 +15,12 @@ protocol CafeRepository {
     func putCrowded(accessToken: String, cafeLogId: Int, crowded: Int) async throws -> CafeLogResponse
     func deleteCafeDetailLog(accessToken: String, cafeDetailLogId: Int) async throws -> CafeLogResponse
     func expireMaster(accessToken: String, cafeLogId: Int, adWatched: Bool) async throws -> CafeLogResponse
+    func addAdPoint(accessToken: String, cafeLogId: Int) async throws -> UserResponse
     func fetchUnExpiredCafeLog(accessToken: String) async throws -> [CafeLogResponse]
     func fetchAutoExpiredCafeLog(accessToken: String) async throws -> AutoExpiredCafeLogResponse
     func deleteAutoExpiredCafeLog(accessToken: String, autoExpiredCafeLogId: Int) async throws
     func thumbsUp(accessToken: String, recentLogId: Int, isAdWatched: Bool) async throws -> UserResponse
+    func search(query: String) async throws -> [CafeInfoRepresentationResponse]
 }
 
 
@@ -245,6 +247,39 @@ final class CafeRepositoryImpl: CafeRepository {
         }
     }
     
+    func addAdPoint(accessToken: String, cafeLogId: Int) async throws -> UserResponse {
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.post(
+                urlString: httpRoute.adPoint(),
+                accessToken: accessToken,
+                requestBody: ["cafe_log_id": cafeLogId]
+            )
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if httpUrlRes.statusCode == 401 {
+                _ = try JSONDecoder().decode(TokenExpiredErrorResponse.self, from: data)
+                throw CustomError.accessTokenExpired
+                
+            } else if (200 ..< 300).contains(httpUrlRes.statusCode) {
+                return try JSONDecoder().decode(UserResponse.self, from: data)
+                
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+            
+        } catch CustomError.accessTokenExpired {
+            throw CustomError.accessTokenExpired
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
+    }
+    
     func fetchUnExpiredCafeLog(accessToken: String) async throws -> [CafeLogResponse] {
         do {
             let urlSession = URLSession.shared
@@ -372,6 +407,32 @@ final class CafeRepositoryImpl: CafeRepository {
             
         } catch CustomError.accessTokenExpired {
             throw CustomError.accessTokenExpired
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
+    }
+    
+    
+    func search(query: String) async throws -> [CafeInfoRepresentationResponse] {
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.get(
+                urlString: httpRoute.search(query: query)
+            )
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if (200 ..< 300).contains(httpUrlRes.statusCode) {
+                return try JSONDecoder().decode([CafeInfoRepresentationResponse].self, from: data)
+                
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+            
         } catch CustomError.errorMessage(let msg) {
             throw CustomError.errorMessage(msg)
         } catch let error as NSError {

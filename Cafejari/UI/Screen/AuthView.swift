@@ -10,7 +10,7 @@ import SwiftUI
 struct AuthView: View {
     
     private enum Field: Int, CaseIterable {
-        case nickname, phoneNumber, authNumber
+        case nickname, phoneNumber, authNumber, recommendNickname
     }
     
     @EnvironmentObject private var coreState: CoreState
@@ -23,11 +23,13 @@ struct AuthView: View {
     
     @State private var temp: String = "010"
     @State private var nickname: String = ""
+    @State private var recommendNickname: String = ""
     @State private var phoneNumber: String = ""
     @State private var authNumber: String = ""
     @State private var isAutoLoginOn: Bool = true
     @State private var isSmsSent: Bool = false
     @State private var isSmsAuthed: Bool = false
+    @State private var isRecommendNicknameChecked: Bool = false
     
     @FocusState private var focusedField: Field?
     
@@ -131,126 +133,172 @@ struct AuthView: View {
                     }
                     .disabled(!(isTosAgreed && isPrivacyAgreed))
                     
+                    VerticalSpacer(.moreLarge)
+                    
                 } else {
                     // 약관동의 후
-                    VStack(alignment: .leading) {
-                        TextField("닉네임", text: $nickname)
-                            .textFieldStyle(SingleLineTextFieldStyle())
-                            .focused($focusedField, equals: Field.nickname)
-                        VStack(alignment: .leading, spacing: .small) {
-                            Text(nickname.isNicknameLengthValid() ? "닉네임 길이가 적당합니다" : "닉네임은 2~10자로 정해주세요")
-                                .foregroundColor(nickname.isNicknameLengthValid() ? .lightGray : .textPrimary)
-                            Text(nickname.hasSpecialChar() || nickname.isEmpty ? "특수문자 및 공백이 허용되지 않습니다" : "닉네임 구성이 유효합니다")
-                                .foregroundColor(nickname.hasSpecialChar() || nickname.isEmpty ? .textPrimary : .lightGray)
-                        }
-                    }
-                        
-                    VerticalSpacer(.moreLarge)
-                        
-                    VStack(alignment: .leading) {
-                        GeometryReader { geo in
-                            HStack(spacing: .medium) {
-                                TextField("010", text: $temp)
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            VStack(alignment: .leading) {
+                                TextField("닉네임", text: $nickname)
                                     .textFieldStyle(SingleLineTextFieldStyle())
-                                    .disabled(true)
-                                    .frame(width: geo.size.width / 4 - CGFloat.medium * 2)
-                                
-                                TextField("전화번호", text: $phoneNumber)
-                                    .textFieldStyle(SingleLineTextFieldStyle())
-                                    .frame(width: geo.size.width / 2)
-                                    .keyboardType(.numberPad)
-                                    .focused($focusedField, equals: Field.phoneNumber)
-                                    .onChange(of: phoneNumber) { newValue in
-                                        if(newValue.count == 8){
-                                            focusedField = nil
-                                        }
-                                    }
-                                
-                                Button {
-                                    isSmsAuthed = false
-                                    Task {
-                                        await loginViewModel.sendSms(coreState: coreState, phoneNumber: phoneNumber) {
-                                            isSmsSent = true
-                                        }
-                                    }
-                                } label: {
-                                    Text(isSmsSent ? "재요청" : "인증요청")
-                                        .font(.headline.bold())
-                                        .foregroundColor(.white)
-                                        .frame(width: geo.size.width / 4, height: 60)
-                                        .background(Color.moreHeavyGray.opacity(phoneNumber.count == 8 ? 1 : 0.3))
-                                        .cornerRadius(.small)
+                                    .focused($focusedField, equals: Field.nickname)
+                                VStack(alignment: .leading, spacing: .small) {
+                                    Text(nickname.isNicknameLengthValid() ? "닉네임 길이가 적당합니다" : "닉네임은 2~10자로 정해주세요")
+                                        .foregroundColor(nickname.isNicknameLengthValid() ? .lightGray : .textPrimary)
+                                    Text(nickname.hasSpecialChar() || nickname.isEmpty ? "특수문자 및 공백이 허용되지 않습니다" : "닉네임 구성이 유효합니다")
+                                        .foregroundColor(nickname.hasSpecialChar() || nickname.isEmpty ? .textPrimary : .lightGray)
                                 }
-                                .disabled(phoneNumber.count != 8)
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .frame(height: 60)
-                        
-                        Text(phoneNumber.count == 8 ? "전화번호가 유효합니다" : "하이픈(-) 없이 뒷번호 8자리를 입력해주세요")
-                            .foregroundColor(phoneNumber.count == 8 ? .lightGray : .textPrimary)
-                    }
-                    
-                    VerticalSpacer(.moreLarge)
-                    
-                    VStack(alignment: .leading) {
-                        GeometryReader { geo in
-                            HStack(spacing: .medium) {
-                                TextField("인증번호", text: $authNumber)
-                                    .textFieldStyle(SingleLineTextFieldStyle())
-                                    .frame(width: geo.size.width * 0.75 - CGFloat.medium)
-                                    .keyboardType(.numberPad)
-                                    .focused($focusedField, equals: Field.authNumber)
-                                    .onChange(of: authNumber) { newValue in
-                                        if(newValue.count == 6) {
-                                            focusedField = nil
-                                        }
-                                    }
                                 
-                                Button {
-                                    Task {
-                                        await loginViewModel.authSms(coreState: coreState, phoneNumber: phoneNumber,authNumber: authNumber) {
-                                            isSmsAuthed = true
+                            VerticalSpacer(.moreLarge)
+                                
+                            VStack(alignment: .leading) {
+                                GeometryReader { geo in
+                                    HStack(spacing: .medium) {
+                                        TextField("010", text: $temp)
+                                            .textFieldStyle(SingleLineTextFieldStyle())
+                                            .disabled(true)
+                                            .frame(width: geo.size.width / 4 - CGFloat.medium * 2)
+                                        
+                                        TextField("전화번호", text: $phoneNumber)
+                                            .textFieldStyle(SingleLineTextFieldStyle())
+                                            .frame(width: geo.size.width / 2)
+                                            .keyboardType(.numberPad)
+                                            .focused($focusedField, equals: Field.phoneNumber)
+                                            .onChange(of: phoneNumber) { newValue in
+                                                if(newValue.count == 8){
+                                                    focusedField = nil
+                                                }
+                                            }
+                                        
+                                        Button {
+                                            isSmsAuthed = false
+                                            Task {
+                                                await loginViewModel.sendSms(coreState: coreState, phoneNumber: phoneNumber) {
+                                                    isSmsSent = true
+                                                }
+                                            }
+                                        } label: {
+                                            Text(isSmsSent ? "재요청" : "인증요청")
+                                                .font(.headline.bold())
+                                                .foregroundColor(.white)
+                                                .frame(width: geo.size.width / 4, height: 60)
+                                                .background(Color.moreHeavyGray.opacity(phoneNumber.count == 8 ? 1 : 0.3))
+                                                .cornerRadius(.small)
+                                        }
+                                        .disabled(phoneNumber.count != 8)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .frame(height: 60)
+                                
+                                Text(phoneNumber.count == 8 ? "전화번호가 유효합니다" : "하이픈(-) 없이 뒷번호 8자리를 입력해주세요")
+                                    .foregroundColor(phoneNumber.count == 8 ? .lightGray : .textPrimary)
+                            }
+                            
+                            VerticalSpacer(.moreLarge)
+                            
+                            VStack(alignment: .leading) {
+                                GeometryReader { geo in
+                                    HStack(spacing: .medium) {
+                                        TextField("인증번호", text: $authNumber)
+                                            .textFieldStyle(SingleLineTextFieldStyle())
+                                            .frame(width: geo.size.width * 0.75 - CGFloat.medium)
+                                            .keyboardType(.numberPad)
+                                            .focused($focusedField, equals: Field.authNumber)
+                                            .onChange(of: authNumber) { newValue in
+                                                if(newValue.count == 6) {
+                                                    focusedField = nil
+                                                }
+                                            }
+                                        
+                                        Button {
+                                            Task {
+                                                await loginViewModel.authSms(coreState: coreState, phoneNumber: phoneNumber,authNumber: authNumber) {
+                                                    isSmsAuthed = true
+                                                }
+                                            }
+                                        } label: {
+                                            Text(isSmsAuthed ? "인증성공" : "인증")
+                                                .font(.headline.bold())
+                                                .foregroundColor(.white)
+                                                .frame(width: geo.size.width / 4, height: 60)
+                                                .background(Color.moreHeavyGray.opacity(authNumber.count == 6 && !isSmsAuthed ? 1 : 0.3))
+                                                .cornerRadius(.small)
+                                        }
+                                        .disabled(authNumber.count != 6 || isSmsAuthed)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .frame(height: 60)
+                                
+                                Text(authNumber.count == 6 ? "인증번호가 유효합니다" : "인증번호는 6자리 숫자입니다")
+                                    .foregroundColor(authNumber.count == 6 ? .lightGray : .textPrimary)
+                            }
+                                
+                            VerticalSpacer(.moreLarge)
+
+                            VStack(alignment: .leading) {
+                                GeometryReader { geo in
+                                    HStack(spacing: .medium) {
+                                        TextField("(선택)추천인 닉네임", text: $recommendNickname)
+                                            .textFieldStyle(SingleLineTextFieldStyle())
+                                            .frame(width: geo.size.width * 0.75 - CGFloat.medium)
+                                            .focused($focusedField, equals: Field.recommendNickname)
+
+                                        Button {
+                                            Task {
+                                                await loginViewModel.preRecommend(coreState: coreState, nickname: recommendNickname){
+                                                    isRecommendNicknameChecked = true
+                                                }
+                                                focusedField = nil
+                                            }
+                                        } label: {
+                                            Text("확인")
+                                                .font(.headline.bold())
+                                                .foregroundColor(.white)
+                                                .frame(width: geo.size.width / 4, height: 60)
+                                                .background(Color.moreHeavyGray)
+                                                .cornerRadius(.small)
                                         }
                                     }
-                                } label: {
-                                    Text(isSmsAuthed ? "인증성공" : "인증")
-                                        .font(.headline.bold())
-                                        .foregroundColor(.white)
-                                        .frame(width: geo.size.width / 4, height: 60)
-                                        .background(Color.moreHeavyGray.opacity(authNumber.count == 6 && !isSmsAuthed ? 1 : 0.3))
-                                        .cornerRadius(.small)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
-                                .disabled(authNumber.count != 6 || isSmsAuthed)
+                                .frame(height: 60)
+                                VStack(alignment: .leading, spacing: .small) {
+                                    Text("추천인 작성시 500P 지급!")
+                                        .foregroundColor(isRecommendNicknameChecked ? .lightGray : .textPrimary)
+                                    Text("'확인'을 눌러 유효한지 확인")
+                                        .foregroundColor(isRecommendNicknameChecked ? .lightGray : .textPrimary)
+                                }
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .frame(height: 60)
-                        
-                        Text(authNumber.count == 6 ? "인증번호가 유효합니다" : "인증번호는 6자리 숫자입니다")
-                            .foregroundColor(authNumber.count == 6 ? .lightGray : .textPrimary)
-                    }
-                    
-                    Spacer()
-                    
-                    FilledCtaButton(
-                        text: "회원가입 완료",
-                        backgroundColor: .primary.opacity(isTosAgreed && isPrivacyAgreed && isAgreementCheckComplete && !nickname.hasSpecialChar() && nickname.isNicknameLengthValid() && phoneNumber.count == 8 && authNumber.count == 6 && isSmsSent && isSmsAuthed ? 1 : 0.5),
-                        isProgress: loginViewModel.isAuthorizeLoading
-                    ) {
-                        Task {
-                            await loginViewModel.authorize(coreState: coreState,nickname: nickname, phoneNumber: phoneNumber) {
-                                await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
+
+                            VerticalSpacer(60)
+                            
+                            FilledCtaButton(
+                                text: "회원가입 완료",
+                                backgroundColor: .primary.opacity(isTosAgreed && isPrivacyAgreed && isAgreementCheckComplete && !nickname.hasSpecialChar() && nickname.isNicknameLengthValid() && phoneNumber.count == 8 && authNumber.count == 6 && isSmsSent && isSmsAuthed ? 1 : 0.5),
+                                isProgress: loginViewModel.isAuthorizeLoading
+                            ) {
+                                Task {
+                                    await loginViewModel.authorize(coreState: coreState,nickname: nickname, phoneNumber: phoneNumber) {
+                                        await loginViewModel.recommend(coreState: coreState, nickname: recommendNickname)
+                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
+                                    }
+                                }
                             }
+                            .disabled(!(isTosAgreed && isPrivacyAgreed && isAgreementCheckComplete && !nickname.hasSpecialChar() && nickname.isNicknameLengthValid() && phoneNumber.count == 8 && authNumber.count == 6 && isSmsSent && isSmsAuthed))
+                    
+                            VerticalSpacer(.moreLarge)
                         }
                     }
-                    .disabled(!(isTosAgreed && isPrivacyAgreed && isAgreementCheckComplete && !nickname.hasSpecialChar() && nickname.isNicknameLengthValid() && phoneNumber.count == 8 && authNumber.count == 6 && isSmsSent && isSmsAuthed))
+                    .scrollIndicators(.hidden)
                 }
-                
-                VerticalSpacer(.moreLarge)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.moreLarge)
+            .padding(.horizontal, .moreLarge)
+            .padding(.top, .moreLarge)
         }
         .navigationBarBackButtonHidden()
         .addKeyboardDownButton {

@@ -235,6 +235,18 @@ final class LoginViewModel: BaseViewModel {
         }
     }
     
+    func preRecommend(coreState: CoreState, nickname: String, onSuccess: () -> Void) async {
+        do {
+            let res = try await loginRepogitory.postPreRecommendation(nickname: nickname)
+            onSuccess()
+            coreState.showSnackBar(message: "\(res.nickname)님은 추천 가능합니다")
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: .error)
+        } catch {
+            print(error)
+        }
+    }
+    
     func authorize(
         coreState: CoreState, nickname: String, phoneNumber: String, onSuccess: () async -> Void) async {
         do {
@@ -295,6 +307,24 @@ final class LoginViewModel: BaseViewModel {
         } catch {
             print(error.localizedDescription)
             isAuthorizeLoading = false
+        }
+    }
+    
+    func recommend(coreState: CoreState, nickname: String) async {
+        do {
+            if !nickname.isEmpty {
+                let userRes = try await loginRepogitory.recommendation(accessToken: coreState.accessToken, nickname: nickname)
+                coreState.user = userRes.getUser()
+            }
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState) { newAccessToken in
+                await recommend(coreState: coreState, nickname: nickname)
+            }
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+            isAuthorizeLoading = false
+        } catch {
+            print(error.localizedDescription)
         }
     }
     

@@ -14,17 +14,12 @@ import GooglePlaces
 
 struct MapView: View {
     
-    @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) var scenePhase
     
     @EnvironmentObject private var coreState: CoreState
     @EnvironmentObject private var informationViewModel: InformationViewModel
     @EnvironmentObject private var cafeViewModel: CafeViewModel
     @EnvironmentObject private var adViewModel: AdViewModel
-    
-    @State private var isMenuButtonOpened = false
-    @State private var isAssociatedCafeDescriptionOpened = false
-    @State private var isRefreshButtonVisible = false
     
     init() {
         let appearance = UITabBarAppearance()
@@ -44,351 +39,34 @@ struct MapView: View {
                 NavigationStack(path: $coreState.navigationPath) {
                     TabView(selection: $coreState.selectedBottomBarItem) {
                         // Map tap
-                        ZStack {
-                            if coreState.isLogedIn && coreState.isPermissionChecked {
-                                NaverMapView(
-                                    markers: $cafeViewModel.markers,
-                                    animateToLongDistance: $cafeViewModel.animateToLongDistance,
-                                    animateToShortDistance: $cafeViewModel.animateToShortDistance,
-                                    startCameraPosition: NMFCameraPosition(
-                                        NMGLatLng(
-                                            lat: coreState.userLastLocation?.coordinate.latitude ?? Locations.sinchon.cameraPosition.target.lat,
-                                            lng: coreState.userLastLocation?.coordinate.longitude ?? Locations.sinchon.cameraPosition.target.lng
-                                        ),
-                                        zoom: Zoom.medium
-                                    ),
-                                    closeMenu: { isMenuButtonOpened = false },
-                                    onCameraPositionChanged: { cameraPosition in
-                                        cafeViewModel.lastCameraPosition = cameraPosition
+                        MapFrameView()
+                            .sheet(isPresented: $cafeViewModel.isBottomSheetOpened) {
+                                ZStack(alignment: .bottom) {
+                                    VStack(spacing: 0) {
+                                        VerticalSpacer(.moreLarge)
                                         
-                                        if let work = cafeViewModel.hideRefreshCafeInfoWork {
-                                            work.cancel()
-                                        }
-                                        isRefreshButtonVisible = true
-                                        cafeViewModel.hideRefreshCafeInfoWork = DispatchWorkItem(block: {
-                                            isRefreshButtonVisible = false
-                                            cafeViewModel.hideRefreshCafeInfoWork = nil
-                                        })
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: cafeViewModel.hideRefreshCafeInfoWork!)
-                                    }
-                                )
-                                .ignoresSafeArea(edges: .top)
-                                .task {
-                                    if await informationViewModel.isTodayPopUpVisible() && !informationViewModel.isPopUpTriggered {
-                                        await informationViewModel.getPopUpNotifications(coreState: coreState)
-                                    }
-                                }
-                            }
-                            
-                            VStack {
-                                HStack {
-                                    VStack {
-                                        Text("🎉")
-                                            .font(.subtitle)
-                                        Text("EVENT")
-                                            .font(Font.system(size: 10, weight: .bold))
-                                            .foregroundColor(.white)
-                                    }
-                                    if let event = informationViewModel.randomEvent {
-                                        Text(event.preview)
-                                            .font(.body)
-                                            .foregroundColor(.white)
-                                    } else {
-                                        Text("다양한 이벤트를 확인하고, 포인트를 얻어가세요!")
-                                            .font(.body)
-                                            .foregroundColor(.white)
-                                    }
-                                    Spacer()
-                                }
-                                .padding(.horizontal, .large)
-                                .frame(height: 52, alignment: .leading)
-                                .background(Color.black.opacity(0.5))
-                                .cornerRadius(.medium)
-                                .onTapGesture { coreState.navigate(Screen.Promotion.route) }
-                                
-                                HStack {
-                                    Button {
-                                        cafeViewModel.toggleAssociatedCafeMarkersOnlyVisible()
-                                        isRefreshButtonVisible = false
-                                        if let work = cafeViewModel.hideRefreshCafeInfoWork {
-                                            work.cancel()
-                                        }
-                                        if cafeViewModel.showAssociatedCafeMarkersOnly {
-                                            if let associatedCafeDescriptionCloseWork = cafeViewModel.associatedCafeDescriptionCloseWork {
-                                                associatedCafeDescriptionCloseWork.cancel()
-                                            }
-                                            isAssociatedCafeDescriptionOpened = true
-                                            cafeViewModel.associatedCafeDescriptionCloseWork = DispatchWorkItem(block: {
-                                                isAssociatedCafeDescriptionOpened = false
-                                                cafeViewModel.associatedCafeDescriptionCloseWork = nil
-                                            })
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: cafeViewModel.associatedCafeDescriptionCloseWork!)
-                                        }
-                                    } label: {
-                                        HStack(spacing: .small) {
-                                            Image(cafeViewModel.showAssociatedCafeMarkersOnly ? "reversed_stamp_icon" : "stamp_icon")
-                                                .resizable()
-                                                .frame(width: 18, height: 18)
-                                            Text("제휴카페")
-                                                .foregroundColor(cafeViewModel.showAssociatedCafeMarkersOnly ? .white : .black)
-                                        }
-                                        .padding(.leading, .medium)
-                                        .padding(.trailing, .large)
-                                        .frame(height: 32)
-                                        .background(cafeViewModel.showAssociatedCafeMarkersOnly ? Color.primary : Color.white)
-                                        .cornerRadius(16)
-                                    }
-                                    .background(Color.white)
-                                    .cornerRadius(16)
-                                    .shadow(radius: cafeViewModel.showAssociatedCafeMarkersOnly ? 0 : 1)
-                                    
-                                    Button {
-                                        informationViewModel.isOnSaleCafeDialogOpened = true
-                                    } label: {
-                                        HStack(spacing: .small) {
-                                            Image("sale_tag")
-                                                .resizable()
-                                                .frame(width: 18, height: 18)
-                                            Text("할인중인 카페")
-                                                .foregroundColor(.black)
-                                        }
-                                        .padding(.leading, .medium)
-                                        .padding(.trailing, .large)
-                                        .frame(height: 32)
-                                        .background(Color.white)
-                                        .cornerRadius(16)
-                                    }
-                                    .background(Color.white)
-                                    .cornerRadius(16)
-                                    .shadow(radius: 1)
-                                    
-                                    Spacer()
-                                    
-                                    HStack {
-                                        Text("지역")
-                                        Image(systemName: "chevron.\(isMenuButtonOpened ? "up" : "down")")
-                                            .font(.caption)
-                                    }
-                                    .padding(.horizontal, .medium)
-                                    .frame(height: 32)
-                                    .background(Color.white)
-                                    .cornerRadius(.medium)
-                                    .roundBorder(cornerRadius: .medium, lineWidth: 1, borderColor: isMenuButtonOpened ? .black : .lightGray)
-                                    .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                    .onTapGesture {
-                                        isMenuButtonOpened.toggle()
-                                        isRefreshButtonVisible = false
-                                        if let work = cafeViewModel.hideRefreshCafeInfoWork {
-                                            work.cancel()
-                                        }
-                                    }
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                
-                                ZStack(alignment: .topLeading) {
-                                    VStack {
-                                        if isRefreshButtonVisible {
-                                            Button {
-                                                if !cafeViewModel.cafeInfoLoading {
-                                                    Task {
-                                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
-                                                    }
-                                                }
-                                            } label: {
-                                                HStack(spacing: .small) {
-                                                    Image(systemName: "arrow.clockwise")
-                                                        .foregroundColor(.primary)
-                                                        .font(.caption2.bold())
-                                                    Text(cafeViewModel.cafeInfoLoading ? "카페 정보 로드중.." : "현 지도에서 검색")
-                                                        .foregroundColor(.primary)
-                                                        .font(.caption.bold())
-                                                }
-                                                .padding(.horizontal, .large)
-                                                .frame(height: 32)
-                                                .background(Color.white)
-                                                .roundBorder(cornerRadius: 16, lineWidth: 2, borderColor: .primary)
-                                            }
-                                            .background(Color.white)
-                                            .cornerRadius(16)
-                                            .shadow(radius: 1)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .animation(.easeInOut, value: isRefreshButtonVisible)
-                                    .padding(.top, .moreLarge)
-                                    
-                                    VStack {
-                                        if isAssociatedCafeDescriptionOpened {
-                                            VStack(alignment: .leading, spacing: .medium) {
-                                                Text("제휴 카페란?")
-                                                    .font(.body.bold())
-                                                    .foregroundColor(.primary)
-                                                Text("카페자리와 제휴를 맺고\n매장에서 직접 혼잡도 정보를\n제공해주는 카페를 말해요")
-                                                    .font(.caption)
-                                                    .foregroundColor(.heavyGray)
-                                            }
-                                            .padding(.large)
-                                            .background(Color.white)
-                                            .cornerRadius(.medium)
-                                            .shadow(radius: 1)
-                                        }
-                                        
-                                        if adViewModel.isInterstitialAdNoticeVisible {
-                                            Text("\(adViewModel.interstitialAdNoticeSecond)초 후에 광고가 표시됩니다")
-                                                .font(.body.bold())
-                                                .foregroundColor(.white)
-                                                .padding(.medium)
-                                                .background(Color.black.opacity(0.5))
-                                                .cornerRadius(.medium)
-                                                .offset(x: 0, y: .small)
-                                        }
-                                    }
-                                    .animation(.easeInOut, value: isAssociatedCafeDescriptionOpened)
-                                    
-                                    HStack(alignment: .top) {
-                                        Spacer()
-                                        VStack(spacing: 0) {
-                                            if isMenuButtonOpened {
-                                                ScrollView {
-                                                    LazyVStack(spacing: 0) {
-                                                        ForEach(Locations.locationList, id: \.name) { location in
-                                                            HStack {
-                                                                Image("gray_coffee_bean_marker")
-                                                                Spacer()
-                                                                Text(location.name)
-                                                                Spacer()
-                                                            }
-                                                            .padding(.horizontal, .large)
-                                                            .frame(width: 140, height: 48, alignment: .leading)
-                                                            .background(Color.white)
-                                                            .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.moreLightGray)
-                                                            .onTapGesture {
-                                                                isMenuButtonOpened = false
-                                                                cafeViewModel.animateToLongDistance = location.cameraPosition
-                                                                Task {
-                                                                    await cafeViewModel.getNearbyCafeInfos(
-                                                                        coreState: coreState,
-                                                                        cameraPosition: location.cameraPosition
-                                                                    )
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                .scrollIndicators(.never)
-                                                .frame(height: 48 * 5 + 24)
-                                                
-                                                Divider()
-                                                Divider()
-                                                
-                                                HStack {
-                                                    Image(systemName: "plus.circle.fill")
+                                        // 마커, 카페 이름
+                                        HStack(spacing: .large) {
+                                            if let place = cafeViewModel.modalCafePlace {
+                                                if place.isOpen() == .closed {
+                                                    Image("gray_coffee_bean_marker")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 24)
+                                                    
+                                                    Text(cafeViewModel.modalCafeInfo.name + " (영업종료)")
+                                                        .font(.headline.bold())
                                                         .foregroundColor(.lightGray)
-                                                        .font(.headline)
-                                                    Spacer()
-                                                    Text("카페 추가하기")
-                                                    Spacer()
+                                                } else {
+                                                    Image("coffee_bean_marker")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 24)
+                                                    
+                                                    Text(cafeViewModel.modalCafeInfo.name)
+                                                        .font(.headline.bold())
+                                                        .foregroundColor(.primary)
                                                 }
-                                                .padding(.horizontal, .large)
-                                                .frame(width: 140, height: 48, alignment: .leading)
-                                                .background(Color.white)
-                                                .roundBorder(cornerRadius: 0, lineWidth: 1, borderColor: Color.moreLightGray)
-                                                .onTapGesture {
-                                                    isMenuButtonOpened = false
-                                                    coreState.navigate(Screen.CafeInquiry.route)
-                                                }
-                                            }
-                                        }
-                                        .frame(width: 140, height: isMenuButtonOpened ? 48 * 6 + 24 + 1 : 0, alignment: .top)
-                                        .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                        .background(Color.white)
-                                        .cornerRadius(.large)
-                                        .shadow(radius: 1)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: isMenuButtonOpened ? 48 * 6 + 24 + 1 : 0)
-                                    .animation(Animation.easeInOut, value: isMenuButtonOpened)
-                                }
-                                Spacer()
-                            }
-                            .padding(.horizontal, .moreLarge)
-                            .padding(.vertical, .large)
-                            
-                            ZStack {
-                                VStack(alignment: .trailing) {
-                                    HStack {
-                                        if coreState.isMasterActivated {
-                                            Button {
-                                                coreState.navigate(Screen.MasterRoom.route)
-                                            } label: {
-                                                Text("혼잡도 공유 이어서 하기")
-                                                    .font(.headline.bold())
-                                                    .frame(width: 240, height: 52)
-                                                    .foregroundColor(.white)
-                                                    .background(Color.primary)
-                                                    .cornerRadius(26)
-                                            }
-                                            .background(Color.white)
-                                            .cornerRadius(26)
-                                        }
-                                        Spacer()
-                                        HStack {
-                                            Image(systemName: "location.fill")
-                                                .foregroundColor(.heavyGray)
-                                                .font(.subtitle.weight(.semibold))
-                                        }
-                                        .frame(width: 56, height: 56)
-                                        .background(.white)
-                                        .cornerRadius(28)
-                                        .shadow(radius: 2)
-                                        .onTapGesture {
-                                            if let clPosition = coreState.userLastLocation {
-                                                cafeViewModel.animateToLongDistance = NMFCameraPosition(
-                                                    NMGLatLng(lat: clPosition.coordinate.latitude, lng: clPosition.coordinate.longitude),
-                                                    zoom: Zoom.medium
-                                                )
-                                                Task {
-                                                    await cafeViewModel.getNearbyCafeInfos(
-                                                        coreState: coreState,
-                                                        cameraPosition: NMFCameraPosition(
-                                                            NMGLatLng(lat: clPosition.coordinate.latitude, lng: clPosition.coordinate.longitude),
-                                                            zoom: Zoom.small
-                                                        )
-                                                    )
-                                                }
-                                            } else {
-                                                coreState.requestPermissions()
-                                            }
-                                        }
-                                    }
-                                }
-                                .padding(.moreLarge)
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                        }
-                        .onChange(of: cafeViewModel.interstitialAdCounter, perform: { newValue in
-                            if newValue > 5 {
-                                adViewModel.showInterstital(willShowInterstitial: { cafeViewModel.isBottomSheetOpened = false })
-                                cafeViewModel.interstitialAdCounter = 0
-                            }
-                        })
-                        .sheet(isPresented: $cafeViewModel.isBottomSheetOpened) {
-                            ZStack(alignment: .bottom) {
-                                VStack(spacing: 0) {
-                                    VerticalSpacer(.moreLarge)
-                                    
-                                    // 마커, 카페 이름
-                                    HStack(spacing: .large) {
-                                        if let place = cafeViewModel.modalCafePlace {
-                                            if place.isOpen() == .closed {
-                                                Image("gray_coffee_bean_marker")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 24)
-                                                
-                                                Text(cafeViewModel.modalCafeInfo.name + " (영업종료)")
-                                                    .font(.headline.bold())
-                                                    .foregroundColor(.lightGray)
                                             } else {
                                                 Image("coffee_bean_marker")
                                                     .resizable()
@@ -399,128 +77,68 @@ struct MapView: View {
                                                     .font(.headline.bold())
                                                     .foregroundColor(.primary)
                                             }
-                                        } else {
-                                            Image("coffee_bean_marker")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 24)
-                                            
-                                            Text(cafeViewModel.modalCafeInfo.name)
-                                                .font(.headline.bold())
-                                                .foregroundColor(.primary)
+                                            Spacer()
                                         }
-                                        Spacer()
-                                    }
-                                    .padding(.moreLarge)
-                                    
-                                    // 내용
-                                    ScrollView {
-                                        if !cafeViewModel.modalCafeInfo.cafes.isEmpty {
-                                            LazyVStack(alignment: .leading, spacing: 0) {
-                                                MapSheetCafeCrowdedView(isBottomSheetOpened: $cafeViewModel.isBottomSheetOpened)
-                                                SecondaryDivider()
-                                                MapSheetCafeInfoView(isBottomSheetOpened: $cafeViewModel.isBottomSheetOpened)
-                                            }
-                                            .padding(.vertical, .large)
-                                        } else {
-                                            ProgressView()
-                                        }
-                                    }
-                                    .scrollIndicators(.never)
-                                    .presentationDetents([.fraction(0.48), .large])
-                                }
-                                
-                                SnackBar(
-                                    isSnackBarOpened: $cafeViewModel.isModalSnackBarOpened,
-                                    snackBarType: $cafeViewModel.modalSnackBarType,
-                                    content: $cafeViewModel.modalSnackBarContent,
-                                    onCloseButtonClick: { cafeViewModel.clearModalSnackBar() }
-                                )
-                                Dialog(
-                                    isDialogVisible: $cafeViewModel.isThumbsUpDialogOpened,
-                                    positiveButtonText: "빨리 볼게요",
-                                    negativeButtonText: "그냥 추천할래요",
-                                    onPositivebuttonClick: {
-                                        adViewModel.showRewardedInterstitial(
-                                            willShowRewardedInterstitial: { cafeViewModel.isBottomSheetOpened = false },
-                                            onAdWatched: {
-                                                Task {
-                                                    await cafeViewModel.thumbsUp (
-                                                        coreState: coreState,
-                                                        recentLogId: cafeViewModel.thumbsUpRecentLog.id,
-                                                        isAdWatched: true,
-                                                        onSuccess: {
-                                                            cafeViewModel.isBottomSheetOpened = false
-                                                            Task {
-                                                                await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
-                                                            }
-                                                        }
-                                                    )
+                                        .padding(.moreLarge)
+                                        
+                                        // 내용
+                                        ScrollView {
+                                            if !cafeViewModel.modalCafeInfo.cafes.isEmpty {
+                                                LazyVStack(alignment: .leading, spacing: 0) {
+                                                    MapSheetCafeCrowdedView()
+                                                    SecondaryDivider()
+                                                    MapSheetCafeInfoView()
                                                 }
-                                            },
-                                            onFail: {
-                                                cafeViewModel.showModalSnackBar(
-                                                    message: "광고가 준비중입니다. 잠시후에 시도하시거나 일반 추천을 활용해주세요", type: .error)
+                                                .padding(.vertical, .large)
+                                            } else {
+                                                ProgressView()
                                             }
-                                        )
-                                    },
-                                    onNegativebuttonClick: {
+                                        }
+                                        .scrollIndicators(.never)
+                                        .presentationDetents([.fraction(0.48), .large])
+                                    }
+                                    // sheet에서 동작하는 스낵바
+                                    SnackBar(
+                                        isSnackBarOpened: $cafeViewModel.isModalSnackBarOpened,
+                                        snackBarType: $cafeViewModel.modalSnackBarType,
+                                        content: $cafeViewModel.modalSnackBarContent,
+                                        onCloseButtonClick: { cafeViewModel.clearModalSnackBar() }
+                                    )
+                                    // 마스터 추천 다이얼로그
+                                    ThumbsUpDialog()
+                                }
+                            }
+                            .onChange(of: cafeViewModel.interstitialAdCounter, perform: { newValue in
+                                if newValue > 5 {
+                                    print("trigger")
+                                    adViewModel.showInterstital(willShowInterstitial: { cafeViewModel.isBottomSheetOpened = false })
+                                    cafeViewModel.interstitialAdCounter = 0
+                                }
+                            })
+                            .onChange(of: cafeViewModel.isBottomSheetOpened, perform: { _ in
+                                cafeViewModel.isThumbsUpDialogOpened = false
+                            })
+                            .onChange(of: coreState.selectedBottomBarItem, perform: { tapName in
+                                if tapName == BottomTab.Map.name {
+                                    if !cafeViewModel.cafeInfoRefreshDisabled {
                                         Task {
-                                            await cafeViewModel.thumbsUp (
-                                                coreState: coreState,
-                                                recentLogId: cafeViewModel.thumbsUpRecentLog.id,
-                                                isAdWatched: false,
-                                                onSuccess: {
-                                                    cafeViewModel.isBottomSheetOpened = false
-                                                    Task {
-                                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
-                                                    }
-                                                }
-                                            )
+                                            await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
                                         }
-                                    },
-                                    onDismiss: {
-                                        cafeViewModel.isThumbsUpDialogOpened = false
-                                    }
-                                ) {
-                                    Text("광고 보고 추천시 ")
-                                        .font(.headline)
-                                    +
-                                    Text("최대 4번")
-                                        .font(.headline.bold())
-                                    +
-                                    Text("\n추천이 가능해요!")
-                                        .font(.headline)
-                                    +
-                                    Text("\n\n*추천시 포인트 지급")
-                                        .foregroundColor(.moreHeavyGray)
-                                }
-                            }
-                        }
-                        .onChange(of: cafeViewModel.isBottomSheetOpened, perform: { _ in
-                            cafeViewModel.isThumbsUpDialogOpened = false
-                        })
-                        .onChange(of: coreState.selectedBottomBarItem, perform: { tapName in
-                            if tapName == BottomTab.Map.name {
-                                if !cafeViewModel.cafeInfoRefreshDisabled {
-                                    Task {
-                                        await cafeViewModel.getNearbyCafeInfos(coreState: coreState)
                                     }
                                 }
+                            })
+                            .task {
+                                if informationViewModel.unExpiredEvents.isEmpty && informationViewModel.expiredEvents.isEmpty {
+                                    await informationViewModel.getEvents(coreState: coreState)
+                                }
                             }
-                        })
-                        .task {
-                            if informationViewModel.unExpiredEvents.isEmpty && informationViewModel.expiredEvents.isEmpty {
-                                await informationViewModel.getEvents(coreState: coreState)
+                            .tabItem {
+                                Label(
+                                    BottomTab.Map.name,
+                                    systemImage: BottomTab.Map.SFImage
+                                )
                             }
-                        }
-                        .tabItem {
-                            Label(
-                                BottomTab.Map.name,
-                                systemImage: BottomTab.Map.SFImage
-                            )
-                        }
-                        .tag(BottomTab.Map.name)
+                            .tag(BottomTab.Map.name)
                         
                         
                         // Leaderboard tap
@@ -593,6 +211,8 @@ struct MapView: View {
                             WebView()
                         case Screen.PointHistory.route:
                             PointHistoryView()
+                        case Screen.CafeCorrection.route:
+                            CafeCorrectionView()
                         default:
                             EmptyView()
                         }
@@ -605,54 +225,9 @@ struct MapView: View {
                     content: $coreState.snackBarContent,
                     onCloseButtonClick: { coreState.clearSnackBar() }
                 )
+                
                 // 자동종료 다이얼로그
-                Dialog(
-                    isDialogVisible: $coreState.isAutoExpiredDialogOpened,
-                    positiveButtonText: "확인",
-                    negativeButtonText: "아니오",
-                    onPositivebuttonClick: {
-                        coreState.tapToProfile()
-                        coreState.navigateWithClear(Screen.MasterDetail.route)
-                        Task {
-                            if let autoExpiredCafeLog = coreState.autoExpiredCafeLog {
-                                await cafeViewModel.deleteAutoExpiredCafeLog(
-                                    coreState: coreState, autoExpiredCafeLogId: autoExpiredCafeLog.id)
-                                coreState.autoExpiredCafeLog = nil
-                            }
-                        }
-                    },
-                    onNegativebuttonClick: {
-                        Task {
-                            if let autoExpiredCafeLog = coreState.autoExpiredCafeLog {
-                                await cafeViewModel.deleteAutoExpiredCafeLog(
-                                    coreState: coreState, autoExpiredCafeLogId: autoExpiredCafeLog.id)
-                                coreState.autoExpiredCafeLog = nil
-                            }
-                        }
-                    },
-                    onDismiss: {
-                        Task {
-                            if let autoExpiredCafeLog = coreState.autoExpiredCafeLog {
-                                await cafeViewModel.deleteAutoExpiredCafeLog(
-                                    coreState: coreState, autoExpiredCafeLogId: autoExpiredCafeLog.id)
-                                coreState.autoExpiredCafeLog = nil
-                            }
-                        }
-                    }
-                ) {
-                    if let autoExpiredCafeLog = coreState.autoExpiredCafeLog {
-                        return Text("\(autoExpiredCafeLog.cafeLog.name) \(autoExpiredCafeLog.cafeLog.floor.toFloor())층\n\n")
-                            .font(.headline.bold())
-                        + Text("마스터 활동이 ")
-                        + Text("\(cafeViewModel.time.parseYearFrom(timeString: autoExpiredCafeLog.time)).\(cafeViewModel.time.parseMonthFrom(timeString: autoExpiredCafeLog.time)).\(cafeViewModel.time.parseDayFrom(timeString: autoExpiredCafeLog.time)) \(cafeViewModel.time.getAMPMHourMinuteStringFrom(timeString: autoExpiredCafeLog.time))")
-                            .font(.body.bold())
-                        + Text("에\n")
-                        + Text("자동 종료되었습니다. 확인하시겠습니까?")
-                            .baselineOffset(-.small)
-                    } else {
-                        return Text("")
-                    }
-                }
+                AutoExpiredLogDialog()
                 
                 // 세일중인 카페
                 OnSaleCafeDialog()
@@ -661,7 +236,7 @@ struct MapView: View {
                 PopUpDialog()
                 
                 // 온보딩
-                OnboardingDialog(isDialogVisible: $coreState.isOnboardingDialogOpened)
+                OnboardingDialog()
             }
             .task {
                 // 스플래쉬가 끝난 시점에서,

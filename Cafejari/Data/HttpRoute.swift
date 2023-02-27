@@ -43,6 +43,8 @@ struct HttpRoute {
     func googleLoginFinish() -> String { return "\(userBaseUrl)/google/login/finish/" }
     func appleLoginFinish() -> String { return "\(userBaseUrl)/apple/login/finish/" }
     func preAuthorization() -> String { return "\(userBaseUrl)/pre_authorization/" }
+    func preRecommendation() -> String { return "\(userBaseUrl)/pre_recommend/" }
+    func recommendation() -> String { return "\(userBaseUrl)/recommend/" }
     func makeNewProfile() -> String { return "\(userBaseUrl)/profile/" }
     func smsSend() -> String { return "\(userBaseUrl)/naver/sms/send/" }
     func smsAuth() -> String { return "\(userBaseUrl)/naver/sms/authentication/" }
@@ -61,10 +63,12 @@ struct HttpRoute {
     func crowded() -> String { return "\(cafeBaseUrl)/cafe_master/crowded/" }
     func cafeDetailLog(id: Int) -> String { return "\(cafeBaseUrl)/cafe_detail_log/\(id)/" }
     func masterExpiration() -> String { return "\(cafeBaseUrl)/cafe_master/expiration/" }
+    func adPoint() -> String { return "\(cafeBaseUrl)/cafe_master/ad_point/" }
     func cafeLog(expired: Bool) -> String { return "\(cafeBaseUrl)/cafe_log/?expired=\(expired ? "True" : "False")" }
     func autoExpiredCafeLog() -> String { return "\(cafeBaseUrl)/auto_expired_log/" }
     func deleteAutoExpiredCafeLog(id: Int) -> String { return "\(cafeBaseUrl)/auto_expired_log/\(id)/" }
     func thumbsUp() -> String { return "\(cafeBaseUrl)/thumbs_up/" }
+    func search(query: String) -> String { return "\(cafeBaseUrl)/search/?query=\(query)" }
     
     // shop
     func item() -> String { return "\(shopBaseUrl)/item/" }
@@ -80,6 +84,7 @@ struct HttpRoute {
     func onSaleCafe() -> String { return "\(infomationBaseUrl)/on_sale_cafe/" }
     func inquiryEtc() -> String { return "\(infomationBaseUrl)/inquiry_etc/" }
     func inquiryCafe() -> String { return "\(infomationBaseUrl)/inquiry_cafe/" }
+    func inquiryCafeAdditionalInfo() -> String { return "\(infomationBaseUrl)/inquiry_cafe_additional_info/" }
     func deleteInquiryEtc(id: Int) -> String { return "\(infomationBaseUrl)/inquiry_etc/\(id)/" }
     func deleteInquiryCafe(id: Int) -> String { return "\(infomationBaseUrl)/inquiry_cafe/\(id)/" }
 }

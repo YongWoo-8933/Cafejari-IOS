@@ -64,7 +64,7 @@ struct SnackBar: View {
             .cornerRadius(.medium)
             .shadow(radius: 3)
             .padding(.horizontal, .large)
-            .padding(.vertical, 40)
+            .padding(.vertical, 92)
             .animation(.easeInOut(duration: .short), value: isSnackBarOpened)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)

@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import CoreLocation
 
 @MainActor
 final class InformationViewModel: BaseViewModel {
@@ -137,7 +138,16 @@ final class InformationViewModel: BaseViewModel {
     func getOnSaleCafes(coreState: CoreState) async {
         do {
             let onSaleCafeResponses = try await informationRepository.fetchOnSaleCafes().sorted(by: { onSaleCafe1, onSaleCafe2 in
-                onSaleCafe1.order < onSaleCafe2.order
+                let distance1 = coreState.userLastLocation.getDistance(
+                    latitude: onSaleCafe1.cafe_info.latitude, longitude: onSaleCafe1.cafe_info.longitude)
+                let distance2 = coreState.userLastLocation.getDistance(
+                    latitude: onSaleCafe1.cafe_info.latitude, longitude: onSaleCafe2.cafe_info.longitude)
+                
+                if distance1 > 0 && distance2 > 0 {
+                    return distance1 < distance2
+                } else {
+                    return onSaleCafe1.order < onSaleCafe2.order
+                }
             })
             self.onSaleCafes.removeAll()
             onSaleCafeResponses.forEach { res in
@@ -146,6 +156,8 @@ final class InformationViewModel: BaseViewModel {
                         order: res.order,
                         content: res.content,
                         image: res.image,
+                        distance: coreState.userLastLocation.getDistance(
+                            latitude: res.cafe_info.latitude, longitude: res.cafe_info.longitude),
                         cafeInfoId: res.cafe_info.id,
                         cafeInfoName: res.cafe_info.name,
                         cafeInfoCity: res.cafe_info.city,
@@ -160,6 +172,24 @@ final class InformationViewModel: BaseViewModel {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)
         } catch {
             print(error)
+        }
+    }
+    
+    func sortOnSaleCafesByDistance(coreState: CoreState) {
+        var newOnSaleCafes: OnSaleCafes = []
+        if let userLastLocation = coreState.userLastLocation {
+            self.onSaleCafes.forEach { onSaleCafe in
+                userLastLocation.distance(from: CLLocation(latitude: onSaleCafe.cafeInfoLatitude, longitude: onSaleCafe.cafeInfoLongitude))
+                let distance = userLastLocation.distance(from: CLLocation.init(latitude: onSaleCafe.cafeInfoLatitude, longitude: onSaleCafe.cafeInfoLongitude))
+                newOnSaleCafes.append(onSaleCafe.copy(distance: Int(distance)))
+            }
+            self.onSaleCafes = newOnSaleCafes.sorted (by: { onSaleCafe1, onSaleCafe2 in
+                if onSaleCafe1.distance > 0 && onSaleCafe2.distance > 0 {
+                    return onSaleCafe1.distance < onSaleCafe2.distance
+                } else {
+                    return onSaleCafe1.order < onSaleCafe2.order
+                }
+            })
         }
     }
     
@@ -270,6 +300,45 @@ final class InformationViewModel: BaseViewModel {
         } catch CustomError.accessTokenExpired {
             await self.refreshAccessToken(coreState: coreState) { newAccessToken in
                 await submitInquiryCafe(coreState: coreState, name: name, address: address)
+            }
+        } catch CustomError.errorMessage(let msg) {
+            coreState.showSnackBar(message: msg, type: SnackBarType.error)
+        } catch {
+            print(error)
+        }
+    }
+    
+    func submitInquiryCafeAdditionalInfo(
+        coreState: CoreState,
+        cafeInfoIndex: Int,
+        storeInfoContent: String,
+        openingHourContent: String,
+        wallSocketContent: String,
+        restroomContent: String
+    ) async {
+        do {
+            try await informationRepository.postInquiryCafeAdditionalInfo(
+                accessToken: coreState.accessToken,
+                cafeInfoIndex: cafeInfoIndex,
+                storeInfo: storeInfoContent,
+                openingHour: openingHourContent,
+                wallSocket: wallSocketContent,
+                restroom: restroomContent
+            )
+            coreState.showSnackBar(message: "카페 정보를 제보하였습니다")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                coreState.popUp()
+            }
+        } catch CustomError.accessTokenExpired {
+            await self.refreshAccessToken(coreState: coreState) { newAccessToken in
+                await submitInquiryCafeAdditionalInfo(
+                    coreState: coreState,
+                    cafeInfoIndex: cafeInfoIndex,
+                    storeInfoContent: storeInfoContent,
+                    openingHourContent: openingHourContent,
+                    wallSocketContent: wallSocketContent,
+                    restroomContent: restroomContent
+                )
             }
         } catch CustomError.errorMessage(let msg) {
             coreState.showSnackBar(message: msg, type: SnackBarType.error)

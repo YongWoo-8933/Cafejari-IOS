@@ -13,8 +13,6 @@ struct MapSheetCafeCrowdedView: View {
     @EnvironmentObject private var cafeViewModel: CafeViewModel
     @EnvironmentObject private var informationViewModel: InformationViewModel
     
-    @Binding var isBottomSheetOpened: Bool
-    
     var body: some View {
         VStack(spacing: 0) {
             if let onSaleCafe = informationViewModel.getOnSaleCafeFromId(cafeInfoId: cafeViewModel.modalCafeInfo.id) {
@@ -81,8 +79,9 @@ struct MapSheetCafeCrowdedView: View {
                     .onTapGesture {
                         if cafeViewModel.modalCafeInfo.isMasterAvailable() {
                             cafeViewModel.setCafeLogInfo(coreState: coreState)
-                            isBottomSheetOpened = false
-                            coreState.navigate(Screen.MasterRoom.route)
+                            cafeViewModel.collapseBottomSheet {
+                                coreState.navigate(Screen.MasterRoom.route)
+                            }
                         }
                     }
                 }
@@ -155,8 +154,9 @@ struct MapSheetCafeCrowdedView: View {
                 Button {
                     if cafeViewModel.modalCafe.master.userId == coreState.user.userId {
                         // 혼잡도 공유 이어하기
-                        isBottomSheetOpened = false
-                        coreState.navigate(Screen.MasterRoom.route)
+                        cafeViewModel.collapseBottomSheet {
+                            coreState.navigate(Screen.MasterRoom.route)
+                        }
                     } else if (!cafeViewModel.modalCafe.isMasterAvailable()) {
                         // 마스터 추천
                         if coreState.isNearBy(latitude: cafeViewModel.modalCafeInfo.latitude, longitude: cafeViewModel.modalCafeInfo.longitude) {
@@ -173,8 +173,9 @@ struct MapSheetCafeCrowdedView: View {
                     } else {
                         // 마스터 하러가기
                         cafeViewModel.setCafeLogInfo(coreState: coreState)
-                        isBottomSheetOpened = false
-                        coreState.navigate(Screen.MasterRoom.route)
+                        cafeViewModel.collapseBottomSheet {
+                            coreState.navigate(Screen.MasterRoom.route)
+                        }
                     }
                 } label: {
                     HStack {

@@ -92,6 +92,7 @@ struct ShopView: View {
                                             VStack(alignment: .leading, spacing: .medium) {
                                                 Text(item.name)
                                                     .font(.body.bold())
+                                                    .multilineTextAlignment(.leading)
                                                 Text("( \(item.brand) )")
                                                     .foregroundColor(.heavyGray)
                                             }

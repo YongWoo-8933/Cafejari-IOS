@@ -39,6 +39,24 @@ struct CafeInfoRepresentationResponse: Decodable {
     let longitude: Double
     let google_place_id: String
 }
+extension CafeInfoRepresentationResponse {
+    func getCafeInfo() -> CafeInfo {
+        return CafeInfo(
+            id: self.id,
+            name: self.name,
+            city: self.city,
+            gu: self.gu,
+            address: self.address,
+            totalFloor: self.total_floor,
+            floor: self.floor,
+            latitude: self.latitude,
+            longitude: self.longitude,
+            googlePlaceId: self.google_place_id,
+            cafes: [],
+            moreInfo: MoreInfo.empty
+        )
+    }
+}
 
 struct InquiryCafeResponse: Decodable {
     let id: Int
@@ -53,6 +71,15 @@ struct InquiryEtcResponse: Decodable {
     let content: String
     let answer: String?
     let time: String
+}
+
+struct InquiryCafeAdditionalInfoResponse: Decodable {
+    let id: Int
+    let cafe_info: Int
+    let store_information: String
+    let opening_hour: String
+    let wall_socket: String
+    let restroom: String
 }
 
 struct EventPointHistoryResponse: Decodable {

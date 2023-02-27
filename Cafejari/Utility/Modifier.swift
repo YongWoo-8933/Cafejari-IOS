@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 struct TopNavigationBackButton: ViewModifier {
     
@@ -65,6 +66,36 @@ struct RoundBorder: ViewModifier {
     }
 }
 
+struct AdaptsToKeyboard: ViewModifier {
+    @State var currentHeight: CGFloat = 0
+    
+    func body(content: Content) -> some View {
+        GeometryReader { geometry in
+            content
+                .padding(.bottom, self.currentHeight)
+                .onAppear(perform: {
+                    NotificationCenter.Publisher(center: NotificationCenter.default, name: UIResponder.keyboardWillShowNotification)
+                        .merge(with: NotificationCenter.Publisher(center: NotificationCenter.default, name: UIResponder.keyboardWillChangeFrameNotification))
+                        .compactMap { notification in
+                            withAnimation(.easeOut(duration: 0.16)) {
+                                notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+                            }
+                    }
+                    .map { rect in
+                        rect.height - geometry.safeAreaInsets.bottom
+                    }
+                    .subscribe(Subscribers.Assign(object: self, keyPath: \.currentHeight))
+                    
+                    NotificationCenter.Publisher(center: NotificationCenter.default, name: UIResponder.keyboardWillHideNotification)
+                        .compactMap { notification in
+                            CGFloat.zero
+                    }
+                    .subscribe(Subscribers.Assign(object: self, keyPath: \.currentHeight))
+                })
+        }
+    }
+}
+
 struct SingleLineTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
@@ -82,6 +113,17 @@ struct MultiLineTextFieldStyle: TextFieldStyle {
             .padding(.moreLarge)
             .frame(maxWidth: .infinity)
             .lineLimit(10...)
+            .background(.white)
+            .roundBorder(cornerRadius: .small, lineWidth: 1, borderColor: .lightGray)
+    }
+}
+
+struct ThreeLineTextFieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .padding(.moreLarge)
+            .frame(maxWidth: .infinity)
+            .lineLimit(3...)
             .background(.white)
             .roundBorder(cornerRadius: .small, lineWidth: 1, borderColor: .lightGray)
     }

@@ -17,6 +17,10 @@ struct PreAuthResponse: Decodable {
     let phone_number: String
 }
 
+struct RecommendResponse: Decodable {
+    let nickname: String
+}
+
 struct KakaoLoginResponse: Decodable {
     let access_token: String
     let is_user_exist: Bool

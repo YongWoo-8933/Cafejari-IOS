@@ -25,6 +25,14 @@ protocol InformationRepository {
     func fetchInquiryEtcs(accessToken: String) async throws -> [InquiryEtcResponse]
     func postInquiryCafe(accessToken: String, email: String, cafeName: String, cafeAddress: String) async throws
     func postInquiryEtc(accessToken: String, email: String, content: String) async throws
+    func postInquiryCafeAdditionalInfo(
+        accessToken: String,
+        cafeInfoIndex: Int,
+        storeInfo: String,
+        openingHour: String,
+        wallSocket: String,
+        restroom: String
+    ) async throws
     func deleteInquiryCafe(accessToken: String, inquiryCafeId: Int) async throws
     func deleteInquiryEtc(accessToken: String, inquiryEtcId: Int) async throws
 }
@@ -355,6 +363,50 @@ final class InformationRepositoryImpl: InformationRepository {
                 urlString: httpRoute.inquiryEtc(),
                 accessToken: accessToken,
                 requestBody: ["email": email, "content": content]
+            )
+            let (data, urlRes) = try await urlSession.data(for: request)
+            
+            guard let httpUrlRes = urlRes as? HTTPURLResponse
+            else { throw CustomError.errorMessage("오류가 발생했습니다. 다시 시도해주세요") }
+            
+            if httpUrlRes.statusCode == 401 {
+                _ = try JSONDecoder().decode(TokenExpiredErrorResponse.self, from: data)
+                throw CustomError.accessTokenExpired
+                
+            } else if (200 ..< 300).contains(httpUrlRes.statusCode) {
+                
+            } else {
+                throw CustomError.errorMessage("내부 서버 오류입니다. 잠시 후에 다시 시도해주세요")
+            }
+        } catch CustomError.accessTokenExpired {
+            throw CustomError.accessTokenExpired
+        } catch CustomError.errorMessage(let msg) {
+            throw CustomError.errorMessage(msg)
+        } catch let error as NSError {
+            throw nsErrorHandle(error)
+        }
+    }
+    
+    func postInquiryCafeAdditionalInfo(
+        accessToken: String,
+        cafeInfoIndex: Int,
+        storeInfo: String,
+        openingHour: String,
+        wallSocket: String,
+        restroom: String
+    ) async throws {
+        do {
+            let urlSession = URLSession.shared
+            let request = customUrlRequest.post(
+                urlString: httpRoute.inquiryCafeAdditionalInfo(),
+                accessToken: accessToken,
+                requestBody: [
+                    "cafe_info": cafeInfoIndex,
+                    "store_information": storeInfo,
+                    "opening_hour": openingHour,
+                    "wall_socket": wallSocket,
+                    "restroom": restroom
+                ]
             )
             let (data, urlRes) = try await urlSession.data(for: request)
             

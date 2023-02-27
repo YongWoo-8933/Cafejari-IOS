@@ -20,17 +20,12 @@ struct LeaderBoardView: View {
     var body: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
-                NavigationTitle(title: "카페자리 랭킹")
+                NavigationTitle(title: "명예의 카페지기")
                 
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         VStack(spacing: 0) {
                             VerticalSpacer(.medium)
-                            
-                            Text("명예의 카페지기")
-                                .font(.headline.bold())
-                            
-                            VerticalSpacer(30)
                             
                             HStack(alignment: .bottom, spacing: .medium) {
                                 if userViewModel.isLeaderLoading {

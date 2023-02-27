@@ -251,6 +251,10 @@ extension String {
     func isNicknameLengthValid() -> Bool {
         return self.count <= 10 && self.count >= 2
     }
+    
+    func getEncodedStringFromKorean() -> String {
+        return self.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) ?? self
+    }
 }
 
 extension Date {
@@ -266,6 +270,19 @@ extension View {
     func roundBorder(cornerRadius: CGFloat, lineWidth: CGFloat, borderColor: Color) -> some View {
         modifier(RoundBorder(cornerRadius: cornerRadius, lineWidth: lineWidth, borderColor: borderColor))
     }
+    func adaptsToKeyboard() -> some View {
+        return modifier(AdaptsToKeyboard())
+    }
+    func placeholder<Content: View>(
+            when shouldShow: Bool,
+            alignment: Alignment = .leading,
+            @ViewBuilder placeholder: () -> Content) -> some View {
+
+            ZStack(alignment: alignment) {
+                placeholder().opacity(shouldShow ? 1 : 0)
+                self
+            }
+        }
 }
 
 extension CLLocation? {
@@ -277,7 +294,6 @@ extension CLLocation? {
             distance += cos(rad * latitude) * cos(rad * location.coordinate.latitude) * cos(rad * (longitude - location.coordinate.longitude))
             let ret = earthRadius * acos(distance)
             return Int(round(ret))  // 미터 단위
-            
         } else {
             return -1
         }

@@ -28,6 +28,7 @@ enum Screen {
     case PermissionRequest
     case WebView
     case PointHistory
+    case CafeCorrection
 
     var route: String {
         switch self {
@@ -71,6 +72,8 @@ enum Screen {
             return "WebView"
         case .PointHistory:
             return "PointHistoryView"
+        case .CafeCorrection:
+            return "CafeCorrectionView"
         }
     }
 }
